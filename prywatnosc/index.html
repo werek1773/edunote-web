@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polityka prywatności · EduNote</title>
+<meta name="description" content="Jak EduNote przetwarza dane.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800&display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="../"><span class="mark">E</span><span>EduNote</span></a>
+  </div>
+  <main class="prose">
+    <h1 class="display">Polityka prywatności EduNote</h1>
+    <p class="muted">Obowiązuje od 18 października 2026</p>
+
+    <h2>1. Kto odpowiada za Twoje dane</h2>
+    <p>Administratorem danych jest Marcin Różycki, e-mail: <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>. W każdej sprawie dotyczącej danych napisz na ten adres.</p>
+
+    <h2>2. Co zostaje na Twoim Macu</h2>
+    <ul>
+      <li><strong>Dźwięk zajęć.</strong> Mikrofon nagrywa tylko po kliknięciu „Rób notatki”. Mowa jest przepisywana na Twoim Macu (model Whisper). Dźwięk nigdy nie opuszcza komputera i jest usuwany po przepisaniu zajęć. Gdy przepisanie się nie udaje, aplikacja ponawia próbę przy kolejnych uruchomieniach, a dźwięk usuwa po 5 próbach albo przy pierwszym uruchomieniu po 7 dniach od zajęć.</li>
+      <li><strong>Podgląd na żywo.</strong> Szary szkic w trakcie zajęć tworzy rozpoznawanie mowy Apple, wyłącznie na urządzeniu.</li>
+      <li><strong>Notatki, transkrypcje, plan zajęć, fiszki, tablice i kopie zapasowe</strong> są zapisane tylko na Twoim Macu, w folderach, które wybierasz.</li>
+      <li><strong>Kalendarz.</strong> Jeśli importujesz plan z Kalendarza Apple, wydarzenia są odczytywane lokalnie i nie są nigdzie wysyłane.</li>
+      <li><strong>Wstępna ocena nagrania.</strong> To, czy nagranie wygląda na zajęcia, czy na prywatną rozmowę, ocenia model Apple na Twoim Macu. Prywatne rozmowy i bardzo krótkie nagrania nie są wysyłane do AI.</li>
+    </ul>
+
+    <h2>3. Co wysyłamy poza Twój Mac i po co</h2>
+    <table>
+      <thead><tr><th>Dane</th><th>Do kogo</th><th>Po co</th><th>Jak długo</th></tr></thead>
+      <tbody>
+        <tr><td>Tekst zajęć (bez dźwięku) albo zdjęcie lub PDF planu zajęć, gdy sam je wybierzesz</td><td>Serwer EduNote (Supabase, UE, Frankfurt), który przekazuje je do Anthropic (model Claude, USA)</td><td>Ułożenie notatek, pojęć, pytań, wyjaśnień wizualnych i odczytanie planu</td><td>Serwer EduNote nie zapisuje treści. Anthropic może przechowywać zapytania przez ograniczony czas zgodnie ze swoimi zasadami dla klientów API i nie używa ich do trenowania modeli</td></tr>
+        <tr><td>Notatka, którą sam udostępnisz linkiem: przedmiot, temat, data zajęć i treść notatek (bez transkrypcji, dźwięku i zdjęć)</td><td>Supabase (UE, Frankfurt); każdy, kto dostanie od Ciebie link</td><td>Udostępnienie notatki znajomym na stronie WWW</td><td>30 dni od ostatniego udostępnienia albo do chwili, gdy zatrzymasz udostępnianie</td></tr>
+        <tr><td>Liczba otwarć udostępnionego linku i kliknięć w przycisk EduNote na tej stronie (bez danych osób, które je otworzyły)</td><td>Supabase</td><td>Pokazanie Ci, ile osób otworzyło notatkę</td><td>Razem z udostępnioną notatką</td></tr>
+        <tr><td>Anonimowy identyfikator konta (bez imienia, e-maila i hasła)</td><td>Supabase</td><td>Miesięczny limit AI dla Twojego konta i przypisanie udostępnionych notatek do Ciebie</td><td>Do usunięcia konta</td></tr>
+        <tr><td>Liczba zapytań AI, liczba tokenów i ich koszt w danym miesiącu</td><td>Supabase</td><td>Limit planu i rozliczenie kosztów</td><td>Do usunięcia konta</td></tr>
+        <tr><td>Zakup subskrypcji</td><td>Apple</td><td>Płatność i odnawianie subskrypcji</td><td>Zgodnie z zasadami Apple</td></tr>
+      </tbody>
+    </table>
+    <p>Nie używamy reklam, narzędzi analitycznych ani śledzenia między aplikacjami. Nie sprzedajemy danych.</p>
+
+    <h2>4. Podstawa prawna</h2>
+    <ul>
+      <li>Wykonanie umowy, czyli dostarczenie usługi, o którą prosisz (art. 6 ust. 1 lit. b RODO): przetwarzanie tekstu zajęć przez AI, udostępnianie notatek linkiem, anonimowe konto i limit.</li>
+      <li>Prawnie uzasadniony interes (art. 6 ust. 1 lit. f RODO): ochrona przed nadużyciami limitu AI.</li>
+    </ul>
+
+    <h2>5. Przekazanie danych poza EOG</h2>
+    <p>Anthropic przetwarza dane w USA. Przekazanie odbywa się na podstawie standardowych klauzul umownych zatwierdzonych przez Komisję Europejską, zawartych w umowie powierzenia z Anthropic.</p>
+
+    <h2>6. Głosy innych osób na zajęciach</h2>
+    <p>Nagrywając zajęcia, nagrywasz też głos prowadzącego i innych osób. Rób to tylko za zgodą prowadzącego i zgodnie z zasadami Twojej szkoły lub uczelni. Dźwięk zostaje na Twoim Macu i jest usuwany po przepisaniu, a do AI trafia sam tekst. Udostępniane są wyłącznie notatki, nigdy nagrania ani transkrypcje.</p>
+
+    <h2>7. Twoje prawa</h2>
+    <p>Masz prawo do dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przeniesienia oraz sprzeciwu. Dane z serwera usuniesz sam w aplikacji: <strong>Ustawienia → Kopie danych → Usuń moje dane z serwera</strong>. Udostępnioną notatkę usuniesz w aplikacji przyciskiem „Zatrzymaj udostępnianie”. Dane na Macu usuwasz, kasując notatki albo aplikację. Masz też prawo złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych.</p>
+
+    <h2>8. Wiek</h2>
+    <p>EduNote jest przeznaczony dla osób, które ukończyły 16 lat. Młodsze osoby mogą korzystać z aplikacji tylko za zgodą rodzica lub opiekuna.</p>
+
+    <h2>9. Zmiany</h2>
+    <p>O ważnych zmianach poinformujemy w aplikacji. Aktualna wersja jest zawsze pod tym adresem.</p>
+  </main>
+  <footer>
+    <span>© 2026 Marcin Różycki</span>
+    <a href="../prywatnosc/">Polityka prywatności</a>
+    <a href="../regulamin/">Regulamin</a>
+    <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>
+  </footer>
+</div>
+</body>
+</html>

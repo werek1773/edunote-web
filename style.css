@@ -1,0 +1,121 @@
+/* EduNote w przeglądarce: kremowa kartka, tusz i mech, ramki rysowane ręką. Tylko jasny wygląd. */
+:root {
+  --canvas: #F7F5EE;
+  --paper: #FFFEFA;
+  --ink: #2A2A22;
+  --muted: #6E6B5F;
+  --faint: #A8A596;
+  --line: #E2DFD3;
+  --mat: #E3E9CF;
+  --accent: #6B8131;
+  --accent-text: #4E5F22;
+  --mustard: #D6A12B;
+  --coral: #E2725B;
+  --sky: #3F7FBF;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+a { color: var(--accent-text); }
+.wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
+.display {
+  font-family: "Archivo", -apple-system, system-ui, sans-serif;
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+h1.display { font-size: clamp(28px, 6vw, 40px); margin: 6px 0 8px; }
+h2.display { font-size: 22px; margin: 34px 0 10px; }
+h3.display { font-size: 18px; margin: 22px 0 6px; font-weight: 700; }
+.muted { color: var(--muted); }
+.faint { color: var(--faint); }
+
+/* ramka „ołówkiem”: krzywe rogi jak w SketchBox */
+.sketch {
+  background: var(--paper);
+  border: 1.6px solid var(--ink);
+  border-radius: 18px 6px 16px 8px / 8px 16px 6px 18px;
+  padding: 18px 20px;
+}
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 26px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.brand .mark {
+  width: 30px; height: 30px; display: grid; place-items: center;
+  border: 1.6px solid var(--ink); border-radius: 9px 4px 8px 5px / 5px 8px 4px 9px; background: var(--mat);
+  font-family: "Archivo", system-ui, sans-serif; font-weight: 800; font-size: 15px;
+}
+.brand span { font-family: "Archivo", system-ui, sans-serif; font-stretch: 125%; font-variation-settings: "wdth" 125; font-weight: 800; font-size: 18px; }
+
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 0 22px; border-radius: 999px; border: 0;
+  background: var(--accent); color: #FFFEFA; font-weight: 600; font-size: 16px; text-decoration: none; cursor: pointer;
+}
+.button:hover { background: var(--accent-text); }
+.button.ghost { background: var(--paper); color: var(--ink); border: 1px solid var(--line); }
+
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: 1px; }
+.meta { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.summary { font-size: 19px; font-weight: 500; }
+.section p, .prose p { margin: 0 0 12px; }
+.prose h2 { font-family: "Archivo", system-ui, sans-serif; font-stretch: 125%; font-variation-settings: "wdth" 125; font-weight: 800; font-size: 21px; margin: 30px 0 8px; }
+.prose h3 { font-size: 17px; margin: 22px 0 6px; }
+.prose table { width: 100%; border-collapse: collapse; font-size: 15px; margin: 8px 0 16px; display: block; overflow-x: auto; }
+.prose th, .prose td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0; min-width: 120px; }
+.prose li { margin-bottom: 6px; }
+
+dl.concepts { margin: 0; }
+dl.concepts dt { font-weight: 700; margin-top: 10px; }
+dl.concepts dt.key::after { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--mustard); margin-left: 8px; vertical-align: 2px; }
+dl.concepts dd { margin: 2px 0 0; color: var(--ink); }
+ul.plain { margin: 0; padding-left: 20px; }
+details.q { border-bottom: 1px solid var(--line); padding: 10px 0; }
+details.q summary { cursor: pointer; font-weight: 600; list-style: none; }
+details.q summary::-webkit-details-marker { display: none; }
+details.q summary::before { content: "+"; display: inline-block; width: 20px; color: var(--muted); }
+details.q[open] summary::before { content: "–"; }
+details.q p { margin: 6px 0 0 20px; color: var(--ink); }
+.mat { background: var(--mat); border-radius: 12px; padding: 14px 18px; }
+
+/* wyjaśnienie wizualne */
+.slide { margin-top: 18px; }
+.formula { text-align: center; font-size: 1.5em; padding: 22px 12px; overflow-x: auto; }
+.symbols { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin-top: 12px; align-items: baseline; }
+.symbols .m { font-size: 1.15em; }
+.graph svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; }
+.legend .sw { display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+ol.steps { list-style: none; padding: 0; margin: 0; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 12px; margin-bottom: 14px; }
+ol.steps li::before {
+  content: counter(s); width: 26px; height: 26px; border: 1.4px solid var(--ink); border-radius: 50%;
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; margin-top: 4px;
+}
+ol.steps .l { font-size: 1.2em; overflow-x: auto; }
+ol.steps .c { color: var(--muted); font-size: 15px; }
+
+.cta { margin-top: 40px; text-align: center; padding: 28px 20px; }
+.cta p { margin: 8px 0 18px; }
+footer { margin-top: 48px; font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 18px; }
+footer a { color: var(--muted); }
+.center { text-align: center; }
+.hidden { display: none; }
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  .sketch, .card { padding: 16px; }
+  .topbar .button { display: none; }
+}

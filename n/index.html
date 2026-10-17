@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notatka z zajęć · EduNote</title>
+<meta name="description" content="Notatka z zajęć udostępniona z aplikacji EduNote.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="../"><span class="mark">E</span><span>EduNote</span></a>
+    <a class="button ghost" id="top-cta" href="../">Czym jest EduNote?</a>
+  </div>
+
+  <div id="loading" class="center muted" style="padding:60px 0">Wczytuję notatkę…</div>
+
+  <div id="missing" class="hidden center" style="padding:40px 0">
+    <h1 class="display">Tej notatki już nie ma</h1>
+    <p class="muted">Link wygasł albo autor zatrzymał udostępnianie. Poproś o nowy link.</p>
+  </div>
+
+  <article id="note" class="hidden">
+    <div class="meta" id="meta"></div>
+    <h1 class="display" id="topic"></h1>
+    <p class="summary" id="summary"></p>
+    <div id="body"></div>
+
+    <div class="sketch cta">
+      <h2 class="display" style="margin:0">Ucz się z tej notatki w EduNote</h2>
+      <p class="muted">Fiszki, powtórki i własne notatki z zajęć, które robią się same, gdy słuchasz wykładu.</p>
+      <a class="button" id="cta" href="../">Ucz się z tej notatki w EduNote</a>
+    </div>
+  </article>
+
+  <footer>
+    <span>EduNote · notatki z zajęć na Macu</span>
+    <a href="../prywatnosc/">Polityka prywatności</a>
+    <a href="../regulamin/">Regulamin</a>
+  </footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="../note.js"></script>
+</body>
+</html>
