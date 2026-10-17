@@ -114,6 +114,13 @@ footer { margin-top: 48px; font-size: 14px; color: var(--muted); display: flex; 
 footer a { color: var(--muted); }
 .center { text-align: center; }
 .hidden { display: none; }
+@media (max-width: 600px) {
+  .prose table, .prose tbody, .prose tr, .prose td { display: block; width: 100%; }
+  .prose thead { display: none; }
+  .prose tr { border-bottom: 1px solid var(--line); padding: 10px 0; }
+  .prose td { border: 0; padding: 2px 0; min-width: 0; }
+  .prose td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 6px; }
+}
 @media (max-width: 520px) {
   body { font-size: 16px; }
   .sketch, .card { padding: 16px; }
