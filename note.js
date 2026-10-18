@@ -23,8 +23,17 @@
     return e;
   }
 
+  // te same kolory symboli co w aplikacji (VisualExplanation.symbolColors)
+  var SYMBOL_COLORS = ["#6B8131", "#E2725B", "#3F7FBF", "#A97C14", "#6A3357"];
+
+  function highlighted(latex) {
+    SYMBOL_COLORS.forEach(function (hex, i) { latex = latex.split("\\hl" + (i + 1) + "{").join("\\color{" + hex + "}{"); });
+    return latex.replace(/\\hl[0-9]*\{/g, "{");
+  }
+
   function math(latex, display) {
     var span = el("span", { class: "m" });
+    latex = highlighted(latex);
     try {
       katex.render(latex, span, { displayMode: !!display, throwOnError: false, output: "html" });
     } catch (e) {
@@ -219,6 +228,144 @@
     return el("div", {}, [box, legend]);
   }
 
+  // MARK: mapa pojęć i oś lekcji – ten sam układ co w aplikacji (ConceptMapView, LessonPathView)
+
+  var TONES = ["#E3E9CF", "#FBF0C9", "#DCE8F5", "#F8DED7", "#ECE3EC"];
+
+  function noise(seed) { var x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); }
+
+  function mapLayout(nodes, links, width, nw, nh, gap) {
+    var ids = nodes.map(function (n) { return n.id; }), incoming = {}, level = {};
+    links.forEach(function (l) { incoming[l.to] = true; });
+    var roots = ids.filter(function (id) { return !incoming[id]; });
+    if (!roots.length && ids.length) roots = [ids[0]];
+    var queue = roots.slice();
+    roots.forEach(function (r) { level[r] = 0; });
+    while (queue.length) {
+      var id = queue.shift();
+      links.forEach(function (l) { if (l.from === id && level[l.to] === undefined) { level[l.to] = level[id] + 1; queue.push(l.to); } });
+    }
+    var deepest = Math.max.apply(null, [0].concat(Object.keys(level).map(function (k) { return level[k]; })));
+    ids.forEach(function (id) { if (level[id] === undefined) level[id] = deepest + 1; });
+    var maxLevel = Math.max.apply(null, ids.map(function (id) { return level[id]; })), rows = [];
+    for (var lv = 0; lv <= maxLevel; lv++) {
+      var inLevel = nodes.filter(function (n) { return level[n.id] === lv; });
+      for (var k = 0; k < inLevel.length; k += 4) rows.push(inLevel.slice(k, k + 4));
+    }
+    function order(r, by) {
+      if (!rows[by]) return;
+      var pos = {};
+      rows[by].forEach(function (n, i) { pos[n.id] = (i + 0.5) / rows[by].length; });
+      var keyed = rows[r].map(function (n, i) {
+        var near = [];
+        links.forEach(function (l) { if (l.to === n.id && pos[l.from] !== undefined) near.push(pos[l.from]); if (l.from === n.id && pos[l.to] !== undefined) near.push(pos[l.to]); });
+        return { k: near.length ? near.reduce(function (a, b) { return a + b; }, 0) / near.length : (i + 0.5) / rows[r].length, i: i, n: n };
+      });
+      keyed.sort(function (a, b) { return a.k - b.k || a.i - b.i; });
+      rows[r] = keyed.map(function (x) { return x.n; });
+    }
+    for (var pass = 0; pass < 2; pass++) {
+      for (var r1 = 1; r1 < rows.length; r1++) order(r1, r1 - 1);
+      for (var r2 = rows.length - 2; r2 >= 0; r2--) order(r2, r2 + 1);
+    }
+    var out = {};
+    rows.forEach(function (row, r) {
+      var step = width / row.length;
+      row.forEach(function (n, i) { out[n.id] = { x: step * (i + 0.5), y: nh / 2 + 8 + r * gap, level: level[n.id], node: n }; });
+    });
+    return out;
+  }
+
+  function conceptMap(nodes, links) {
+    var W = 728, NW = 158, NH = 66, GAP = 122, at = mapLayout(nodes, links, W, NW, NH, GAP);
+    function far(a, b) { return Math.abs(a.y - b.y) < 1 && Math.abs(a.x - b.x) > NW * 1.9; }
+    var maxY = 0, arcs = false;
+    Object.keys(at).forEach(function (k) { maxY = Math.max(maxY, at[k].y); });
+    links.forEach(function (l) { if (at[l.from] && at[l.to] && far(at[l.from], at[l.to])) arcs = true; });
+    var H = maxY + NH / 2 + (arcs ? 60 : 12);
+    var s = svg("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Mapa pojęć" });
+    function ends(a, b) {
+      var h = NH / 2 + 3, w = NW / 2 + 3;
+      if (Math.abs(a.y - b.y) < 1) {
+        if (far(a, b)) return [{ x: a.x, y: a.y + h }, { x: b.x, y: b.y + h }];
+        var d = b.x > a.x ? 1 : -1;
+        return [{ x: a.x + d * w, y: a.y }, { x: b.x - d * w, y: b.y }];
+      }
+      var dy = b.y > a.y ? 1 : -1;
+      return [{ x: a.x, y: a.y + dy * h }, { x: b.x, y: b.y - dy * h }];
+    }
+    function control(p, q, seed) {
+      var mid = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+      if (Math.abs(p.y - q.y) < 1 && Math.abs(p.x - q.x) > NW * 1.9) return { x: mid.x, y: mid.y + NH + 40 };
+      var dx = q.x - p.x, dy = q.y - p.y, len = Math.max(Math.hypot(dx, dy), 1), bend = (noise(seed * 7 + 3) - 0.5) * Math.min(len * 0.18, 26);
+      return { x: mid.x - dy / len * bend, y: mid.y + dx / len * bend };
+    }
+    var labels = [];
+    links.forEach(function (l, i) {
+      var a = at[l.from], b = at[l.to];
+      if (!a || !b) return;
+      var e = ends(a, b), p = e[0], q = e[1], c = control(p, q, i), ang = Math.atan2(q.y - c.y, q.x - c.x);
+      var d = "M" + p.x + " " + p.y + " Q" + c.x + " " + c.y + " " + q.x + " " + q.y;
+      [-1, 1].forEach(function (side) { var t = ang + Math.PI - side * 0.45; d += " M" + q.x + " " + q.y + " L" + (q.x + 10 * Math.cos(t)) + " " + (q.y + 10 * Math.sin(t)); });
+      s.appendChild(svg("path", { d: d, fill: "none", stroke: "#2A2A22", "stroke-opacity": 0.75, "stroke-width": 1.6, "stroke-linecap": "round" }));
+      if (l.label) labels.push({ x: 0.25 * p.x + 0.5 * c.x + 0.25 * q.x, y: 0.25 * p.y + 0.5 * c.y + 0.25 * q.y, t: l.label });
+    });
+    labels.forEach(function (lb) {
+      var t = svg("text", { x: lb.x, y: lb.y + 4, "text-anchor": "middle", "font-size": 12, "font-style": "italic", fill: "#6E6B5F",
+                            stroke: "#F7F5EE", "stroke-width": 5, "paint-order": "stroke" });
+      t.textContent = lb.t; s.appendChild(t);
+    });
+    var i = 0;
+    Object.keys(at).forEach(function (k) {
+      var n = at[k], root = n.level === 0;
+      var fo = svg("foreignObject", { x: n.x - NW / 2, y: n.y - NH / 2, width: NW, height: NH });
+      var box = document.createElement("div");
+      box.className = "mapnode";
+      box.style.background = TONES[root ? 0 : 1 + (i++ % 4)];
+      box.style.borderWidth = root ? "2px" : "1.4px";
+      box.appendChild(el("b", { text: n.node.label }));
+      if (n.node.detail) box.appendChild(el("small", { text: n.node.detail }));
+      fo.appendChild(box);
+      s.appendChild(fo);
+    });
+    var wrap = el("div", { class: "diagram" }); wrap.appendChild(s);
+    return wrap;
+  }
+
+  function lessonPath(stages) {
+    var W = 728, H = 270, line = H / 2, n = stages.length, margin = 70;
+    var stops = stages.map(function (_, i) {
+      return { x: n === 1 ? W / 2 : margin + (W - 2 * margin) * i / (n - 1), y: line + (noise(i * 13 + 5) - 0.5) * 10 };
+    });
+    var s = svg("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "Oś lekcji" });
+    var f = stops[0], last = stops[n - 1];
+    var d = "M18 " + (f.y + 6) + " Q40 " + (f.y + 12) + " " + f.x + " " + f.y;
+    for (var i = 1; i < n; i++) {
+      var a = stops[i - 1], b = stops[i], wave = i % 2 === 0 ? 22 : -22;
+      d += " C" + (a.x + (b.x - a.x) * 0.35) + " " + (a.y + wave) + " " + (a.x + (b.x - a.x) * 0.65) + " " + (b.y - wave) + " " + b.x + " " + b.y;
+    }
+    var endX = W - 24, endY = last.y - 4, cx = last.x + 30, cy = last.y - 12, ang = Math.atan2(endY - cy, endX - cx);
+    d += " Q" + cx + " " + cy + " " + endX + " " + endY;
+    [-1, 1].forEach(function (side) { var t = ang + Math.PI - side * 0.45; d += " M" + endX + " " + endY + " L" + (endX + 10 * Math.cos(t)) + " " + (endY + 10 * Math.sin(t)); });
+    s.appendChild(svg("path", { d: d, fill: "none", stroke: "#6B8131", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }));
+    var spacing = n > 1 ? (W - 140) / (n - 1) : W, lw = Math.min(190, spacing * 1.7);
+    stages.forEach(function (st, i) {
+      var p = stops[i];
+      s.appendChild(svg("circle", { cx: p.x, cy: p.y, r: 14, fill: "#FFFEFA", stroke: "#2A2A22", "stroke-width": 1.6 }));
+      var num = svg("text", { x: p.x, y: p.y + 4.5, "text-anchor": "middle", "font-size": 13, "font-weight": 700, fill: "#2A2A22" });
+      num.textContent = i + 1; s.appendChild(num);
+      var above = i % 2 === 0, x = Math.min(Math.max(p.x, lw / 2), W - lw / 2);
+      var fo = svg("foreignObject", { x: x - lw / 2, y: above ? p.y - 108 : p.y + 24, width: lw, height: 84 });
+      var box = document.createElement("div");
+      box.className = "stage " + (above ? "above" : "below");
+      box.appendChild(el("b", { text: st.title }));
+      if (st.detail) box.appendChild(el("small", { text: st.detail }));
+      fo.appendChild(box); s.appendChild(fo);
+    });
+    var wrap = el("div", { class: "diagram" }); wrap.appendChild(s);
+    return wrap;
+  }
+
   function visual(v) {
     var wrap = el("section", {}, [el("h2", { class: "display", text: v.title ? "Wyjaśnienie: " + v.title : "Wyjaśnienie wizualne" })]);
     (v.slides || []).forEach(function (s) {
@@ -227,11 +374,19 @@
         var f = el("div", { class: "sketch formula" }); f.appendChild(math(s.latex, true)); slide.appendChild(f);
         if (s.symbols && s.symbols.length) {
           var g = el("div", { class: "symbols" });
-          s.symbols.forEach(function (sym) { g.appendChild(math(sym.latex)); g.appendChild(el("span", { class: "muted", text: sym.meaning })); });
+          s.symbols.forEach(function (sym, i) {
+            var hex = SYMBOL_COLORS[i % SYMBOL_COLORS.length], m = math("\\color{" + hex + "}{" + sym.latex + "}");
+            m.style.background = hex + "29"; m.style.borderRadius = "6px"; m.style.padding = "0 6px";
+            g.appendChild(m); g.appendChild(el("span", { class: "muted", text: sym.meaning }));
+          });
           slide.appendChild(g);
         }
       } else if (s.kind === "graph" && s.plots && s.plots.length) {
         slide.appendChild(graph(s));
+      } else if (s.kind === "map" && s.nodes && s.nodes.length) {
+        slide.appendChild(conceptMap(s.nodes, s.links || []));
+      } else if (s.kind === "path" && s.stages && s.stages.length) {
+        slide.appendChild(lessonPath(s.stages));
       } else if (s.kind === "steps" && s.steps && s.steps.length) {
         var ol = el("ol", { class: "steps" });
         s.steps.forEach(function (st) {
