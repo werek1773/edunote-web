@@ -34,7 +34,10 @@
     <table>
       <thead><tr><th>Dane</th><th>Do kogo</th><th>Po co</th><th>Jak długo</th></tr></thead>
       <tbody>
-        <tr><td data-label="Dane">Tekst zajęć (bez dźwięku) albo zdjęcie lub PDF planu zajęć, gdy sam je wybierzesz</td><td data-label="Do kogo">Serwer EduNote (Supabase, UE, Frankfurt), który przekazuje je do Anthropic (model Claude, USA)</td><td data-label="Po co">Ułożenie notatek, pojęć, pytań, wyjaśnień wizualnych i odczytanie planu</td><td data-label="Jak długo">Serwer EduNote nie zapisuje treści. Anthropic może przechowywać zapytania przez ograniczony czas zgodnie ze swoimi zasadami dla klientów API i nie używa ich do trenowania modeli</td></tr>
+        <tr><td data-label="Dane">Tekst zajęć (bez dźwięku) albo zdjęcie lub PDF planu zajęć, gdy sam je wybierzesz</td><td data-label="Do kogo">Serwer EduNote (Supabase, UE, Frankfurt), który przekazuje je do Anthropic (model Claude, USA)</td><td data-label="Po co">Ułożenie notatek, pojęć, pytań, wyjaśnień wizualnych i scenariuszy podcastów oraz odczytanie planu</td><td data-label="Jak długo">Serwer EduNote nie zapisuje treści. Anthropic może przechowywać zapytania przez ograniczony czas zgodnie ze swoimi zasadami dla klientów API i nie używa ich do trenowania modeli</td></tr>
+        <tr><td data-label="Dane">Tekst scenariusza podcastu z lekcji („Posłuchaj”), ułożony przez AI z Twoich notatek (bez dźwięku zajęć)</td><td data-label="Do kogo">Serwer EduNote (Supabase, UE, Frankfurt), który przekazuje go do ElevenLabs (lektor, USA)</td><td data-label="Po co">Zamiana tekstu na mowę głosem lektora w EduNote Pro</td><td data-label="Jak długo">ElevenLabs zwraca nagranie i może przechowywać zapytania przez ograniczony czas zgodnie ze swoimi zasadami dla klientów API</td></tr>
+        <tr><td data-label="Dane">Gotowe nagranie podcastu</td><td data-label="Do kogo">Supabase Storage (UE, Frankfurt), prywatny folder Twojego konta</td><td data-label="Po co">Ponowne odsłuchanie odcinka bez nagrywania go od nowa</td><td data-label="Jak długo">Do usunięcia konta</td></tr>
+        <tr><td data-label="Dane">Zgłoszenie problemu z podcastem (powód i Twój komentarz) oraz liczba znaków nagranych odcinków</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Poprawianie słabych nagrań i rozliczenie lektora</td><td data-label="Jak długo">Zgłoszenia do usunięcia konta; liczba znaków bez powiązania z Tobą</td></tr>
         <tr><td data-label="Dane">Notatka, którą sam udostępnisz linkiem: przedmiot, temat, data zajęć i treść notatek (bez transkrypcji, dźwięku i zdjęć)</td><td data-label="Do kogo">Supabase (UE, Frankfurt); każdy, kto dostanie od Ciebie link</td><td data-label="Po co">Udostępnienie notatki znajomym na stronie WWW</td><td data-label="Jak długo">30 dni od ostatniego udostępnienia albo do chwili, gdy zatrzymasz udostępnianie</td></tr>
         <tr><td data-label="Dane">Liczba otwarć udostępnionego linku i kliknięć w przycisk EduNote na tej stronie (bez danych osób, które je otworzyły)</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Pokazanie Ci, ile osób otworzyło notatkę</td><td data-label="Jak długo">Razem z udostępnioną notatką</td></tr>
         <tr><td data-label="Dane">Anonimowy identyfikator konta (bez imienia, e-maila i hasła)</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Miesięczny limit AI dla Twojego konta i przypisanie udostępnionych notatek do Ciebie</td><td data-label="Jak długo">Do usunięcia konta</td></tr>
@@ -46,23 +49,26 @@
 
     <h2>4. Podstawa prawna</h2>
     <ul>
-      <li>Wykonanie umowy, czyli dostarczenie usługi, o którą prosisz (art. 6 ust. 1 lit. b RODO): przetwarzanie tekstu zajęć przez AI, udostępnianie notatek linkiem, anonimowe konto i limit.</li>
+      <li>Wykonanie umowy, czyli dostarczenie usługi, o którą prosisz (art. 6 ust. 1 lit. b RODO): przetwarzanie tekstu zajęć przez AI, podcasty z lekcji, udostępnianie notatek linkiem, anonimowe konto i limit.</li>
       <li>Prawnie uzasadniony interes (art. 6 ust. 1 lit. f RODO): ochrona przed nadużyciami limitu AI.</li>
     </ul>
 
     <h2>5. Przekazanie danych poza EOG</h2>
-    <p>Anthropic przetwarza dane w USA. Przekazanie odbywa się na podstawie standardowych klauzul umownych zatwierdzonych przez Komisję Europejską, zawartych w umowie powierzenia z Anthropic.</p>
+    <p>Anthropic i ElevenLabs przetwarzają dane w USA. Przekazanie odbywa się na podstawie standardowych klauzul umownych zatwierdzonych przez Komisję Europejską, zawartych w umowach powierzenia z tymi firmami.</p>
 
-    <h2>6. Głosy innych osób na zajęciach</h2>
+    <h2>6. Podcasty i głos na Macu</h2>
+    <p>Podcast z lekcji czyta lektor ElevenLabs tylko w EduNote Pro i tylko wtedy, gdy klikniesz „Posłuchaj”. Do ElevenLabs trafia sam tekst scenariusza ułożony z notatek, nigdy nagranie zajęć. W planie Basic, po wyczerpaniu miesięcznego limitu albo gdy serwer lektora jest niedostępny, podcast czyta głos Apple wbudowany w macOS. Wtedy tekst nie jest wysyłany do ElevenLabs, a mowa powstaje na Twoim Macu.</p>
+
+    <h2>7. Głosy innych osób na zajęciach</h2>
     <p>Nagrywając zajęcia, nagrywasz też głos prowadzącego i innych osób. Rób to tylko za zgodą prowadzącego i zgodnie z zasadami Twojej szkoły lub uczelni. Dźwięk zostaje na Twoim Macu i jest usuwany po przepisaniu, a do AI trafia sam tekst. Udostępniane są wyłącznie notatki, nigdy nagrania ani transkrypcje.</p>
 
-    <h2>7. Twoje prawa</h2>
-    <p>Masz prawo do dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przeniesienia oraz sprzeciwu. Dane z serwera usuniesz sam w aplikacji: <strong>Ustawienia → Kopie danych → Usuń moje dane z serwera</strong>. Udostępnioną notatkę usuniesz w aplikacji przyciskiem „Zatrzymaj udostępnianie”. Dane na Macu usuwasz, kasując notatki albo aplikację. Masz też prawo złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych.</p>
+    <h2>8. Twoje prawa</h2>
+    <p>Masz prawo do dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przeniesienia oraz sprzeciwu. Dane z serwera, w tym nagrania podcastów i zgłoszenia, usuniesz sam w aplikacji: <strong>Ustawienia → Kopie danych → Usuń moje dane z serwera</strong>. Udostępnioną notatkę usuniesz w aplikacji przyciskiem „Zatrzymaj udostępnianie”. Dane na Macu usuwasz, kasując notatki albo aplikację. Masz też prawo złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych.</p>
 
-    <h2>8. Wiek</h2>
+    <h2>9. Wiek</h2>
     <p>EduNote jest przeznaczony dla osób, które ukończyły 16 lat. Młodsze osoby mogą korzystać z aplikacji tylko za zgodą rodzica lub opiekuna.</p>
 
-    <h2>9. Zmiany</h2>
+    <h2>10. Zmiany</h2>
     <p>O ważnych zmianach poinformujemy w aplikacji. Aktualna wersja jest zawsze pod tym adresem.</p>
   </main>
   <footer>
