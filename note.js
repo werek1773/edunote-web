@@ -402,8 +402,13 @@
   }
 
   // Link do EduNote w Mac App Store z kampanią „share” (App Store Connect pokazuje pobrania z udostępnionych notatek).
-  // Pusty, dopóki aplikacji nie ma w sklepie: przycisk prowadzi wtedy na stronę główną.
-  var APP_STORE = "";
+  // Ten sam identyfikator co w aplikacji (ProAccess.appStoreURL) i na stronie głównej. Pusty = przycisk na stronę główną.
+  var APP_STORE = "https://apps.apple.com/app/id6824044215";
+
+  // odpowiedź porównana jak w aplikacji (folded): bez wielkości liter, polskich znaków i spacji na brzegach
+  function fold(s) {
+    return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\u0142\u0141]/g, "l").toLowerCase().trim();
+  }
 
   function quiz(items) {
     var box = el("div", { class: "card quiz" });
@@ -418,11 +423,11 @@
         b.addEventListener("click", function () {
           if (wrap.dataset.answered) return;
           wrap.dataset.answered = "1";
-          var ok = o.toLowerCase() === (q.answer || "").toLowerCase();
+          var ok = fold(o) === fold(q.answer);
           if (ok) good++;
           done++;
           Array.prototype.forEach.call(opts.children, function (x) {
-            if (x.textContent.toLowerCase() === (q.answer || "").toLowerCase()) x.classList.add("right");
+            if (fold(x.textContent) === fold(q.answer)) x.classList.add("right");
           });
           if (!ok) b.classList.add("wrong");
           if (q.explanation) why.classList.remove("hidden");
@@ -446,7 +451,9 @@
     meta.appendChild(el("span", { class: "dot" }));
     meta.appendChild(document.createTextNode([data.subject, formatDate(data.lesson_date)].filter(Boolean).join(" · ")));
     var made = document.getElementById("made");
-    if (made) made.textContent = c.minutes > 0 ? "Zrobione w EduNote z " + c.minutes + "-minutowych zajęć" : "Zrobione w EduNote z nagrania zajęć";
+    // „z nagrania” tylko przy notatce z nagrania; minuty to długość nagrania (starsze linki nie mają tych pól)
+    if (made) made.textContent = !c.fromRecording ? "Zrobione w EduNote"
+      : "Zrobione w EduNote z " + (c.minutes > 0 ? c.minutes + "-minutowego nagrania zajęć" : "nagrania zajęć");
     document.getElementById("topic").textContent = data.topic || data.subject || "Notatka z zajęć";
     document.getElementById("summary").textContent = c.summary || "";
     var body = document.getElementById("body");
