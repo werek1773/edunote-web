@@ -401,12 +401,52 @@
     return wrap;
   }
 
+  // Link do EduNote w Mac App Store z kampanią „share” (App Store Connect pokazuje pobrania z udostępnionych notatek).
+  // Pusty, dopóki aplikacji nie ma w sklepie: przycisk prowadzi wtedy na stronę główną.
+  var APP_STORE = "";
+
+  function quiz(items) {
+    var box = el("div", { class: "card quiz" });
+    var done = 0, good = 0;
+    var result = el("p", { class: "quiz-result hidden" });
+    items.forEach(function (q, qi) {
+      var wrap = el("div", { class: "quiz-q" }, [el("p", { class: "quiz-prompt", text: (qi + 1) + ". " + q.prompt })]);
+      var opts = el("div", { class: "quiz-options" });
+      var why = el("p", { class: "muted quiz-why hidden", text: q.explanation || "" });
+      (q.options || []).forEach(function (o) {
+        var b = el("button", { class: "quiz-option", type: "button", text: o });
+        b.addEventListener("click", function () {
+          if (wrap.dataset.answered) return;
+          wrap.dataset.answered = "1";
+          var ok = o.toLowerCase() === (q.answer || "").toLowerCase();
+          if (ok) good++;
+          done++;
+          Array.prototype.forEach.call(opts.children, function (x) {
+            if (x.textContent.toLowerCase() === (q.answer || "").toLowerCase()) x.classList.add("right");
+          });
+          if (!ok) b.classList.add("wrong");
+          if (q.explanation) why.classList.remove("hidden");
+          if (done === items.length) {
+            result.textContent = "Wynik: " + good + " z " + items.length + ". Chcesz te pytania jako fiszki z powtórkami? EduNote przypomni je, zanim wylecą z głowy.";
+            result.classList.remove("hidden");
+          }
+        });
+        opts.appendChild(b);
+      });
+      wrap.appendChild(opts); wrap.appendChild(why); box.appendChild(wrap);
+    });
+    box.appendChild(result);
+    return el("section", {}, [el("h2", { class: "display", text: "Sprawdź się" }), box]);
+  }
+
   function render(data) {
     var c = data.content || {};
     document.title = (data.topic || data.subject || "Notatka") + " · EduNote";
     var meta = document.getElementById("meta");
     meta.appendChild(el("span", { class: "dot" }));
     meta.appendChild(document.createTextNode([data.subject, formatDate(data.lesson_date)].filter(Boolean).join(" · ")));
+    var made = document.getElementById("made");
+    if (made) made.textContent = c.minutes > 0 ? "Zrobione w EduNote z " + c.minutes + "-minutowych zajęć" : "Zrobione w EduNote z nagrania zajęć";
     document.getElementById("topic").textContent = data.topic || data.subject || "Notatka z zajęć";
     document.getElementById("summary").textContent = c.summary || "";
     var body = document.getElementById("body");
@@ -431,10 +471,12 @@
       c.questions.forEach(function (q) { qs.appendChild(el("details", { class: "q" }, [el("summary", { text: q.question }), el("p", { text: q.answer })])); });
       body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Pytania do nauki" }), qs]));
     }
+    if (c.quiz && c.quiz.length) body.appendChild(quiz(c.quiz));
     if (c.homework && c.homework.length) {
       var hw = el("ul", { class: "plain" }); c.homework.forEach(function (t) { hw.appendChild(el("li", { text: t })); });
       body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Zadanie domowe" }), hw]));
     }
+    if (APP_STORE) document.getElementById("cta").href = APP_STORE + (APP_STORE.indexOf("?") < 0 ? "?" : "&") + "ct=share";
     document.getElementById("cta").addEventListener("click", function () {
       // keepalive: zapytanie dojdzie, nawet gdy przeglądarka już przechodzi na stronę EduNote
       fetch(SUPABASE + "/rest/v1/rpc/record_share_click", {

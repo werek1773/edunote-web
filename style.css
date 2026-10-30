@@ -138,3 +138,16 @@ footer a { color: var(--muted); }
   .sketch, .card { padding: 16px; }
   .topbar .button { display: none; }
 }
+
+/* mini‑quiz pod udostępnioną notatką */
+.made { margin: -4px 0 10px; font-size: 14px; }
+.quiz-q { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.quiz-q:last-of-type { border-bottom: 0; }
+.quiz-prompt { font-weight: 600; margin: 0 0 10px; }
+.quiz-options { display: grid; gap: 8px; }
+.quiz-option { text-align: left; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper, #FFFEFA); color: var(--ink); cursor: pointer; }
+.quiz-option:hover { border-color: var(--muted); }
+.quiz-option.right { background: #E3E9CF; border-color: #6B8131; }
+.quiz-option.wrong { background: #F6DDD6; border-color: #E2725B; }
+.quiz-why { margin: 8px 0 0; font-size: 14px; }
+.quiz-result { margin: 14px 0 0; font-weight: 600; }
