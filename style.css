@@ -1,4 +1,18 @@
 /* EduNote w przeglądarce: kremowa kartka, tusz i mech, ramki rysowane ręką. Tylko jasny wygląd. */
+
+/* Archivo z własnego serwera (SIL Open Font License 1.1, fonts/OFL.txt), a nie z Google Fonts: strona nie wysyła
+   adresów IP czytających do Google. Jeden plik zmiennej grubości na zakres znaków; polskie litery są w latin-ext. */
+@font-face {
+  font-family: "Archivo"; font-style: normal; font-weight: 700 800; font-stretch: 125%; font-display: swap;
+  src: url("fonts/archivo-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Archivo"; font-style: normal; font-weight: 700 800; font-stretch: 125%; font-display: swap;
+  src: url("fonts/archivo-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
   --canvas: #F7F5EE;
   --paper: #FFFEFA;
@@ -151,3 +165,22 @@ footer a { color: var(--muted); }
 .quiz-option.wrong { background: #F6DDD6; border-color: #E2725B; }
 .quiz-why { margin: 8px 0 0; font-size: 14px; }
 .quiz-result { margin: 14px 0 0; font-weight: 600; }
+
+/* oznaczenie treści z AI i stopka notatki (ważność linku, „Zgłoś treść”) */
+.ai-note { font-size: 14px; color: var(--muted); border-left: 3px solid var(--mustard); padding: 2px 0 2px 12px; margin: 14px 0 0; }
+.note-foot { margin: 18px 0 0; font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.note-foot a { color: var(--muted); }
+
+/* formularz zgłoszenia treści */
+.form fieldset { border: 0; margin: 0; padding: 0; }
+.form legend { font-weight: 600; margin: 18px 0 6px; padding: 0; }
+.form label { display: block; font-weight: 600; margin: 18px 0 6px; }
+.form .hint { font-weight: 400; font-size: 14px; color: var(--muted); }
+.form input[type=text], .form input[type=email], .form textarea {
+  width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--paper); color: var(--ink);
+}
+.form textarea { min-height: 140px; resize: vertical; }
+.form label.choice { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; margin: 8px 0; }
+.form .choice input { margin-top: 6px; flex: none; }
+.form-error { color: #A4402C; font-weight: 600; }

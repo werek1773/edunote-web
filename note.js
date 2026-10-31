@@ -401,16 +401,47 @@
     return wrap;
   }
 
-  // Link do EduNote w Mac App Store z kampanią „share” (App Store Connect pokazuje pobrania z udostępnionych notatek).
-  // Ten sam identyfikator co w aplikacji (ProAccess.appStoreURL) i na stronie głównej. Pusty = przycisk na stronę główną.
+  // Link do EduNote w Mac App Store z kampanią (ct): „share” z przycisku pod notatką, „mail” z linku wysłanego sobie
+  // na Maca. App Store Connect pokazuje pobrania z każdej kampanii. Ten sam identyfikator co w aplikacji
+  // (ProAccess.appStoreURL) i na stronie głównej.
   var APP_STORE = "https://apps.apple.com/app/id6824044215";
+
+  function storeLink(campaign) {
+    return APP_STORE + (APP_STORE.indexOf("?") < 0 ? "?" : "&") + "ct=" + campaign;
+  }
+
+  // Ostatni dzień, w którym link działa („15 marca 2027”); serwer trzyma chwilę wygaśnięcia, np. 16 marca o północy
+  function lastDay(iso) {
+    var end = new Date(new Date(iso).getTime() - 1000);
+    return end.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Warsaw" });
+  }
+
+  // KaTeX tylko przy notatkach ze wzorami (slajdy z wzorem, wykresem albo krokami), żeby pozostałe nie łączyły się
+  // z CDN. Gdy się nie wczyta, wzór zostaje tekstem (math).
+  var KATEX = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/";
+
+  function needsMath(c) {
+    return !!(c.visual && (c.visual.slides || []).some(function (s) {
+      return s.kind === "formula" || s.kind === "graph" || s.kind === "steps";
+    }));
+  }
+
+  function loadMath() {
+    return new Promise(function (resolve) {
+      document.head.appendChild(el("link", { rel: "stylesheet", href: KATEX + "katex.min.css" }));
+      var js = el("script", { src: KATEX + "katex.min.js" });
+      js.onload = js.onerror = function () { resolve(); };
+      document.head.appendChild(js);
+    });
+  }
 
   // odpowiedź porównana jak w aplikacji (folded): bez wielkości liter, polskich znaków i spacji na brzegach
   function fold(s) {
     return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\u0142\u0141]/g, "l").toLowerCase().trim();
   }
 
-  function quiz(items) {
+  // `after`: zdanie po wyniku (na Macu zaproszenie do fiszek w EduNote, gdzie indziej termin ważności linku)
+  function quiz(items, after) {
     var box = el("div", { class: "card quiz" });
     var done = 0, good = 0;
     var result = el("p", { class: "quiz-result hidden" });
@@ -432,7 +463,7 @@
           if (!ok) b.classList.add("wrong");
           if (q.explanation) why.classList.remove("hidden");
           if (done === items.length) {
-            result.textContent = "Wynik: " + good + " z " + items.length + ". Chcesz te pytania jako fiszki z powtórkami? EduNote przypomni je, zanim wylecą z głowy.";
+            result.textContent = "Wynik: " + good + " z " + items.length + "." + (after ? " " + after : "");
             result.classList.remove("hidden");
           }
         });
@@ -456,6 +487,12 @@
       : "Zrobione w EduNote z " + (c.minutes > 0 ? c.minutes + "-minutowego nagrania zajęć" : "nagrania zajęć");
     document.getElementById("topic").textContent = data.topic || data.subject || "Notatka z zajęć";
     document.getElementById("summary").textContent = c.summary || "";
+    // oznaczenie treści z AI (AI Act, art. 50) przy każdej notatce, którą pisało AI, a nie tylko autor
+    var ai = c.fromRecording || c.summary || (c.sections && c.sections.length) || (c.concepts && c.concepts.length) || c.visual;
+    var aiNote = document.getElementById("ai-note");
+    if (ai) aiNote.textContent = (c.fromRecording ? "Notatka wygenerowana przez AI z nagrania zajęć." : "Notatka przygotowana z pomocą AI.")
+      + " Może zawierać błędy. To nie jest materiał prowadzącego.";
+    else aiNote.classList.add("hidden");
     var body = document.getElementById("body");
     (c.sections || []).forEach(function (s) {
       var sec = el("section", { class: "section" }, [el("h2", { class: "display", text: s.heading })]);
@@ -478,13 +515,32 @@
       c.questions.forEach(function (q) { qs.appendChild(el("details", { class: "q" }, [el("summary", { text: q.question }), el("p", { text: q.answer })])); });
       body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Pytania do nauki" }), qs]));
     }
-    if (c.quiz && c.quiz.length) body.appendChild(quiz(c.quiz));
+    var mac = eduPlatform() === "mac";
+    var until = data.expires_at ? "Link działa do " + lastDay(data.expires_at) + "." : "";
+    if (c.quiz && c.quiz.length) {
+      body.appendChild(quiz(c.quiz, mac ? "Chcesz te pytania jako fiszki z powtórkami? EduNote przypomni je, zanim wylecą z głowy."
+        : until && "Wróć tu przed kolokwium. " + until));
+    }
     if (c.homework && c.homework.length) {
       var hw = el("ul", { class: "plain" }); c.homework.forEach(function (t) { hw.appendChild(el("li", { text: t })); });
       body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Zadanie domowe" }), hw]));
     }
-    if (APP_STORE) document.getElementById("cta").href = APP_STORE + (APP_STORE.indexOf("?") < 0 ? "?" : "&") + "ct=share";
-    document.getElementById("cta").addEventListener("click", function () {
+    // Przycisk pod notatką: do App Store tylko na Macu. Na telefonie i na Windowsie strona „tylko na Maca” w App Store
+    // to ślepa uliczka, więc zamiast niej link do wysłania sobie na Maca i uczciwa informacja o innych wersjach.
+    var cta = document.getElementById("cta");
+    if (mac) {
+      cta.href = storeLink("share");
+    } else {
+      document.getElementById("cta-title").textContent = "EduNote jest na razie na Maca";
+      document.getElementById("cta-text").textContent = "Wersje na iPhone'a, iPada, Androida i Windowsa są w planach. "
+        + "Masz Maca? Wyślij sobie link: EduNote robi z wykładu notatki, fiszki i krótkie powtórki.";
+      cta.textContent = "Wyślij sobie link na Maca";
+      cta.href = "mailto:?subject=" + encodeURIComponent("EduNote na Maca")
+        + "&body=" + encodeURIComponent("EduNote w Mac App Store: " + storeLink("mail"));
+    }
+    document.getElementById("valid").textContent = until;
+    document.getElementById("report").href = "../zglos/#n=" + code;
+    cta.addEventListener("click", function () {
       // keepalive: zapytanie dojdzie, nawet gdy przeglądarka już przechodzi na stronę EduNote
       fetch(SUPABASE + "/rest/v1/rpc/record_share_click", {
         method: "POST", keepalive: true,
@@ -502,5 +558,8 @@
   }
 
   if (!code) { missing(); return; }
-  rpc("get_shared_note", { p_code: code }).then(function (d) { d ? render(d) : missing(); }).catch(missing);
+  rpc("get_shared_note", { p_code: code }).then(function (d) {
+    if (!d) return missing();
+    return (needsMath(d.content || {}) ? loadMath() : Promise.resolve()).then(function () { render(d); });
+  }).catch(missing);
 })();

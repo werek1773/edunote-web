@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zgłoś treść · EduNote</title>
+<meta name="description" content="Zgłoszenie udostępnionej notatki, która narusza prawo, i prośba prowadzącego o usunięcie notatek z zajęć.">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="../"><span class="mark">E</span><span>EduNote</span></a>
+  </div>
+  <main class="prose">
+    <h1 class="display">Zgłoś treść</h1>
+    <p>Tu zgłosisz udostępnioną notatkę, która narusza prawo, na przykład prawa autorskie albo czyjeś dane osobowe. Jeśli prowadzisz zajęcia i nie chcesz, żeby notatki z nich były udostępniane w EduNote, wybierz ostatnią opcję. Usuniemy wtedy wszystkie notatki z Twoich zajęć, które znajdziemy.</p>
+    <p class="muted">Każde zgłoszenie czyta człowiek, a nie automat. Potwierdzenie i decyzję wysyłamy na podany adres, zwykle w ciągu 48 godzin.</p>
+
+    <form id="form" class="form" novalidate>
+      <fieldset>
+        <legend>Czego dotyczy zgłoszenie</legend>
+        <label class="choice"><input type="radio" name="kind" value="prawa_autorskie" checked> Naruszenie praw autorskich</label>
+        <label class="choice"><input type="radio" name="kind" value="dane_osobowe"> Dane osobowe lub wizerunek</label>
+        <label class="choice"><input type="radio" name="kind" value="inne"> Inna treść niezgodna z prawem</label>
+        <label class="choice"><input type="radio" name="kind" value="prowadzacy"> Prowadzę zajęcia i proszę o usunięcie notatek z nich</label>
+      </fieldset>
+
+      <label for="url">Adres notatki <span class="hint">np. edunote.rozycki.pro/n/#…</span></label>
+      <input type="text" id="url" autocomplete="off" inputmode="url" maxlength="500">
+
+      <div id="classes-box" class="hidden">
+        <label for="classes">Twoje zajęcia <span class="hint">przedmiot, uczelnia, dzień i godzina; adres notatki nie jest wtedy potrzebny</span></label>
+        <input type="text" id="classes" maxlength="500">
+      </div>
+
+      <label for="reason">Wyjaśnienie <span class="hint">dlaczego ta treść jest niezgodna z prawem; im dokładniej, tym szybciej to sprawdzimy</span></label>
+      <textarea id="reason" maxlength="5000"></textarea>
+
+      <label for="name">Imię i nazwisko</label>
+      <input type="text" id="name" autocomplete="name" maxlength="200">
+
+      <label for="email">E‑mail <span class="hint">tu wyślemy potwierdzenie i decyzję</span></label>
+      <input type="email" id="email" autocomplete="email" maxlength="200">
+
+      <label class="choice"><input type="checkbox" id="good-faith"> Oświadczam w dobrej wierze, że informacje w zgłoszeniu są prawdziwe i kompletne.</label>
+
+      <p id="error" class="form-error hidden" role="alert"></p>
+      <p><button class="button" type="submit" id="send">Wyślij zgłoszenie</button></p>
+    </form>
+
+    <div id="done" class="sketch hidden" tabindex="-1">
+      <h2 class="display" style="margin-top:0">Zgłoszenie przyjęte</h2>
+      <p id="done-text" style="margin-bottom:0"></p>
+    </div>
+
+    <h2>Co dzieje się dalej</h2>
+    <p>Gdy zgłoszenie jest zasadne, blokujemy notatkę: link przestaje działać, a autor widzi w aplikacji uzasadnienie. O decyzji informujemy zgłaszającego. Od decyzji można się odwołać, pisząc na adres poniżej, a każde odwołanie rozpatrujemy ponownie. Zasady opisuje <a href="../regulamin/">regulamin</a>.</p>
+    <h2>Punkt kontaktowy</h2>
+    <p>Dla użytkowników oraz dla organów państw członkowskich, Komisji Europejskiej i Europejskiej Rady ds. Usług Cyfrowych (art. 11 i 12 aktu o usługach cyfrowych): <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>, po polsku lub po angielsku.</p>
+    <p class="muted">Imię i nazwisko, e‑mail i treść zgłoszenia przetwarzamy tylko po to, żeby je rozpatrzyć. Szczegóły w <a href="../prywatnosc/">polityce prywatności</a>.</p>
+  </main>
+  <footer>
+    <span>© 2026 Marcin Różycki</span>
+    <a href="../prywatnosc/">Polityka prywatności</a>
+    <a href="../regulamin/">Regulamin</a>
+    <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>
+  </footer>
+</div>
+<script>
+// Formularz zgłoszenia (art. 16 aktu o usługach cyfrowych): zapis przez funkcję report_content w Supabase,
+// mail do Marcina wysyła funkcja report-notify
+(function () {
+  "use strict";
+  // ten sam serwer i klucz publiczny (publishable, nie sekret) co w note.js
+  var SUPABASE = "https://fjpbdwsbktiylkborxvf.supabase.co";
+  var KEY = "sb_publishable_XtknqXVtb-T-5Wd-oKFxEA_NINWbDsE";
+  var form = document.getElementById("form");
+
+  function value(id) { return document.getElementById(id).value.trim(); }
+  function kind() { return form.querySelector("input[name=kind]:checked").value; }
+  function syncKind() { document.getElementById("classes-box").classList.toggle("hidden", kind() !== "prowadzacy"); }
+  function fail(text) {
+    var e = document.getElementById("error");
+    e.textContent = text;
+    e.classList.remove("hidden");
+  }
+  // kod notatki z linku (…/n/#KOD) albo sam kod
+  function codeOf(text) {
+    var m = /\/n\/#?([A-Za-z0-9]{6,})/.exec(text) || /^([A-Za-z0-9]{6,})$/.exec(text);
+    return m ? m[1] : "";
+  }
+
+  // z linku „Zgłoś treść” pod notatką: #n=KOD
+  var params = {};
+  location.hash.replace(/^#/, "").split("&").forEach(function (p) {
+    var kv = p.split("=");
+    if (kv[0]) params[kv[0]] = decodeURIComponent(kv[1] || "");
+  });
+  var preset = (params.n || "").replace(/[^A-Za-z0-9]/g, "");
+  if (preset) document.getElementById("url").value = "https://edunote.rozycki.pro/n/#" + preset;
+  Array.prototype.forEach.call(form.querySelectorAll("input[name=kind]"), function (r) { r.addEventListener("change", syncKind); });
+  syncKind();
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    document.getElementById("error").classList.add("hidden");
+    var k = kind(), link = value("url"), classes = value("classes");
+    if (k === "prowadzacy" ? !link && classes.length < 3 : !link) {
+      return fail(k === "prowadzacy" ? "Podaj adres notatki albo opisz swoje zajęcia." : "Podaj adres notatki.");
+    }
+    if (value("reason").length < 10) return fail("Napisz kilka zdań wyjaśnienia.");
+    if (value("name").length < 2) return fail("Podaj imię i nazwisko.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value("email"))) return fail("Podaj poprawny adres e‑mail.");
+    if (!document.getElementById("good-faith").checked) return fail("Zaznacz oświadczenie o działaniu w dobrej wierze.");
+    var send = document.getElementById("send");
+    send.disabled = true;
+    send.textContent = "Wysyłam…";
+    fetch(SUPABASE + "/rest/v1/rpc/report_content", {
+      method: "POST",
+      headers: { "apikey": KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        p_kind: k, p_code: codeOf(link), p_url: link, p_classes: classes, p_reason: value("reason"),
+        p_name: value("name"), p_email: value("email"), p_good_faith: true
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return null; }).then(function (body) {
+        // komunikat serwera pokazujemy tylko przy limicie zgłoszeń; resztę błędów opisuje zdanie niżej
+        if (!r.ok) throw new Error(body && /^Za dużo/.test(body.message || "") ? body.message : "");
+        return body;
+      });
+    }).then(function (id) {
+      form.classList.add("hidden");
+      document.getElementById("done-text").textContent = "Numer zgłoszenia: " + id + ". Potwierdzenie i decyzję wyślemy na "
+        + value("email") + ", zwykle w ciągu 48 godzin.";
+      var done = document.getElementById("done");
+      done.classList.remove("hidden");
+      done.focus();
+    }).catch(function (e) {
+      send.disabled = false;
+      send.textContent = "Wyślij zgłoszenie";
+      fail(e.message || "Nie udało się wysłać zgłoszenia. Spróbuj jeszcze raz albo napisz na marcin@rozycki.pro.");
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -10,9 +10,6 @@
 <meta property="og:description" content="Notatki z wykładu, pojęcia i krótki quiz do sprawdzenia się. Zrobione w EduNote na Macu.">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="EduNote">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700;125,800&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -26,7 +23,7 @@
 
   <div id="missing" class="hidden center" style="padding:40px 0">
     <h1 class="display">Tej notatki już nie ma</h1>
-    <p class="muted">Link wygasł albo autor zatrzymał udostępnianie. Poproś o nowy link.</p>
+    <p class="muted">Link wygasł albo notatka nie jest już udostępniana. Poproś o nowy link.</p>
   </div>
 
   <article id="note" class="hidden">
@@ -34,13 +31,15 @@
     <p class="made muted" id="made"></p>
     <h1 class="display" id="topic"></h1>
     <p class="summary" id="summary"></p>
+    <p class="ai-note" id="ai-note"></p>
     <div id="body"></div>
 
     <div class="sketch cta">
-      <h2 class="display" style="margin:0">Ucz się tego jako fiszki</h2>
-      <p class="muted">EduNote robi notatki z zajęć, gdy słuchasz wykładu, a potem fiszki i krótkie powtórki, żeby to zostało w głowie. Nagranie nie opuszcza Twojego Maca.</p>
+      <h2 class="display" id="cta-title" style="margin:0">Ucz się tego jako fiszki</h2>
+      <p class="muted" id="cta-text">EduNote robi notatki z zajęć, gdy słuchasz wykładu, a potem fiszki i krótkie powtórki, żeby to zostało w głowie. Nagranie nie opuszcza Twojego Maca.</p>
       <a class="button" id="cta" href="../">Ucz się tego jako fiszki w EduNote</a>
     </div>
+    <p class="note-foot muted"><span id="valid"></span><a id="report" href="../zglos/">Zgłoś treść</a></p>
   </article>
 
   <footer>
@@ -49,7 +48,7 @@
     <a href="../regulamin/">Regulamin</a>
   </footer>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="../platform.js"></script>
 <script src="../note.js"></script>
 </body>
 </html>
