@@ -494,3 +494,15 @@ ol.steps .c { color: var(--muted); font-size: 15px; }
 .today-in ol { margin: 0 0 18px; padding-left: 22px; }
 .today-in li { margin: 6px 0; }
 .today-in .tile-row { display: flex; flex-wrap: wrap; gap: 10px; }
+/* zapis na inne urządzenia (waitlist.js) */
+.waitlist { margin-top: 18px; text-align: left; border-top: 1px solid var(--line); padding-top: 16px; }
+.waitlist-q { font-weight: 650; margin: 0 0 10px; }
+.waitlist-opts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.waitlist-opts .btn.on { background: var(--mat); color: var(--moss-dark); border-color: var(--moss); }
+.waitlist input[type=email] { width: 100%; min-height: 46px; font: inherit; font-size: 16px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); color: var(--ink); }
+.waitlist input[type=email]:focus { border-color: var(--moss); outline: 3px solid var(--mat); outline-offset: 0; }
+.waitlist-status:not(:empty) { margin: 10px 0 0; font-weight: 600; color: var(--moss-dark); }
+.waitlist-note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.waitlist-note a { color: var(--muted); }
+.cta .waitlist { margin-top: 22px; }
+details.faq .waitlist { margin: 0 0 18px; }

@@ -793,10 +793,8 @@
         eduShare("Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Z nagrania robi notatkę, fiszki i quiz "
           + "dla całej grupy (na razie za darmo). Tak to wygląda:", url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
       }));
-      var wait = el("a", { class: "link", text: "Chcę EduNote na Androida lub Windowsa" });
-      wait.href = "mailto:marcin@rozycki.pro?subject=" + encodeURIComponent("EduNote na Androida lub Windowsa")
-        + "&body=" + encodeURIComponent("Cześć, daj znać, gdy EduNote będzie na: Androida / Windowsa / iPhone'a (zostaw, co pasuje).");
-      slot.appendChild(el("p", { class: "cta-links" }, [wait]));
+      // zapis na EduNote na Androida, Windowsa albo iPhone'a jednym kliknięciem (waitlist.js)
+      eduWaitlist(slot, { privacy: "../prywatnosc/" });
     }
     // zapis notatki na później: drukowanie albo PDF z przeglądarki, z rozwiniętymi rozwiązaniami
     $("print").addEventListener("click", function () {
