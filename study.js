@@ -95,7 +95,7 @@
     opts = opts || {};
     var root = opts.container, compact = !!opts.compact, mode = opts.mode || "fresh";
     var inner = el("div", { class: "study-box" + (compact ? " compact" : ""), tabindex: "-1" });
-    var cards, queue, first, flipped, saved = false;
+    var cards, queue, first, flipped, saved = false, back = false;
 
     // first: przód fiszki → pierwsza odpowiedź w tej sesji (true = „Pamiętam”)
     function reset(list) {
@@ -118,6 +118,7 @@
       if (!(c.front in first)) { first[c.front] = ok; remember(c.front, ok); }
       if (!ok) queue.push(c);
       flipped = false;
+      back = !ok && queue.length > 1;
       if (queue.length) render(); else finish();
     }
 
@@ -151,6 +152,9 @@
         el("span", { class: "count num", text: left(queue.length) })
       ]);
       var bar = el("div", { class: "progress" }, [el("i", { style: "width:" + Math.round((cards.length - queue.length) / cards.length * 100) + "%" })]);
+      // po „Jeszcze raz” licznik stoi, więc mówimy wprost, co się stało z tamtą fiszką
+      var note = back ? el("p", { class: "back-note", role: "status", text: "Poprzednia fiszka wróci na koniec." }) : null;
+      back = false;
       // zadanie z liczbami: zwykły krój i do lewej, a zamiast „Pamiętam” uczciwe „Policzone dobrze”
       var card = el("button", { class: "flash" + (task ? " long" : ""), type: "button", "aria-live": "polite" }, [
         first[c.front] === false ? el("span", { class: "again-tag", text: "Powtórka" }) : null,
@@ -163,7 +167,7 @@
         ? el("div", { class: "grades" }, [button(task ? "Jeszcze nie" : "Jeszcze raz", "btn btn-ghost", function () { grade(false); }),
                                           button(task ? "Policzone dobrze" : "Pamiętam", "btn btn-primary", function () { grade(true); })])
         : button(task ? "Pokaż rozwiązanie" : "Pokaż odpowiedź", "btn btn-primary btn-block btn-lg", flip);
-      [head, bar, card, controls].forEach(function (n) { inner.appendChild(n); });
+      [head, bar, note, card, controls].forEach(function (n) { if (n) inner.appendChild(n); });
       if (!compact) inner.appendChild(el("p", { class: "keys", text: "Spacja: odpowiedź · 1: jeszcze raz · 2: pamiętam" }));
       keepInView();
     }

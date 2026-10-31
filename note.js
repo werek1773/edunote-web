@@ -614,7 +614,8 @@
     // razem z uczciwym dopiskiem, że to nieoficjalna notatka z AI (żeby nikt nie wziął jej za materiał prowadzącego)
     function shareNote() {
       eduShare(data.sample
-        ? title + " (" + (data.subject || "").toLowerCase() + "): notatka, " + what + " z wyjaśnieniami. Przykład z EduNote, działa w przeglądarce bez logowania:"
+        ? title + " (" + (data.subject || "").toLowerCase() + "): " + what + ", ok. " + eduStudy.minutes(cards) + " min. "
+          + "To przykład z EduNote, nie nasz wykład. Działa w przeglądarce, bez logowania:"
         : label + (what ? " · " + what : "") + ". Nieoficjalna notatka z AI, sprawdźcie z wykładem. Działa w przeglądarce, bez logowania:",
         url, "Wyślij na grupę roku");
     }
@@ -664,7 +665,7 @@
         el("p", { class: "eyebrow", text: !p ? what + " · ok. " + eduStudy.minutes(cards) + " min · bez logowania"
           : resume ? "Przerobione " + p.seen + " z " + p.total + " fiszek"
           : "Ostatnio " + p.ok + " z " + p.total + " za pierwszym razem" + (p.fixed ? " · " + p.fixed + " powtórzone" : "") }),
-        el("h2", { text: p ? "Wracasz do fiszek" : "Przepytaj się z tej notatki" }),
+        el("h2", { text: p ? "Twoje fiszki" : "Przepytaj się z tej notatki" }),
         el("p", { class: "muted", text: "Najpierw spróbuj sobie przypomnieć odpowiedź, potem ją odkryj i oceń się. "
           + "Fiszki, których nie pamiętasz, wracają na koniec. Zadania liczysz na kartce." })
       ]);
@@ -683,6 +684,9 @@
       ]));
       panels.cards.innerHTML = "";
       panels.cards.appendChild(intro);
+      // po „Zakończ” wstęp zaczyna się tuż pod zakładkami, a nie gdzieś w połowie ekranu
+      var top = $("tabs-anchor").getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight;
+      if (window.scrollY > top) window.scrollTo(0, top);
     }
     // Quizlet i Anki przyjmują tekst: pojęcie, tabulator, definicja, każda fiszka w osobnej linii
     function tsv() {
@@ -786,8 +790,8 @@
       $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote z nagrań na Macu: wystarczy jedna "
         + "osoba z Makiem na roku, która za zgodą prowadzącego nagra wykład i wyśle link grupie.";
       slot.appendChild(button("Poproś kogoś z Makiem", "btn btn-primary", function () {
-        eduShare("Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Teraz jest za darmo. Z nagrania robi notatkę, fiszki i quiz, "
-          + "które można wysłać całej grupie. Tak to wygląda:", url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
+        eduShare("Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Z nagrania robi notatkę, fiszki i quiz "
+          + "dla całej grupy (na razie za darmo). Tak to wygląda:", url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
       }));
       var wait = el("a", { class: "link", text: "Chcę EduNote na Androida lub Windowsa" });
       wait.href = "mailto:marcin@rozycki.pro?subject=" + encodeURIComponent("EduNote na Androida lub Windowsa")

@@ -9,7 +9,7 @@
     "sections": [
       {
         "heading": "Jak ją policzyć",
-        "body": "Dzielisz procentową zmianę wielkości popytu przez procentową zmianę ceny. Wynik prawie zawsze wychodzi ujemny, bo gdy cena rośnie, ludzie kupują mniej, dlatego z liczbą 1 porównuje się go bez znaku (co do wartości bezwzględnej).\nPrzykład: kawa w bufecie zdrożała z 10 do 12 zł, czyli o 20%, a sprzedaż spadła ze 100 do 70 kubków dziennie, czyli o 30%. Elastyczność to −30% / 20% = −1,5, czyli 1,5 bez znaku."
+        "body": "Dzielisz procentową zmianę wielkości popytu przez procentową zmianę ceny. Wynik prawie zawsze wychodzi ujemny, bo gdy cena rośnie, ludzie kupują mniej (wyjątkiem są rzadkie dobra Giffena), dlatego z liczbą 1 porównuje się go bez znaku (co do wartości bezwzględnej).\nPrzykład: kawa w bufecie zdrożała z 10 do 12 zł, czyli o 20%, a sprzedaż spadła ze 100 do 70 kubków dziennie, czyli o 30%. Elastyczność to −30% / 20% = −1,5, czyli 1,5 bez znaku."
       },
       {
         "heading": "Elastyczność łukowa (metoda punktu środkowego)",
@@ -112,7 +112,7 @@
       },
       {
         "term": "Wielkość popytu",
-        "definition": "Ilość dobra, jaką kupujący chcą i mogą kupić przy danej cenie. Zmienia się, gdy zmienia się cena tego dobra."
+        "definition": "Ilość dobra, jaką kupujący chcą i mogą kupić przy danej cenie. Zmiana ceny tego dobra to ruch po krzywej popytu, czyli zmiana wielkości popytu."
       },
       {
         "term": "Popyt elastyczny",
@@ -153,7 +153,7 @@
       },
       {
         "question": "Zadanie: elastyczność popytu na papierosy to −0,4. O ile procent zmieni się wielkość popytu po podwyżce ceny o 15%?",
-        "answer": "%ΔQ = E · %ΔP = −0,4 · 15% = −6%. Popyt jest nieelastyczny, więc przychód ze sprzedaży wzrośnie (1,15 · 0,94 ≈ 1,081, czyli o ok. 8%)."
+        "answer": "%ΔQ ≈ E · %ΔP = −0,4 · 15% = −6% (w przybliżeniu, bo elastyczność liczymy jak stałą). Popyt jest nieelastyczny, więc przychód ze sprzedaży wzrośnie (1,15 · 0,94 ≈ 1,081, czyli o ok. 8%)."
       },
       {
         "question": "Cena wzrosła o 10%, a wielkość popytu spadła o 5%. Jaka to elastyczność i co stanie się z przychodem?",
@@ -166,7 +166,7 @@
     ],
     "quiz": [
       {
-        "prompt": "Cena biletu wzrosła o 20%, a liczba sprzedanych biletów spadła o 10%. Popyt na bilety jest…",
+        "prompt": "Cena biletu miesięcznego wzrosła o 20%, a liczba sprzedanych biletów spadła o 10%. Popyt na bilety miesięczne jest…",
         "options": [
           "elastyczny",
           "nieelastyczny",
@@ -199,7 +199,7 @@
         "explanation": "dQ/dP = −3, a Q = 90 − 60 = 30, więc E = −3 · 20 / 30 = −2. Samo nachylenie (−3) to nie elastyczność."
       },
       {
-        "prompt": "Elastyczność popytu na bilety wynosi −0,6. Kino podnosi cenę o 10%. Co stanie się z przychodem?",
+        "prompt": "Elastyczność popytu na bilety komunikacji miejskiej wynosi −0,6. Miasto podnosi cenę o 10%. Co stanie się z przychodem?",
         "options": [
           "spadnie o ok. 6%",
           "nie zmieni się",

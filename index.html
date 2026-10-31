@@ -50,6 +50,22 @@
     </div>
   </section>
 
+  <!-- bez Maca: co ta osoba może zrobić dziś (pokazuje to skrypt na dole) -->
+  <section class="today frame hidden" id="no-mac">
+    <div class="today-in">
+      <h2>Nie masz Maca? Co możesz zrobić dziś</h2>
+      <ol>
+        <li>Uczyć się z linku od kogoś z roku: notatka, fiszki i quiz w przeglądarce, bez konta.</li>
+        <li>Przenieść fiszki do Quizleta albo Anki i wrócić do nich przed kolokwium.</li>
+        <li>Poprosić osobę z Makiem z roku, żeby za zgodą prowadzącego nagrywała wykłady.</li>
+      </ol>
+      <div class="tile-row">
+        <a class="btn btn-primary" href="n/#przyklad">Zobacz przykładową notatkę</a>
+        <button class="btn btn-ghost" id="ask-mac" type="button">Poproś kogoś z Makiem</button>
+      </div>
+    </div>
+  </section>
+
   <!-- zalety: trzy konkrety z cienkimi liniami i zrzut z nagrywania -->
   <section class="feature frame" id="jak">
     <div>
@@ -134,8 +150,9 @@
       <details class="faq"><summary>Czy na studiach wolno uczyć się z AI?</summary><p>Zwykle tak, ale o zakresie na przedmiocie decyduje prowadzący. Na Uniwersytecie Łódzkim <a href="https://www.wz.uni.lodz.pl/fileadmin/Wydzialy/Wydzia%C5%82_Zarz%C4%85dzania/Strefa_Pracownika/GenAI/zarz._nr_73_z_16.02.2026_r.pdf" rel="noopener">zarządzenie rektora nr 73/2026</a> (PDF) wprost dopuszcza AI do streszczeń i nauki do egzaminów; zasady dla przedmiotu są w sylabusie.</p></details>
       <details class="faq"><summary>Nie mam Maca. Co mogę zrobić?</summary><p>Uczyć się z notatek, które wyśle Ci ktoś z roku: notatka, fiszki i quiz działają w każdej przeglądarce. Wystarczy jedna osoba z Makiem na roku. Jeśli chcesz EduNote na Windowsa albo Androida, <a id="waitlist" href="mailto:marcin@rozycki.pro">daj znać</a>.</p></details>
       <details class="faq"><summary>Kto płaci, gdy jedna osoba nagrywa dla całego roku?</summary><p>Osoby, które dostają link, nigdy nie płacą. Teraz nie płaci też osoba nagrywająca, bo aplikacja jest za darmo. Po wczesnym dostępie darmowy plan daje 3 notatki AI w tygodniu, więc przy nagrywaniu wszystkich wykładów zwykle potrzebny będzie EduNote Pro (24,99 zł miesięcznie).</p></details>
+      <details class="faq"><summary>Kto pisze notatki i co z moimi danymi?</summary><p>Notatki pisze model Claude firmy Anthropic (USA). Do AI trafia sam tekst zajęć, bez nagrania, przez serwer EduNote w UE (Frankfurt). Szczegóły są w <a href="prywatnosc/">polityce prywatności</a>.</p></details>
       <details class="faq"><summary>Czy poradzi sobie w dużej sali?</summary><p>Tak, jeśli Mac dobrze słyszy prowadzącego, więc lepiej usiąść bliżej i nie zasłaniać mikrofonu. Przed nauką warto zerknąć, czy liczby i nazwy własne się zgadzają.</p></details>
-      <details class="faq"><summary>Co widzą osoby, którym wyślę link?</summary><p>Notatkę, pojęcia, fiszki i quiz. Nigdy nagranie ani transkrypcję, a nazwisko prowadzącego z planu zajęć zamieniamy na inicjały. Link działa do końca sesji poprawkowej: notatki z semestru zimowego do 15 marca, z letniego do 30 września.</p></details>
+      <details class="faq"><summary>Co widzą osoby, którym wyślę link?</summary><p>Notatkę, pojęcia, fiszki i quiz. Nigdy nagranie ani transkrypcję, a nazwisko prowadzącego z planu zajęć EduNote zamienia na inicjały. Link działa do końca sesji poprawkowej: notatki z semestru zimowego do 15 marca, z letniego do 30 września.</p></details>
       <details class="faq"><summary>Co, jeśli notatka narusza czyjeś prawa?</summary><p>Zgłoś ją przez <a href="zglos/">formularz</a>. Każde zgłoszenie czyta człowiek, zwykle w ciągu 48 godzin.</p></details>
     </div>
   </section>
@@ -208,6 +225,12 @@
   // Na telefonie i na Windowsie strona „tylko na Maca” w App Store prowadzi donikąd: główną akcją jest przykład,
   // do App Store prowadzi tylko link wysłany sobie na Maca, a przy cenie prośba do osoby z Makiem (cennik jest ten sam)
   if (eduPlatform() !== "mac") {
+    var ASK = "Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Z nagrania robi notatkę, fiszki i quiz dla całej grupy (na razie za darmo). Zobacz:";
+    var ask = function () {
+      eduShare(ASK, "https://edunote.rozycki.pro/", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
+    };
+    document.getElementById("no-mac").classList.remove("hidden");
+    document.getElementById("ask-mac").addEventListener("click", ask);
     var cta = document.getElementById("bar-cta");
     cta.textContent = "Przykład";
     cta.href = "n/#przyklad";
@@ -229,10 +252,7 @@
     send.type = "button";
     send.className = "btn btn-light btn-lg";
     send.textContent = "Poproś kogoś z Makiem";
-    send.addEventListener("click", function () {
-      eduShare("Hej, nagrasz nam wykład w EduNote? Z nagrania robi notatkę, fiszki i quiz, które można wysłać całej grupie. Zobacz:",
-        "https://edunote.rozycki.pro/", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
-    });
+    send.addEventListener("click", ask);
     var wait = document.createElement("a");
     wait.className = "btn btn-ghost btn-lg";
     wait.href = WAITLIST;
