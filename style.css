@@ -507,26 +507,36 @@ ol.steps .c { color: var(--muted); font-size: 15px; }
 .waitlist-note a { color: var(--muted); }
 .cta .waitlist { margin-top: 22px; }
 details.faq .waitlist { margin: 0 0 18px; }
-/* iPhone z Dynamic Island (jak 15 Pro): ramka z tytanową krawędzią, przyciski boczne, pasek stanu, wyspa i pasek „home”.
-   Wymiary w cqw (procent szerokości ramki), więc telefon wygląda tak samo w każdej wielkości. */
+/* iPhone z Dynamic Island (jak 15 Pro, naturalny tytan) w proporcjach prawdziwego telefonu: tytanowa krawędź 1,7%
+   szerokości, czarna ramka ekranu 2,2%, rogi ekranu współśrodkowe z rogami obudowy, przyciski boczne, pasek stanu,
+   wyspa i pasek „home”. Wymiary wewnątrz w cqw (procent szerokości obudowy), a nie w procentach rodzica: padding
+   w procentach liczy się od szerokości rodzica, więc w szerokiej grafice na pierwszym ekranie ramka wychodziła trzy
+   razy za gruba, a rogi ekranu nie pasowały do rogów obudowy. */
 .iphone {
-  position: relative; container-type: inline-size; aspect-ratio: 716 / 1466; padding: 2.4%; border-radius: 16.8% / 8.2%;
-  background: linear-gradient(150deg, #3a3a3c 0%, #111113 22%, #0a0a0b 60%, #2a2a2c 100%);
-  box-shadow: 0 0 0 1px #6e6e73, 0 0 0 2.5px #c8c8cd, 0 0 0 3.5px #8e8e93, 0 30px 60px -28px rgba(0, 0, 0, .55);
+  position: relative; container-type: inline-size; aspect-ratio: 716 / 1466; border-radius: 16.8% / 8.2%;
+  background: linear-gradient(145deg, #e4e1db 0%, #a29e97 14%, #d3cfc8 32%, #8d8a84 56%, #bdb9b2 78%, #ebe8e2 100%);
+  box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .6), 0 0 0 .5px rgba(52, 49, 44, .5), 0 30px 60px -28px rgba(0, 0, 0, .5);
 }
-.iphone-screen { position: relative; height: 100%; overflow: hidden; border-radius: 14.6% / 7%; background: var(--page); display: flex; flex-direction: column; }
+.iphone-screen {
+  position: absolute; inset: 1.7cqw; overflow: hidden; display: flex; flex-direction: column;
+  border: 2.2cqw solid #050505; border-radius: 15.1cqw; background: var(--page);
+  box-shadow: 0 0 0 .3cqw rgba(48, 45, 40, .28);
+}
 .iphone-screen > img { display: block; width: 100%; height: auto; flex: none; }
-.iphone-status { flex: none; height: 12.6cqw; display: flex; align-items: center; justify-content: space-between; padding: 1.4cqw 7.4cqw 0 9cqw; font: 600 4.1cqw/1 -apple-system, "SF Pro Text", system-ui, sans-serif; color: #000; letter-spacing: -.01em; }
+.iphone-status { flex: none; height: 12.2cqw; display: flex; align-items: center; justify-content: space-between; padding: 1.2cqw 7cqw 0 8.6cqw; font: 600 4.1cqw/1 -apple-system, "SF Pro Text", system-ui, sans-serif; color: #000; letter-spacing: -.01em; }
 .iphone-icons { display: inline-flex; align-items: center; gap: 1.5cqw; }
 .iphone-icons svg { height: 2.9cqw; width: auto; fill: currentColor; color: #000; }
 .iphone-icons svg:last-child { height: 3.1cqw; }
-.iphone-island { position: absolute; top: 2.6cqw; left: 50%; transform: translateX(-50%); width: 29.5cqw; height: 8.6cqw; border-radius: 999px; background: #000; }
-.iphone-screen::after { content: ""; position: absolute; left: 50%; bottom: 2cqw; transform: translateX(-50%); width: 33cqw; height: 1.3cqw; border-radius: 999px; background: rgba(0, 0, 0, .78); }
-.iphone-btn { position: absolute; width: 1.1%; border-radius: 2px; background: linear-gradient(90deg, #8e8e93, #d1d1d6 50%, #8e8e93); }
-.iphone-btn.action { left: -1.1%; top: 17%; height: 4.2%; }
-.iphone-btn.vol-up { left: -1.1%; top: 24%; height: 7.4%; }
-.iphone-btn.vol-down { left: -1.1%; top: 33%; height: 7.4%; }
-.iphone-btn.power { right: -1.1%; top: 27%; height: 11.5%; }
+.iphone-island { position: absolute; top: 2.5cqw; left: 50%; transform: translateX(-50%); width: 29.5cqw; height: 8.6cqw; border-radius: 999px; background: #000; }
+.iphone-screen::after { content: ""; position: absolute; left: 50%; bottom: 1.9cqw; transform: translateX(-50%); width: 31.5cqw; height: 1.2cqw; border-radius: 999px; background: rgba(0, 0, 0, .78); }
+/* przyciski wystają z krawędzi o 0,9% szerokości, z tego samego tytanu */
+.iphone-btn { position: absolute; width: .9cqw; background: linear-gradient(90deg, #8f8b85, #dedad4 55%, #a9a59e); }
+.iphone-btn.action, .iphone-btn.vol-up, .iphone-btn.vol-down { left: -.9cqw; border-radius: .6cqw 0 0 .6cqw; }
+.iphone-btn.power { right: -.9cqw; border-radius: 0 .6cqw .6cqw 0; background: linear-gradient(270deg, #8f8b85, #dedad4 55%, #a9a59e); }
+.iphone-btn.action { top: 19%; height: 4.6%; }
+.iphone-btn.vol-up { top: 26.5%; height: 7.6%; }
+.iphone-btn.vol-down { top: 35.5%; height: 7.6%; }
+.iphone-btn.power { top: 28%; height: 11.6%; }
 .hero-art .iphone { position: absolute; right: 3%; bottom: 0; width: 30%; }
 .phones .iphone { width: 100%; }
 .phones .iphone-screen { background: var(--canvas); }
