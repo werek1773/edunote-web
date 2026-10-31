@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=55feead0e7">
 </head>
 <body class="home">
 <!-- ikonki paska stanu iPhone'a (zasięg, Wi-Fi, bateria) dla ramek telefonów -->
@@ -69,6 +69,7 @@
         <a class="btn btn-primary" href="n/#przyklad">Zobacz przykładową notatkę</a>
         <button class="btn btn-ghost" id="ask-mac" type="button">Poproś kogoś z Makiem</button>
       </div>
+      <p class="today-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p>
       <div id="waitlist-home"></div>
     </div>
   </section>
@@ -153,7 +154,7 @@
   <section class="faq-wrap frame" id="pytania">
     <h2>Pytania</h2>
     <div>
-      <details class="faq"><summary>Czy mogę nagrywać wykład?</summary><p>Tak, za zgodą prowadzącego i zgodnie z zasadami uczelni. Nagranie zostaje na Twoim Macu, a do AI trafia sam tekst.</p></details>
+      <details class="faq"><summary>Czy mogę nagrywać wykład?</summary><p>Tak, za zgodą prowadzącego i zgodnie z zasadami uczelni. Nagranie zostaje na Twoim Macu, a do AI trafia sam tekst.</p><p class="faq-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p></details>
       <details class="faq"><summary>Czy na studiach wolno uczyć się z AI?</summary><p>Zwykle tak, ale o zakresie na przedmiocie decyduje prowadzący. Na Uniwersytecie Łódzkim <a href="https://www.wz.uni.lodz.pl/fileadmin/Wydzialy/Wydzia%C5%82_Zarz%C4%85dzania/Strefa_Pracownika/GenAI/zarz._nr_73_z_16.02.2026_r.pdf" rel="noopener">zarządzenie rektora nr 73/2026</a> (PDF) wprost dopuszcza AI do streszczeń i nauki do egzaminów; zasady dla przedmiotu są w sylabusie.</p></details>
       <details class="faq"><summary>Nie mam Maca. Co mogę zrobić?</summary><p>Uczyć się z notatek, które wyśle Ci ktoś z roku: notatka, fiszki i quiz działają w każdej przeglądarce. Wystarczy jedna osoba z Makiem na roku. Jeśli chcesz EduNote na Windowsa, Androida albo iPhone'a, zapisz się tutaj:</p><div id="waitlist-faq"></div></details>
       <details class="faq"><summary>Kto płaci, gdy jedna osoba nagrywa dla całego roku?</summary><p>Osoby, które dostają link, nigdy nie płacą. Teraz nie płaci też osoba nagrywająca, bo aplikacja jest za darmo. Po wczesnym dostępie darmowy plan daje 3 notatki AI w tygodniu, więc przy nagrywaniu wszystkich wykładów zwykle potrzebny będzie EduNote Pro (24,99 zł miesięcznie).</p></details>
@@ -179,18 +180,20 @@
     <p class="foot-copy">© 2026 Marcin Różycki</p>
   </div>
 </footer>
-<script src="platform.js"></script>
-<script src="study.js"></script>
-<script src="share.js"></script>
-<script src="waitlist.js"></script>
+<script src="platform.js?v=55feead0e7"></script>
+<script src="study.js?v=55feead0e7"></script>
+<script src="share.js?v=55feead0e7"></script>
+<script src="waitlist.js?v=55feead0e7"></script>
 <script>
 // Strona główna: pasek po przewinięciu, fiszki w telefonie, kroki z boku i przyciski zależne od urządzenia
 (function () {
   "use strict";
   var MAIL = "mailto:?subject=" + encodeURIComponent("EduNote na Maca")
     + "&body=" + encodeURIComponent("EduNote w Mac App Store: https://apps.apple.com/app/id6824044215?ct=mail");
-  // zapis na inne urządzenia jednym kliknięciem (waitlist.js), w pytaniach dla każdego, a bez Maca także na górze
+  // zapis na inne urządzenia (waitlist.js), w pytaniach dla każdego, a bez Maca także na górze
   eduWaitlist(document.getElementById("waitlist-faq"), { privacy: "prywatnosc/" });
+  // gotowa prośba do prowadzącego o zgodę na nagrywanie (share.js)
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ask=lecturer]"), function (b) { b.addEventListener("click", eduAsk.lecturer); });
 
   // po przewinięciu pasek odrywa się od brzegów (jak u Granoli)
   var bar = document.getElementById("bar");
@@ -201,7 +204,7 @@
   // fiszki z n/przyklad.json w telefonie, pytanie skrócone, żeby zmieściło się w ramce
   eduStudy.start([
     { front: "Popyt elastyczny", back: "Elastyczność bez znaku większa od 1: wielkość popytu zmienia się procentowo mocniej niż cena." },
-    { front: "Cena +10%, wielkość popytu −5%. Jaka to elastyczność?", back: "−0,5, czyli 0,5 bez znaku: popyt nieelastyczny. Przychód firmy wzrośnie." },
+    { front: "Cena +10%, wielkość popytu −5%. Jaka to elastyczność?", back: "−0,5, czyli 0,5 bez znaku: popyt nieelastyczny. Utarg firmy wzrośnie." },
     { front: "Wielkość popytu", back: "Ilość dobra, jaką kupujący chcą kupić przy danej cenie. Zmienia się, gdy zmienia się cena tego dobra." },
     { front: "Substytut", back: "Dobro, które może zastąpić inne, np. herbata kawę. Im więcej substytutów, tym bardziej elastyczny popyt." }
   ], {
@@ -231,11 +234,13 @@
   // Na telefonie i na Windowsie strona „tylko na Maca” w App Store prowadzi donikąd: główną akcją jest przykład,
   // do App Store prowadzi tylko link wysłany sobie na Maca, a przy cenie prośba do osoby z Makiem (cennik jest ten sam)
   if (eduPlatform() !== "mac") {
-    var ASK = "Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Z nagrania robi notatkę, fiszki i quiz dla całej grupy (na razie za darmo). Zobacz:";
     var ask = function () {
-      eduShare(ASK, "https://edunote.rozycki.pro/", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
+      eduShare(eduAsk.mac, "https://edunote.rozycki.pro/n/#przyklad", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
     };
     document.getElementById("no-mac").classList.remove("hidden");
+    // bez Maca od razu po „co możesz zrobić dziś” nauka z telefonu, a dopiero potem nagrywanie na Macu
+    var jak = document.getElementById("jak");
+    jak.parentNode.insertBefore(document.getElementById("rok"), jak);
     eduWaitlist(document.getElementById("waitlist-home"), { privacy: "prywatnosc/" });
     document.getElementById("ask-mac").addEventListener("click", ask);
     var cta = document.getElementById("bar-cta");

@@ -5,11 +5,11 @@
   "sample": true,
   "content": {
     "fromRecording": false,
-    "summary": "Elastyczność cenowa popytu mówi, o ile procent zmieni się wielkość popytu, czyli ilość, jaką ludzie chcą i mogą kupić, gdy cena zmieni się o 1%. Od niej zależy, czy podwyżka ceny zwiększy przychód firmy, czy go zmniejszy.",
+    "summary": "Elastyczność cenowa popytu mówi, o ile procent zmieni się wielkość popytu, czyli ilość, jaką ludzie chcą i mogą kupić, gdy cena zmieni się o 1%. Od niej zależy, czy podwyżka ceny zwiększy utarg (przychód) firmy, czy go zmniejszy.",
     "sections": [
       {
         "heading": "Jak ją policzyć",
-        "body": "Dzielisz procentową zmianę wielkości popytu przez procentową zmianę ceny. Wynik prawie zawsze wychodzi ujemny, bo gdy cena rośnie, ludzie kupują mniej (wyjątkiem są rzadkie dobra Giffena), dlatego z liczbą 1 porównuje się go bez znaku (co do wartości bezwzględnej).\nPrzykład: kawa w bufecie zdrożała z 10 do 12 zł, czyli o 20%, a sprzedaż spadła ze 100 do 70 kubków dziennie, czyli o 30%. Elastyczność to −30% / 20% = −1,5, czyli 1,5 bez znaku."
+        "body": "Dzielisz procentową zmianę wielkości popytu przez procentową zmianę ceny. Wynik prawie zawsze wychodzi ujemny, bo gdy cena rośnie, ludzie kupują mniej (to prawo popytu; wyjątki są niżej), dlatego z liczbą 1 porównuje się go bez znaku (co do wartości bezwzględnej).\nPrzykład: kawa w bufecie zdrożała z 10 do 12 zł, czyli o 20%, a sprzedaż spadła ze 100 do 70 kubków dziennie, czyli o 30%. Elastyczność to −30% / 20% = −1,5, czyli 1,5 bez znaku."
       },
       {
         "heading": "Elastyczność łukowa (metoda punktu środkowego)",
@@ -24,8 +24,8 @@
         "body": "Gdy znasz funkcję popytu, np. Q = a − bP, elastyczność w punkcie liczysz ze wzoru E = (dQ/dP) · (P/Q) = −b · P/Q.\nNachylenie prostej jest wszędzie takie samo, ale elastyczność nie: wysoko na krzywej (wysoka cena, mała ilość) popyt jest elastyczny, nisko nieelastyczny, a dokładnie w połowie elastyczność bez znaku wynosi 1. Dlatego nie wolno mylić nachylenia z elastycznością."
       },
       {
-        "heading": "Elastyczność a przychód",
-        "body": "Przychód firmy to cena razy sprzedana ilość. Przy popycie elastycznym podwyżka ceny obniża przychód, bo ilość spada procentowo mocniej, niż rośnie cena, a obniżka ceny przychód podnosi. Przy popycie nieelastycznym jest odwrotnie. Przy elastyczności jednostkowej niewielka zmiana ceny przychodu nie zmienia; na liniowej krzywej popytu przychód jest wtedy największy.\nW bufecie przychód spadł z 1000 zł (10 zł × 100) do 840 zł (12 zł × 70), bo popyt na kawę był elastyczny."
+        "heading": "Elastyczność a utarg całkowity (TR)",
+        "body": "Utarg całkowity (TR), czyli przychód ze sprzedaży, to cena razy sprzedana ilość: TR = P · Q. Przy popycie elastycznym podwyżka ceny obniża utarg, bo ilość spada procentowo mocniej, niż rośnie cena, a obniżka ceny utarg podnosi. Przy popycie nieelastycznym jest odwrotnie. Przy elastyczności jednostkowej niewielka zmiana ceny utargu nie zmienia; na liniowej krzywej popytu utarg jest wtedy największy.\nW bufecie utarg spadł z 1000 zł (10 zł × 100) do 840 zł (12 zł × 70), bo popyt na kawę był elastyczny."
       },
       {
         "heading": "Od czego zależy elastyczność",
@@ -34,6 +34,14 @@
       {
         "heading": "Popyt a wielkość popytu",
         "body": "Zmiana ceny samego dobra to ruch wzdłuż krzywej popytu, czyli zmiana wielkości popytu. Zmiana dochodów, gustów albo cen innych dóbr przesuwa całą krzywą, czyli zmienia popyt. Elastyczność cenowa opisuje to pierwsze."
+      },
+      {
+        "heading": "Wyjątki od prawa popytu",
+        "body": "Prawo popytu mówi, że gdy cena rośnie, wielkość popytu spada. Wyjątki często padają na kolokwium.\nDobra Giffena: tanie dobra podstawowe, na które najubożsi wydają dużą część dochodu (np. chleb). Po podwyżce nie stać ich na droższe jedzenie, więc kupują tego dobra więcej. To skrajny i bardzo rzadki przypadek dobra niższego rzędu.\nEfekt Veblena: dobra prestiżowe, np. luksusowe zegarki. Wysoka cena jest częścią ich wartości, więc po podwyżce mogą sprzedawać się lepiej. W obu przypadkach elastyczność cenowa wychodzi dodatnia.\nEfekt spekulacyjny: gdy ludzie spodziewają się dalszych podwyżek, kupują więcej mimo wzrostu ceny. Ściśle biorąc, oczekiwania przesuwają całą krzywą popytu, ale podręczniki zwykle zaliczają ten efekt do wyjątków."
+      },
+      {
+        "heading": "Inne elastyczności: dochodowa i mieszana",
+        "body": "Elastyczność dochodowa mówi, o ile procent zmieni się kupowana ilość (przy tej samej cenie), gdy dochód wzrośnie o 1%. Dla dóbr normalnych jest dodatnia: przy dobrach podstawowych od 0 do 1, przy luksusowych powyżej 1. Dla dóbr niższego rzędu jest ujemna: gdy dochód rośnie, kupujemy ich mniej, np. najtańszych produktów marek sklepowych.\nElastyczność mieszana (krzyżowa) mówi, o ile procent zmieni się popyt na dobro X, gdy cena dobra Y wzrośnie o 1%. Dodatnia oznacza substytuty (kawa i herbata), ujemna dobra komplementarne (drukarka i tusz), a bliska zera dobra niezależne."
       }
     ],
     "visual": {
@@ -68,7 +76,7 @@
               "meaning": "średnia cena przed zmianą i po niej: (P₁ + P₂) / 2"
             }
           ],
-          "text": "Dla kawy: średnia ilość (100 + 70) / 2 = 85, średnia cena (10 + 12) / 2 = 11, więc E ≈ (−30 / 85) / (2 / 11) ≈ −0,353 / 0,182 ≈ −1,94."
+          "text": "Inny przykład: koszulka tanieje z 50 do 40 zł, a sprzedaż rośnie z 90 do 110 sztuk. Średnio to 100 sztuk i 45 zł, więc E = (20 / 100) / (−10 / 45) = 0,2 / (−0,222) ≈ −0,9: popyt nieelastyczny, a utarg spada z 4500 do 4400 zł. Licząc od wartości początkowych, wyszłoby −1,11, czyli „elastyczny”, co nie zgadza się z utargiem. Metoda punktu środkowego zawsze zgadza się z tym, co dzieje się z utargiem."
         },
         {
           "kind": "graph",
@@ -126,26 +134,36 @@
       },
       {
         "term": "Elastyczność jednostkowa",
-        "definition": "Elastyczność bez znaku równa 1: wielkość popytu zmienia się o tyle procent co cena, więc niewielka zmiana ceny nie zmienia przychodu."
+        "definition": "Elastyczność bez znaku równa 1: wielkość popytu zmienia się o tyle procent co cena, więc niewielka zmiana ceny nie zmienia utargu."
       },
       {
         "term": "Elastyczność punktowa",
         "definition": "Elastyczność w jednym punkcie krzywej: E = (dQ/dP) · (P/Q). Dla Q = a − bP to −b · P/Q.",
         "important": true
+      },
+      {
+        "term": "Elastyczność dochodowa",
+        "definition": "Procentowa zmiana kupowanej ilości przy wzroście dochodu o 1%. Dodatnia dla dóbr normalnych (powyżej 1 dla luksusowych), ujemna dla dóbr niższego rzędu."
+      },
+      {
+        "term": "Elastyczność mieszana (krzyżowa)",
+        "definition": "Procentowa zmiana popytu na dobro X przy wzroście ceny dobra Y o 1%. Dodatnia dla substytutów, ujemna dla dóbr komplementarnych."
       }
     ],
     "exam": [
-      "Wzór na elastyczność i liczenie jej z danych, także elastyczność łukowa (punkt środkowy)",
-      "Elastyczność punktowa przy funkcji popytu Q = a − bP",
+      "Wzór na elastyczność i metoda punktu środkowego",
+      "Elastyczność punktowa dla Q = a − bP",
       "Popyt elastyczny, nieelastyczny, jednostkowy i przypadki skrajne",
-      "Co dzieje się z przychodem po podwyżce i po obniżce ceny",
-      "Od czego zależy elastyczność: zamienniki, udział w wydatkach, potrzeba, czas",
-      "Różnica między zmianą popytu a zmianą wielkości popytu"
+      "Utarg całkowity (TR) po podwyżce i po obniżce ceny",
+      "Od czego zależy elastyczność",
+      "Zmiana popytu a zmiana wielkości popytu",
+      "Wyjątki od prawa popytu",
+      "Elastyczność dochodowa i mieszana: co mówi ich znak"
     ],
     "questions": [
       {
-        "question": "Zadanie: bilet do kina potaniał z 25 do 20 zł, a liczba widzów wzrosła z 400 do 560 dziennie. Policz elastyczność metodą punktu środkowego. Co się stało z przychodem?",
-        "answer": "Średnia ilość: (400 + 560) / 2 = 480, więc zmiana ilości to 160 / 480 ≈ 0,333. Średnia cena: (25 + 20) / 2 = 22,5, więc zmiana ceny to −5 / 22,5 ≈ −0,222. E = 0,333 / (−0,222) = −1,5: popyt elastyczny. Przychód wzrósł z 10 000 zł (25 × 400) do 11 200 zł (20 × 560)."
+        "question": "Zadanie: bilet do kina potaniał z 25 do 20 zł, a liczba widzów wzrosła z 400 do 560 dziennie. Policz elastyczność metodą punktu środkowego. Co się stało z utargiem?",
+        "answer": "Średnia ilość: (400 + 560) / 2 = 480, więc zmiana ilości to 160 / 480 ≈ 0,333. Średnia cena: (25 + 20) / 2 = 22,5, więc zmiana ceny to −5 / 22,5 ≈ −0,222. E = 0,333 / (−0,222) = −1,5: popyt elastyczny. Utarg wzrósł z 10 000 zł (25 × 400) do 11 200 zł (20 × 560)."
       },
       {
         "question": "Zadanie: popyt na pizzę w barze to Q = 120 − 4P (sztuki dziennie, cena w zł). Policz elastyczność punktową przy cenie 20 zł i 10 zł.",
@@ -153,15 +171,23 @@
       },
       {
         "question": "Zadanie: elastyczność popytu na papierosy to −0,4. O ile procent zmieni się wielkość popytu po podwyżce ceny o 15%?",
-        "answer": "%ΔQ ≈ E · %ΔP = −0,4 · 15% = −6% (w przybliżeniu, bo elastyczność liczymy jak stałą). Popyt jest nieelastyczny, więc przychód ze sprzedaży wzrośnie (1,15 · 0,94 ≈ 1,081, czyli o ok. 8%)."
+        "answer": "%ΔQ ≈ E · %ΔP = −0,4 · 15% = −6% (w przybliżeniu, bo elastyczność liczymy jak stałą). Popyt jest nieelastyczny, więc utarg ze sprzedaży wzrośnie (1,15 · 0,94 ≈ 1,081, czyli o ok. 8%)."
       },
       {
-        "question": "Cena wzrosła o 10%, a wielkość popytu spadła o 5%. Jaka to elastyczność i co stanie się z przychodem?",
-        "answer": "−0,5, czyli 0,5 bez znaku: popyt nieelastyczny. Przychód wzrośnie, bo ilość spada procentowo słabiej, niż rośnie cena."
+        "question": "Cena wzrosła o 10%, a wielkość popytu spadła o 5%. Jaka to elastyczność i co stanie się z utargiem?",
+        "answer": "−0,5, czyli 0,5 bez znaku: popyt nieelastyczny. Utarg wzrośnie, bo ilość spada procentowo słabiej, niż rośnie cena."
       },
       {
         "question": "Dlaczego popyt na paliwo jest mniej elastyczny w krótkim okresie niż w długim?",
         "answer": "Od razu trudno zmienić sposób dojazdu. Z czasem można kupić oszczędniejszy samochód, przesiąść się na komunikację albo zamieszkać bliżej, więc reakcja na cenę rośnie."
+      },
+      {
+        "question": "Zadanie: dochody studentów wzrosły o 10%, a sprzedaż najtańszych zupek instant spadła o 5%. Policz elastyczność dochodową. Jakie to dobro?",
+        "answer": "E = −5% / 10% = −0,5. Ujemna elastyczność dochodowa oznacza dobro niższego rzędu: gdy dochód rośnie, kupujemy go mniej i przerzucamy się na lepsze jedzenie."
+      },
+      {
+        "question": "Podaj trzy wyjątki od prawa popytu i powiedz, skąd się biorą.",
+        "answer": "Dobra Giffena: tanie dobra podstawowe, na które najubożsi wydają dużą część dochodu; po podwyżce nie stać ich na droższe jedzenie, więc kupują tego dobra więcej. Efekt Veblena: dobra prestiżowe, którym wysoka cena dodaje wartości. Efekt spekulacyjny: kupujemy więcej, bo spodziewamy się dalszych podwyżek."
       }
     ],
     "quiz": [
@@ -199,7 +225,7 @@
         "explanation": "dQ/dP = −3, a Q = 90 − 60 = 30, więc E = −3 · 20 / 30 = −2. Samo nachylenie (−3) to nie elastyczność."
       },
       {
-        "prompt": "Elastyczność popytu na bilety komunikacji miejskiej wynosi −0,6. Miasto podnosi cenę o 10%. Co stanie się z przychodem?",
+        "prompt": "Elastyczność popytu na bilety komunikacji miejskiej wynosi −0,6. Miasto podnosi cenę o 10%. Co stanie się z utargiem ze sprzedaży biletów?",
         "options": [
           "spadnie o ok. 6%",
           "nie zmieni się",
@@ -207,7 +233,7 @@
           "wzrośnie o ok. 3,4%"
         ],
         "answer": "wzrośnie o ok. 3,4%",
-        "explanation": "Ilość spadnie o 0,6 · 10% = 6%. Przychód: 1,10 · 0,94 ≈ 1,034, czyli ok. 3,4% więcej."
+        "explanation": "Ilość spadnie o 0,6 · 10% = 6%. Utarg: 1,10 · 0,94 ≈ 1,034, czyli ok. 3,4% więcej."
       },
       {
         "prompt": "Na liniowej krzywej popytu schodzisz w dół (niższa cena, większa ilość). Elastyczność bez znaku…",
@@ -221,7 +247,7 @@
         "explanation": "E = (dQ/dP) · P/Q. Nachylenie się nie zmienia, ale P/Q maleje, gdy cena spada, a ilość rośnie."
       },
       {
-        "prompt": "Popyt na dobro jest elastyczny. Firma obniża cenę. Jej przychód…",
+        "prompt": "Popyt na dobro jest elastyczny. Firma obniża cenę. Jej utarg całkowity…",
         "options": [
           "spadnie",
           "nie zmieni się",
@@ -232,15 +258,15 @@
         "explanation": "Ilość rośnie procentowo mocniej, niż spada cena, więc iloczyn ceny i ilości rośnie."
       },
       {
-        "prompt": "Dlaczego popyt na benzynę jest bardziej elastyczny w długim okresie niż w krótkim?",
+        "prompt": "Benzyna zdrożała o 20%. Po miesiącu kierowcy kupują jej o 4% mniej, a po trzech latach o 12% mniej. Popyt na benzynę jest…",
         "options": [
-          "w długim okresie benzyna tanieje",
-          "z czasem można zmienić samochód i sposób dojazdu",
-          "w długim okresie rośnie udział benzyny w wydatkach",
-          "w krótkim okresie jest więcej stacji"
+          "w długim okresie bardziej elastyczny, ale nadal nieelastyczny",
+          "w długim okresie elastyczny, bo spadek jest większy",
+          "bardziej elastyczny w krótkim okresie",
+          "w obu okresach tak samo elastyczny"
         ],
-        "answer": "z czasem można zmienić samochód i sposób dojazdu",
-        "explanation": "Elastyczność rośnie z czasem, bo pojawiają się zamienniki: oszczędniejsze auto, komunikacja, przeprowadzka."
+        "answer": "w długim okresie bardziej elastyczny, ale nadal nieelastyczny",
+        "explanation": "Po miesiącu E = −4% / 20% = −0,2, a po trzech latach −12% / 20% = −0,6. Z czasem kierowcy mogą się dostosować: kupić oszczędniejsze auto, przesiąść się na komunikację, zamieszkać bliżej. Mimo to 0,6 jest mniejsze od 1, więc popyt nadal jest nieelastyczny."
       },
       {
         "prompt": "Bilety lotnicze potaniały i ludzie kupują ich więcej. W języku ekonomii to…",
@@ -252,6 +278,17 @@
         ],
         "answer": "zmiana wielkości popytu",
         "explanation": "Zmiana ceny samego dobra to ruch wzdłuż krzywej popytu. Krzywą przesuwają inne czynniki, np. dochody albo gusty."
+      },
+      {
+        "prompt": "Kawa zdrożała o 10%, a sprzedaż herbaty wzrosła o 4%. Elastyczność mieszana popytu na herbatę względem ceny kawy to…",
+        "options": [
+          "+0,4: kawa i herbata to substytuty",
+          "−0,4: to dobra komplementarne",
+          "+2,5: to dobra luksusowe",
+          "0: to dobra niezależne"
+        ],
+        "answer": "+0,4: kawa i herbata to substytuty",
+        "explanation": "E = +4% / +10% = +0,4. Dodatni znak oznacza substytuty: po podwyżce ceny kawy część osób przerzuca się na herbatę. Wynik 2,5 wychodzi, gdy podzielisz odwrotnie."
       }
     ]
   }

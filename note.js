@@ -165,7 +165,15 @@
   }
 
   function graph(slide) {
-    var W = 680, H = 360, L = 52, R = 14, T = 30, B = 40;
+    // Na telefonie wykres rysuje się w rozmiarze ekranu (1 jednostka = 1 px), żeby napisy miały 13–15 px, a nie
+    // zmniejszały się o połowę razem z całym wykresem; 38 to marginesy i ramka .sketch
+    var doc = document.querySelector("main.doc"), cs = doc && getComputedStyle(doc);
+    var avail = doc ? doc.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 38 : 680;
+    var narrow = avail < 560;
+    var W = narrow ? Math.max(260, Math.round(avail)) : 680, H = narrow ? Math.round(W * 0.88) : 380;
+    // podpis osi X stoi pod liczbami na osi, żeby linia wykresu go nie przecinała
+    var L = narrow ? 40 : 52, R = narrow ? 16 : 20, T = 30, B = (narrow ? 34 : 40) + (slide.xLabel ? (narrow ? 20 : 26) : 0);
+    var size = narrow ? { tick: 13, point: 15, axis: 14 } : { tick: 17, point: 20, axis: 18 };
     var x0 = slide.xMin, x1 = slide.xMax, lines = [], ys = [];
     slide.plots.forEach(function (pl, i) {
       var f; try { f = compile(pl.expression); } catch (e) { return; }
@@ -189,15 +197,15 @@
     var clip = svg("clipPath", { id: "plot" + Math.random().toString(36).slice(2) });
     clip.appendChild(svg("rect", { x: L, y: T, width: W - L - R, height: H - T - B }));
     s.appendChild(clip);
-    var xs = niceStep(x1 - x0, 8), ysStep = niceStep(hi - lo, 6);
+    var xs = niceStep(x1 - x0, narrow ? 4 : 8), ysStep = niceStep(hi - lo, narrow ? 4 : 6);
     for (var gx = Math.ceil(x0 / xs) * xs; gx <= x1 + 1e-9; gx += xs) {
       s.appendChild(svg("line", { x1: sx(gx), x2: sx(gx), y1: T, y2: H - B, stroke: "#E2DFD3", "stroke-width": 1 }));
-      var tx = svg("text", { x: sx(gx), y: H - 8, "text-anchor": "middle", "font-size": 17, fill: "#6E6B5F" });
+      var tx = svg("text", { x: sx(gx), y: H - B + (narrow ? 26 : 32), "text-anchor": "middle", "font-size": size.tick, fill: "#6E6B5F" });
       tx.textContent = +gx.toFixed(6); s.appendChild(tx);
     }
     for (var gy = Math.ceil(lo / ysStep) * ysStep; gy <= hi + 1e-9; gy += ysStep) {
       s.appendChild(svg("line", { x1: L, x2: W - R, y1: sy(gy), y2: sy(gy), stroke: "#E2DFD3", "stroke-width": 1 }));
-      var ty = svg("text", { x: L - 8, y: sy(gy) + 6, "text-anchor": "end", "font-size": 17, fill: "#6E6B5F" });
+      var ty = svg("text", { x: L - 8, y: sy(gy) + 5, "text-anchor": "end", "font-size": size.tick, fill: "#6E6B5F" });
       ty.textContent = +gy.toFixed(6); s.appendChild(ty);
     }
     if (lo < 0 && hi > 0) s.appendChild(svg("line", { x1: L, x2: W - R, y1: sy(0), y2: sy(0), stroke: "#2A2A22", "stroke-opacity": 0.6, "stroke-width": 1.3 }));
@@ -218,14 +226,17 @@
       if (p.x < x0 || p.x > x1 || p.y < lo || p.y > hi) return;
       s.appendChild(svg("circle", { cx: sx(p.x), cy: sy(p.y), r: 4.5, fill: "#2A2A22" }));
       if (p.label) {
-        var t = svg("text", { x: sx(p.x) + 9, y: sy(p.y) - 10, "font-size": 20, "font-weight": 700, fill: "#2A2A22",
+        // podpis nad punktem i w prawo, a gdy nie zmieściłby się w wykresie, pod punktem i w lewo
+        var fits = sx(p.x) + 9 + p.label.length * size.point * 0.6 <= W - R;
+        var t = svg("text", { x: fits ? sx(p.x) + 9 : sx(p.x) - 9, y: fits ? sy(p.y) - 10 : sy(p.y) + size.point + 6,
+                              "text-anchor": fits ? "start" : "end", "font-size": size.point, "font-weight": 700, fill: "#2A2A22",
                               stroke: "#FFFEFA", "stroke-width": 4, "paint-order": "stroke" });
         t.textContent = p.label; s.appendChild(t);
       }
     });
     // podpisy osi (opcjonalne pola xLabel i yLabel slajdu)
-    if (slide.xLabel) { var xl = svg("text", { x: W - R, y: H - B - 8, "text-anchor": "end", "font-size": 18, "font-weight": 700, fill: "#2A2A22" }); xl.textContent = slide.xLabel; s.appendChild(xl); }
-    if (slide.yLabel) { var yl = svg("text", { x: L + 8, y: T - 10, "font-size": 18, "font-weight": 700, fill: "#2A2A22" }); yl.textContent = slide.yLabel; s.appendChild(yl); }
+    if (slide.xLabel) { var xl = svg("text", { x: W - R, y: H - 6, "text-anchor": "end", "font-size": size.axis, "font-weight": 700, fill: "#2A2A22" }); xl.textContent = slide.xLabel; s.appendChild(xl); }
+    if (slide.yLabel) { var yl = svg("text", { x: L + 8, y: T - 10, "font-size": size.axis, "font-weight": 700, fill: "#2A2A22" }); yl.textContent = slide.yLabel; s.appendChild(yl); }
     var box = el("div", { class: "sketch graph" }, []);
     box.appendChild(s);
     var legend = el("div", { class: "legend" });
@@ -595,14 +606,19 @@
 
     // nagłówek jak w aplikacji: przedmiot z kropką i data, temat, oznaczenie treści z AI (AI Act, art. 50) przy każdej
     // notatce, którą pisało AI, a nie tylko autor; minuty to długość nagrania (starsze linki nie mają tych pól)
+    // Przy przykładzie AI oznacza już żółty baner, więc bez drugiej etykiety pod tytułem i trzeciej w stopce.
+    // W stopce zamiast tego, gdzie zgłosić błąd (prawdziwe notatki mają tam „Zgłoś treść”).
     if (data.sample) {
       $("sample").classList.remove("hidden");
-      $("origin").textContent = "Przykładowa notatka przygotowana z pomocą AI na potrzeby tej strony, a nie materiał prowadzącego.";
+      var origin = $("origin");
+      origin.textContent = "Widzisz błąd w przykładzie? ";
+      origin.appendChild(el("a", { href: "mailto:marcin@rozycki.pro?subject=" + encodeURIComponent("Błąd w przykładowej notatce"),
+        text: "Napisz do autora EduNote" }));
     }
     $("subject").textContent = [data.subject, data.sample ? "przykład" : shortDate(data.lesson_date)].filter(Boolean).join(" · ");
     $("topic").textContent = title;
     var ai = c.fromRecording || c.summary || (c.sections && c.sections.length) || (c.concepts && c.concepts.length) || c.visual;
-    if (ai) {
+    if (ai && !data.sample) {
       $("ai-text").textContent = (c.fromRecording
         ? "Notatka z AI z " + (c.minutes > 0 ? c.minutes + "-minutowego nagrania" : "nagrania") + " wykładu w EduNote na Macu"
         : "Notatka przygotowana z pomocą AI") + " · może zawierać błędy";
@@ -665,7 +681,7 @@
         el("p", { class: "eyebrow", text: !p ? what + " · ok. " + eduStudy.minutes(cards) + " min · bez logowania"
           : resume ? "Przerobione " + p.seen + " z " + p.total + " fiszek"
           : "Ostatnio " + p.ok + " z " + p.total + " za pierwszym razem" + (p.fixed ? " · " + p.fixed + " powtórzone" : "") }),
-        el("h2", { text: p ? "Twoje fiszki" : "Przepytaj się z tej notatki" }),
+        el("h2", { text: !p ? "Przepytaj się z tej notatki" : resume ? "Dokończ fiszki" : "Fiszki z tej notatki" }),
         el("p", { class: "muted", text: "Najpierw spróbuj sobie przypomnieć odpowiedź, potem ją odkryj i oceń się. "
           + "Fiszki, których nie pamiętasz, wracają na koniec. Zadania liczysz na kartce." })
       ]);
@@ -731,6 +747,15 @@
     }
 
     // Notatka jak w aplikacji: „W skrócie”, działy, wyjaśnienie wzoru, pojęcia na kartach, „Na kolokwium”, pytania
+    // Pojęcia i pytania są zwinięte: rozwinięte wydłużały notatkę na telefonie o kilka ekranów, a gdy fiszki powstają
+    // z nich samych (aplikacja nie wysłała własnych), te same definicje i zadania są w zakładce Fiszki
+    var fromNote = !(c.cards || []).some(function (k) { return k.front && k.back; });
+    function fold(title, meta, children) {
+      return el("section", { class: "section" }, [el("details", { class: "fold" }, [
+        el("summary", {}, [el("span", { class: "fold-title", text: title }),
+          el("span", { class: "fold-meta", text: meta + (fromNote && cards.length ? " · są też w fiszkach" : "") })])
+      ].concat(children))]);
+    }
     if (c.summary) $("summary").textContent = c.summary; else $("brief").classList.add("hidden");
     var body = $("body");
     (c.sections || []).forEach(function (s) {
@@ -748,7 +773,7 @@
           el("p", { class: "def", text: eduStudy.tidy(k.definition) })
         ]));
       });
-      body.appendChild(el("section", { class: "section" }, [el("h2", { text: "Pojęcia" }), grid]));
+      body.appendChild(fold("Pojęcia", eduStudy.plural(c.concepts.length, "definicja", "definicje", "definicji"), [grid]));
     }
     if (c.exam && c.exam.length) {
       var ul = el("ul", { class: "plain" });
@@ -763,8 +788,8 @@
       c.questions.forEach(function (q) {
         qs.appendChild(el("details", { class: "q" }, [el("summary", { text: eduStudy.tidy(q.question) }), el("p", { text: eduStudy.tidy(q.answer) })]));
       });
-      body.appendChild(el("section", { class: "section" }, [el("h2", { text: "Zadania i pytania do nauki" }),
-        el("p", { class: "muted small", text: "Najpierw spróbuj rozwiązać, potem rozwiń odpowiedź." }), qs]));
+      body.appendChild(fold("Zadania i pytania do nauki", eduStudy.plural(c.questions.length, "pytanie", "pytania", "pytań") + " z odpowiedziami",
+        [el("p", { class: "muted small", text: "Najpierw spróbuj rozwiązać, potem rozwiń odpowiedź." }), qs]));
     }
     if (c.homework && c.homework.length) {
       var hw = el("ul", { class: "plain" });
@@ -790,9 +815,10 @@
       $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote z nagrań na Macu: wystarczy jedna "
         + "osoba z Makiem na roku, która za zgodą prowadzącego nagra wykład i wyśle link grupie.";
       slot.appendChild(button("Poproś kogoś z Makiem", "btn btn-primary", function () {
-        eduShare("Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Z nagrania robi notatkę, fiszki i quiz "
-          + "dla całej grupy (na razie za darmo). Tak to wygląda:", url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
+        eduShare(eduAsk.mac, url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
       }));
+      // drugi gotowy tekst: prośba do prowadzącego o zgodę, bez której nikt nie nagra (share.js)
+      slot.appendChild(el("p", { class: "cta-links" }, [button("Prośba do prowadzącego o zgodę", "link", eduAsk.lecturer)]));
       // zapis na EduNote na Androida, Windowsa albo iPhone'a jednym kliknięciem (waitlist.js)
       eduWaitlist(slot, { privacy: "../prywatnosc/" });
     }
@@ -816,7 +842,7 @@
   // Na wydruku i w PDF rozwiązania zadań są rozwinięte; po wydruku wracają do stanu sprzed
   var closed = [];
   window.addEventListener("beforeprint", function () {
-    closed = Array.prototype.filter.call(document.querySelectorAll("details.q"), function (d) { return !d.open; });
+    closed = Array.prototype.filter.call(document.querySelectorAll("details.q, details.fold"), function (d) { return !d.open; });
     closed.forEach(function (d) { d.open = true; });
   });
   window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); });
