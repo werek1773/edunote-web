@@ -1,0 +1,258 @@
+{
+  "subject": "Mikroekonomia",
+  "topic": "Elastyczność cenowa popytu",
+  "lesson_date": "2026-10-27",
+  "sample": true,
+  "content": {
+    "fromRecording": false,
+    "summary": "Elastyczność cenowa popytu mówi, o ile procent zmieni się wielkość popytu, czyli ilość, jaką ludzie chcą i mogą kupić, gdy cena zmieni się o 1%. Od niej zależy, czy podwyżka ceny zwiększy przychód firmy, czy go zmniejszy.",
+    "sections": [
+      {
+        "heading": "Jak ją policzyć",
+        "body": "Dzielisz procentową zmianę wielkości popytu przez procentową zmianę ceny. Wynik prawie zawsze wychodzi ujemny, bo gdy cena rośnie, ludzie kupują mniej, dlatego z liczbą 1 porównuje się go bez znaku (co do wartości bezwzględnej).\nPrzykład: kawa w bufecie zdrożała z 10 do 12 zł, czyli o 20%, a sprzedaż spadła ze 100 do 70 kubków dziennie, czyli o 30%. Elastyczność to −30% / 20% = −1,5, czyli 1,5 bez znaku."
+      },
+      {
+        "heading": "Elastyczność łukowa (metoda punktu środkowego)",
+        "body": "Procent liczony od wartości początkowej daje inny wynik przy podwyżce niż przy obniżce o tę samą kwotę. Dlatego w zadaniach zmiany często liczy się względem średniej z wartości przed zmianą i po niej.\nDla kawy średnia ilość to (100 + 70) / 2 = 85, a średnia cena (10 + 12) / 2 = 11. Zmiana ilości: −30 / 85 ≈ −0,353, czyli −35,3%. Zmiana ceny: 2 / 11 ≈ 0,182, czyli 18,2%. Elastyczność ≈ −0,353 / 0,182 ≈ −1,94, więc popyt nadal jest elastyczny."
+      },
+      {
+        "heading": "Popyt elastyczny i nieelastyczny",
+        "body": "Gdy elastyczność bez znaku jest większa od 1, popyt jest elastyczny: wielkość popytu zmienia się procentowo mocniej niż cena. Tak jest zwykle przy dobrach z wieloma zamiennikami, na przykład przy konkretnej marce napoju.\nGdy jest mniejsza od 1, ale większa od 0, popyt jest nieelastyczny: wielkość popytu zmienia się procentowo słabiej niż cena, choć po podwyżce nadal spada. Tak bywa z paliwem w krótkim okresie.\nRówna 1 to elastyczność jednostkowa. Przypadki skrajne to popyt doskonale nieelastyczny (elastyczność 0: kupujemy tyle samo bez względu na cenę) i doskonale elastyczny (nieskończona: przy najmniejszej podwyżce sprzedaż spada do zera)."
+      },
+      {
+        "heading": "Elastyczność punktowa i liniowa krzywa popytu",
+        "body": "Gdy znasz funkcję popytu, np. Q = a − bP, elastyczność w punkcie liczysz ze wzoru E = (dQ/dP) · (P/Q) = −b · P/Q.\nNachylenie prostej jest wszędzie takie samo, ale elastyczność nie: wysoko na krzywej (wysoka cena, mała ilość) popyt jest elastyczny, nisko nieelastyczny, a dokładnie w połowie elastyczność bez znaku wynosi 1. Dlatego nie wolno mylić nachylenia z elastycznością."
+      },
+      {
+        "heading": "Elastyczność a przychód",
+        "body": "Przychód firmy to cena razy sprzedana ilość. Przy popycie elastycznym podwyżka ceny obniża przychód, bo ilość spada procentowo mocniej, niż rośnie cena, a obniżka ceny przychód podnosi. Przy popycie nieelastycznym jest odwrotnie. Przy elastyczności jednostkowej niewielka zmiana ceny przychodu nie zmienia; na liniowej krzywej popytu przychód jest wtedy największy.\nW bufecie przychód spadł z 1000 zł (10 zł × 100) do 840 zł (12 zł × 70), bo popyt na kawę był elastyczny."
+      },
+      {
+        "heading": "Od czego zależy elastyczność",
+        "body": "Popyt jest bardziej elastyczny, gdy łatwo o zamienniki, gdy dobro pochłania dużą część wydatków (podwyżkę ceny laptopa o 10% czujemy bardziej niż podwyżkę ceny długopisu), gdy można się bez niego obejść i gdy od zmiany ceny minęło więcej czasu. Dlatego popyt na paliwo jest w długim okresie bardziej elastyczny niż w krótkim: z czasem można zmienić samochód albo sposób dojazdu."
+      },
+      {
+        "heading": "Popyt a wielkość popytu",
+        "body": "Zmiana ceny samego dobra to ruch wzdłuż krzywej popytu, czyli zmiana wielkości popytu. Zmiana dochodów, gustów albo cen innych dóbr przesuwa całą krzywą, czyli zmienia popyt. Elastyczność cenowa opisuje to pierwsze."
+      }
+    ],
+    "visual": {
+      "title": "elastyczność krok po kroku",
+      "slides": [
+        {
+          "kind": "formula",
+          "heading": "Wzór",
+          "latex": "E = \\frac{\\hl1{\\%\\Delta Q}}{\\hl2{\\%\\Delta P}}",
+          "symbols": [
+            {
+              "latex": "\\%\\Delta Q",
+              "meaning": "procentowa zmiana wielkości popytu"
+            },
+            {
+              "latex": "\\%\\Delta P",
+              "meaning": "procentowa zmiana ceny"
+            }
+          ]
+        },
+        {
+          "kind": "formula",
+          "heading": "Elastyczność łukowa (punkt środkowy)",
+          "latex": "E = \\frac{\\hl1{(Q_2 - Q_1) / \\bar{Q}}}{\\hl2{(P_2 - P_1) / \\bar{P}}}",
+          "symbols": [
+            {
+              "latex": "\\bar{Q}",
+              "meaning": "średnia ilość przed zmianą i po niej: (Q₁ + Q₂) / 2"
+            },
+            {
+              "latex": "\\bar{P}",
+              "meaning": "średnia cena przed zmianą i po niej: (P₁ + P₂) / 2"
+            }
+          ],
+          "text": "Dla kawy: średnia ilość (100 + 70) / 2 = 85, średnia cena (10 + 12) / 2 = 11, więc E ≈ (−30 / 85) / (2 / 11) ≈ −0,353 / 0,182 ≈ −1,94."
+        },
+        {
+          "kind": "graph",
+          "heading": "Ta sama prosta, różna elastyczność",
+          "xMin": 0,
+          "xMax": 200,
+          "plots": [
+            {
+              "expression": "20 - x/10",
+              "label": "P = 20 - \\frac{Q}{10}"
+            }
+          ],
+          "points": [
+            {
+              "x": 50,
+              "y": 15,
+              "label": "|E| = 3"
+            },
+            {
+              "x": 100,
+              "y": 10,
+              "label": "|E| = 1"
+            },
+            {
+              "x": 150,
+              "y": 5,
+              "label": "|E| ≈ 0,33"
+            }
+          ],
+          "xLabel": "Q (ilość)",
+          "yLabel": "P (cena)",
+          "text": "Popyt Q = 200 − 10P. Nachylenie jest stałe, a elastyczność bez znaku maleje, gdy schodzisz w dół krzywej."
+        }
+      ]
+    },
+    "concepts": [
+      {
+        "term": "Elastyczność cenowa popytu",
+        "definition": "Procentowa zmiana wielkości popytu podzielona przez procentową zmianę ceny, przy pozostałych czynnikach bez zmian (ceteris paribus). Pokazuje, jak mocno kupujący reagują na cenę.",
+        "important": true
+      },
+      {
+        "term": "Wielkość popytu",
+        "definition": "Ilość dobra, jaką kupujący chcą i mogą kupić przy danej cenie. Zmienia się, gdy zmienia się cena tego dobra."
+      },
+      {
+        "term": "Popyt elastyczny",
+        "definition": "Elastyczność bez znaku większa od 1: wielkość popytu zmienia się procentowo mocniej niż cena.",
+        "important": true
+      },
+      {
+        "term": "Popyt nieelastyczny",
+        "definition": "Elastyczność bez znaku mniejsza od 1 (i większa od 0): wielkość popytu zmienia się procentowo słabiej niż cena.",
+        "important": true
+      },
+      {
+        "term": "Elastyczność jednostkowa",
+        "definition": "Elastyczność bez znaku równa 1: wielkość popytu zmienia się o tyle procent co cena, więc niewielka zmiana ceny nie zmienia przychodu."
+      },
+      {
+        "term": "Elastyczność punktowa",
+        "definition": "Elastyczność w jednym punkcie krzywej: E = (dQ/dP) · (P/Q). Dla Q = a − bP to −b · P/Q.",
+        "important": true
+      }
+    ],
+    "exam": [
+      "Wzór na elastyczność i liczenie jej z danych, także elastyczność łukowa (punkt środkowy)",
+      "Elastyczność punktowa przy funkcji popytu Q = a − bP",
+      "Popyt elastyczny, nieelastyczny, jednostkowy i przypadki skrajne",
+      "Co dzieje się z przychodem po podwyżce i po obniżce ceny",
+      "Od czego zależy elastyczność: zamienniki, udział w wydatkach, potrzeba, czas",
+      "Różnica między zmianą popytu a zmianą wielkości popytu"
+    ],
+    "questions": [
+      {
+        "question": "Zadanie: bilet do kina potaniał z 25 do 20 zł, a liczba widzów wzrosła z 400 do 560 dziennie. Policz elastyczność metodą punktu środkowego. Co się stało z przychodem?",
+        "answer": "Średnia ilość: (400 + 560) / 2 = 480, więc zmiana ilości to 160 / 480 ≈ 0,333. Średnia cena: (25 + 20) / 2 = 22,5, więc zmiana ceny to −5 / 22,5 ≈ −0,222. E = 0,333 / (−0,222) = −1,5: popyt elastyczny. Przychód wzrósł z 10 000 zł (25 × 400) do 11 200 zł (20 × 560)."
+      },
+      {
+        "question": "Zadanie: popyt na pizzę w barze to Q = 120 − 4P (sztuki dziennie, cena w zł). Policz elastyczność punktową przy cenie 20 zł i 10 zł.",
+        "answer": "dQ/dP = −4. Przy 20 zł: Q = 40, E = −4 · 20 / 40 = −2 (elastyczny). Przy 10 zł: Q = 80, E = −4 · 10 / 80 = −0,5 (nieelastyczny). Ta sama prosta, a elastyczność inna; |E| = 1 wychodzi przy 15 zł."
+      },
+      {
+        "question": "Zadanie: elastyczność popytu na papierosy to −0,4. O ile procent zmieni się wielkość popytu po podwyżce ceny o 15%?",
+        "answer": "%ΔQ = E · %ΔP = −0,4 · 15% = −6%. Popyt jest nieelastyczny, więc przychód ze sprzedaży wzrośnie (1,15 · 0,94 ≈ 1,081, czyli o ok. 8%)."
+      },
+      {
+        "question": "Cena wzrosła o 10%, a wielkość popytu spadła o 5%. Jaka to elastyczność i co stanie się z przychodem?",
+        "answer": "−0,5, czyli 0,5 bez znaku: popyt nieelastyczny. Przychód wzrośnie, bo ilość spada procentowo słabiej, niż rośnie cena."
+      },
+      {
+        "question": "Dlaczego popyt na paliwo jest mniej elastyczny w krótkim okresie niż w długim?",
+        "answer": "Od razu trudno zmienić sposób dojazdu. Z czasem można kupić oszczędniejszy samochód, przesiąść się na komunikację albo zamieszkać bliżej, więc reakcja na cenę rośnie."
+      }
+    ],
+    "quiz": [
+      {
+        "prompt": "Cena biletu wzrosła o 20%, a liczba sprzedanych biletów spadła o 10%. Popyt na bilety jest…",
+        "options": [
+          "elastyczny",
+          "nieelastyczny",
+          "jednostkowy",
+          "doskonale nieelastyczny"
+        ],
+        "answer": "nieelastyczny",
+        "explanation": "Elastyczność to −10% / 20% = −0,5. Bez znaku 0,5 jest mniejsze od 1, a ilość jednak spadła, więc to nie popyt doskonale nieelastyczny."
+      },
+      {
+        "prompt": "Cena spadła z 8 do 6 zł, a ilość wzrosła z 50 do 70 sztuk. Elastyczność łukowa (metoda punktu środkowego) wynosi około…",
+        "options": [
+          "−1,6",
+          "−1,17",
+          "−0,86",
+          "−0,4"
+        ],
+        "answer": "−1,17",
+        "explanation": "Średnia ilość to 60, więc 20 / 60 ≈ 0,333. Średnia cena to 7, więc −2 / 7 ≈ −0,286. E ≈ −1,17. Wynik −1,6 wychodzi, gdy procenty liczysz od wartości początkowych."
+      },
+      {
+        "prompt": "Popyt opisuje funkcja Q = 90 − 3P. Ile wynosi elastyczność punktowa przy cenie 20 zł?",
+        "options": [
+          "−3",
+          "−1",
+          "−2",
+          "−0,5"
+        ],
+        "answer": "−2",
+        "explanation": "dQ/dP = −3, a Q = 90 − 60 = 30, więc E = −3 · 20 / 30 = −2. Samo nachylenie (−3) to nie elastyczność."
+      },
+      {
+        "prompt": "Elastyczność popytu na bilety wynosi −0,6. Kino podnosi cenę o 10%. Co stanie się z przychodem?",
+        "options": [
+          "spadnie o ok. 6%",
+          "nie zmieni się",
+          "wzrośnie o 10%",
+          "wzrośnie o ok. 3,4%"
+        ],
+        "answer": "wzrośnie o ok. 3,4%",
+        "explanation": "Ilość spadnie o 0,6 · 10% = 6%. Przychód: 1,10 · 0,94 ≈ 1,034, czyli ok. 3,4% więcej."
+      },
+      {
+        "prompt": "Na liniowej krzywej popytu schodzisz w dół (niższa cena, większa ilość). Elastyczność bez znaku…",
+        "options": [
+          "rośnie",
+          "jest stała, bo nachylenie jest stałe",
+          "maleje",
+          "zawsze wynosi 1"
+        ],
+        "answer": "maleje",
+        "explanation": "E = (dQ/dP) · P/Q. Nachylenie się nie zmienia, ale P/Q maleje, gdy cena spada, a ilość rośnie."
+      },
+      {
+        "prompt": "Popyt na dobro jest elastyczny. Firma obniża cenę. Jej przychód…",
+        "options": [
+          "spadnie",
+          "nie zmieni się",
+          "zależy tylko od kosztów firmy",
+          "wzrośnie"
+        ],
+        "answer": "wzrośnie",
+        "explanation": "Ilość rośnie procentowo mocniej, niż spada cena, więc iloczyn ceny i ilości rośnie."
+      },
+      {
+        "prompt": "Dlaczego popyt na benzynę jest bardziej elastyczny w długim okresie niż w krótkim?",
+        "options": [
+          "w długim okresie benzyna tanieje",
+          "z czasem można zmienić samochód i sposób dojazdu",
+          "w długim okresie rośnie udział benzyny w wydatkach",
+          "w krótkim okresie jest więcej stacji"
+        ],
+        "answer": "z czasem można zmienić samochód i sposób dojazdu",
+        "explanation": "Elastyczność rośnie z czasem, bo pojawiają się zamienniki: oszczędniejsze auto, komunikacja, przeprowadzka."
+      },
+      {
+        "prompt": "Bilety lotnicze potaniały i ludzie kupują ich więcej. W języku ekonomii to…",
+        "options": [
+          "przesunięcie krzywej popytu w prawo",
+          "wzrost popytu",
+          "zmiana wielkości popytu",
+          "spadek podaży"
+        ],
+        "answer": "zmiana wielkości popytu",
+        "explanation": "Zmiana ceny samego dobra to ruch wzdłuż krzywej popytu. Krzywą przesuwają inne czynniki, np. dochody albo gusty."
+      }
+    ]
+  }
+}

@@ -1,10 +1,13 @@
-// Strona udostępnionej notatki: czyta ją z Supabase po kodzie z adresu (…/n/#kod) i rysuje jak w aplikacji.
+// Strona udostępnionej notatki: czyta ją z Supabase po kodzie z adresu (…/n/#kod) i rysuje jak w aplikacji, z nauką
+// fiszek w przeglądarce (study.js). Przykładowa notatka ze strony głównej (…/n/#przyklad) leży w n/przyklad.json.
 (function () {
   "use strict";
   var SUPABASE = "https://fjpbdwsbktiylkborxvf.supabase.co";
   // klucz publiczny (publishable) – ten sam co w aplikacji, nie jest sekretem
   var KEY = "sb_publishable_XtknqXVtb-T-5Wd-oKFxEA_NINWbDsE";
-  var code = (location.hash || "").replace(/^#/, "").replace(/[^A-Za-z0-9]/g, "");
+  // adres: …/n/#KOD, a po przełączeniu zakładki …/n/#KOD/fiszki albo …/n/#KOD/quiz (odświeżenie wraca do tej zakładki)
+  var hashParts = (location.hash || "").replace(/^#/, "").split("/");
+  var code = hashParts[0].replace(/[^A-Za-z0-9]/g, ""), startTab = hashParts[1] || "";
 
   function rpc(name, args) {
     return fetch(SUPABASE + "/rest/v1/rpc/" + name, {
@@ -42,10 +45,12 @@
     return span;
   }
 
-  function formatDate(iso) {
+  // „27 października”, a z rokiem tylko wtedy, gdy to inny rok niż teraz
+  function shortDate(iso) {
     if (!iso) return "";
-    var d = new Date(iso + "T12:00:00");
-    return d.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    var d = new Date(iso + "T12:00:00"), opts = { day: "numeric", month: "long" };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
+    return d.toLocaleDateString("pl-PL", opts);
   }
 
   // MARK: wykres – ta sama prosta składnia wzorów co w aplikacji (MathExpression.swift)
@@ -160,7 +165,7 @@
   }
 
   function graph(slide) {
-    var W = 680, H = 340, L = 44, R = 14, T = 14, B = 30;
+    var W = 680, H = 360, L = 52, R = 14, T = 30, B = 40;
     var x0 = slide.xMin, x1 = slide.xMax, lines = [], ys = [];
     slide.plots.forEach(function (pl, i) {
       var f; try { f = compile(pl.expression); } catch (e) { return; }
@@ -187,12 +192,12 @@
     var xs = niceStep(x1 - x0, 8), ysStep = niceStep(hi - lo, 6);
     for (var gx = Math.ceil(x0 / xs) * xs; gx <= x1 + 1e-9; gx += xs) {
       s.appendChild(svg("line", { x1: sx(gx), x2: sx(gx), y1: T, y2: H - B, stroke: "#E2DFD3", "stroke-width": 1 }));
-      var tx = svg("text", { x: sx(gx), y: H - 10, "text-anchor": "middle", "font-size": 12, fill: "#6E6B5F" });
+      var tx = svg("text", { x: sx(gx), y: H - 8, "text-anchor": "middle", "font-size": 17, fill: "#6E6B5F" });
       tx.textContent = +gx.toFixed(6); s.appendChild(tx);
     }
     for (var gy = Math.ceil(lo / ysStep) * ysStep; gy <= hi + 1e-9; gy += ysStep) {
       s.appendChild(svg("line", { x1: L, x2: W - R, y1: sy(gy), y2: sy(gy), stroke: "#E2DFD3", "stroke-width": 1 }));
-      var ty = svg("text", { x: L - 8, y: sy(gy) + 4, "text-anchor": "end", "font-size": 12, fill: "#6E6B5F" });
+      var ty = svg("text", { x: L - 8, y: sy(gy) + 6, "text-anchor": "end", "font-size": 17, fill: "#6E6B5F" });
       ty.textContent = +gy.toFixed(6); s.appendChild(ty);
     }
     if (lo < 0 && hi > 0) s.appendChild(svg("line", { x1: L, x2: W - R, y1: sy(0), y2: sy(0), stroke: "#2A2A22", "stroke-opacity": 0.6, "stroke-width": 1.3 }));
@@ -213,11 +218,14 @@
       if (p.x < x0 || p.x > x1 || p.y < lo || p.y > hi) return;
       s.appendChild(svg("circle", { cx: sx(p.x), cy: sy(p.y), r: 4.5, fill: "#2A2A22" }));
       if (p.label) {
-        var t = svg("text", { x: sx(p.x) + 8, y: sy(p.y) - 8, "font-size": 13, "font-weight": 600, fill: "#2A2A22",
+        var t = svg("text", { x: sx(p.x) + 9, y: sy(p.y) - 10, "font-size": 20, "font-weight": 700, fill: "#2A2A22",
                               stroke: "#FFFEFA", "stroke-width": 4, "paint-order": "stroke" });
         t.textContent = p.label; s.appendChild(t);
       }
     });
+    // podpisy osi (opcjonalne pola xLabel i yLabel slajdu)
+    if (slide.xLabel) { var xl = svg("text", { x: W - R, y: H - B - 8, "text-anchor": "end", "font-size": 18, "font-weight": 700, fill: "#2A2A22" }); xl.textContent = slide.xLabel; s.appendChild(xl); }
+    if (slide.yLabel) { var yl = svg("text", { x: L + 8, y: T - 10, "font-size": 18, "font-weight": 700, fill: "#2A2A22" }); yl.textContent = slide.yLabel; s.appendChild(yl); }
     var box = el("div", { class: "sketch graph" }, []);
     box.appendChild(s);
     var legend = el("div", { class: "legend" });
@@ -367,9 +375,9 @@
   }
 
   function visual(v) {
-    var wrap = el("section", {}, [el("h2", { class: "display", text: v.title ? "Wyjaśnienie: " + v.title : "Wyjaśnienie wizualne" })]);
+    var wrap = el("section", {}, [el("h2", { text: v.title ? "Wyjaśnienie: " + v.title : "Wyjaśnienie wizualne" })]);
     (v.slides || []).forEach(function (s) {
-      var slide = el("div", { class: "slide" }, [s.heading ? el("h3", { class: "display", text: s.heading }) : null]);
+      var slide = el("div", { class: "slide" }, [s.heading ? el("h3", { text: s.heading }) : null]);
       if (s.kind === "formula" && s.latex) {
         var f = el("div", { class: "sketch formula" }); f.appendChild(math(s.latex, true)); slide.appendChild(f);
         if (s.symbols && s.symbols.length) {
@@ -440,116 +448,402 @@
     return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\u0142\u0141]/g, "l").toLowerCase().trim();
   }
 
-  // `after`: zdanie po wyniku (na Macu zaproszenie do fiszek w EduNote, gdzie indziej termin ważności linku)
-  function quiz(items, after) {
+  function shuffle(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+
+  // Ostatni wynik quizu w tej przeglądarce (jak wynik fiszek w study.js): { v: 1, at, good, total }
+  function quizResult(key, value) {
+    try {
+      if (value) { localStorage.setItem("edunote.quiz." + key, JSON.stringify(value)); return value; }
+      var d = JSON.parse(localStorage.getItem("edunote.quiz." + key) || "null");
+      return d && d.v === 1 ? d : null;
+    } catch (e) { return null; }
+  }
+
+  // Quiz: odpowiedzi w nowej, losowej kolejności przy każdym podejściu (w danych dobra bywa zawsze pierwsza), obok
+  // koloru ✓ i ✗, a po wyniku „Tylko błędne”, „Jeszcze raz” i dalsze kroki.
+  // opts.key: pod jakim kluczem zapamiętać wynik całego quizu (kod notatki)
+  // opts.after: zdanie pod wynikiem (na Macu zaproszenie do EduNote, gdzie indziej termin ważności linku)
+  // opts.next: [[tekst, akcja]] – przyciski pod wynikiem, np. powtórka fiszek
+  function quiz(items, opts) {
     var box = el("div", { class: "card quiz" });
-    var done = 0, good = 0;
-    var result = el("p", { class: "quiz-result hidden" });
-    items.forEach(function (q, qi) {
-      var wrap = el("div", { class: "quiz-q" }, [el("p", { class: "quiz-prompt", text: (qi + 1) + ". " + q.prompt })]);
-      var opts = el("div", { class: "quiz-options" });
-      var why = el("p", { class: "muted quiz-why hidden", text: q.explanation || "" });
-      (q.options || []).forEach(function (o) {
-        var b = el("button", { class: "quiz-option", type: "button", text: o });
-        b.addEventListener("click", function () {
-          if (wrap.dataset.answered) return;
-          wrap.dataset.answered = "1";
-          var ok = fold(o) === fold(q.answer);
-          if (ok) good++;
-          done++;
-          Array.prototype.forEach.call(opts.children, function (x) {
-            if (fold(x.textContent) === fold(q.answer)) x.classList.add("right");
+    var last = opts.key && quizResult(opts.key);
+    var sub = el("p", { class: "muted quiz-sub" });
+    var retry = el("div", { class: "quiz-retry" });
+    var section = el("section", { id: "quiz" }, [el("h2", { text: "Sprawdź się" }), sub, retry, box]);
+    function header(list) {
+      sub.textContent = list === items
+        ? eduStudy.plural(items.length, "pytanie", "pytania", "pytań") + (last ? " · ostatnio " + last.good + " z " + last.total : " · wyjaśnienie po każdej odpowiedzi")
+        : eduStudy.plural(list.length, "pytanie", "pytania", "pytań") + " · tylko błędne z poprzedniego podejścia";
+      retry.innerHTML = "";
+      var missed = list === items && last && last.wrong ? items.filter(function (q) { return last.wrong.indexOf(q.prompt) >= 0; }) : [];
+      if (missed.length) retry.appendChild(button("Rozwiąż błędne z ostatniego razu (" + missed.length + ")", "btn btn-secondary", function () { again(missed); }));
+    }
+
+    function mark(b, ok) {
+      b.classList.add(ok ? "right" : "wrong");
+      b.appendChild(el("span", { class: "qmark", "aria-hidden": "true", text: ok ? "✓" : "✗" }));
+      b.appendChild(el("span", { class: "sr", text: ok ? " (dobra odpowiedź)" : " (Twoja odpowiedź, zła)" }));
+    }
+
+    function round(list) {
+      header(list);
+      box.innerHTML = "";
+      var answered = 0, wrong = [];
+      var result = el("div", { class: "quiz-result hidden", role: "status" });
+      list.forEach(function (q, qi) {
+        var wrap = el("div", { class: "quiz-q" }, [el("p", { class: "quiz-prompt", text: (qi + 1) + ". " + eduStudy.tidy(q.prompt) })]);
+        var options = el("div", { class: "quiz-options" });
+        var why = el("p", { class: "muted quiz-why hidden", text: eduStudy.tidy(q.explanation || "") });
+        shuffle(q.options || []).forEach(function (o) {
+          var b = el("button", { class: "quiz-option", type: "button" }, [el("span", { text: eduStudy.tidy(o) })]);
+          if (fold(o) === fold(q.answer)) b.dataset.right = "1";
+          b.addEventListener("click", function () {
+            if (wrap.dataset.answered) return;
+            wrap.dataset.answered = "1";
+            var ok = !!b.dataset.right;
+            if (!ok) wrong.push(q);
+            Array.prototype.forEach.call(options.children, function (x) {
+              x.disabled = true;
+              if (x.dataset.right) mark(x, true);
+            });
+            if (!ok) mark(b, false);
+            if (q.explanation) why.classList.remove("hidden");
+            if (++answered === list.length) score(list, wrong, result);
           });
-          if (!ok) b.classList.add("wrong");
-          if (q.explanation) why.classList.remove("hidden");
-          if (done === items.length) {
-            result.textContent = "Wynik: " + good + " z " + items.length + "." + (after ? " " + after : "");
-            result.classList.remove("hidden");
-          }
+          options.appendChild(b);
         });
-        opts.appendChild(b);
+        wrap.appendChild(options); wrap.appendChild(why); box.appendChild(wrap);
       });
-      wrap.appendChild(opts); wrap.appendChild(why); box.appendChild(wrap);
-    });
-    box.appendChild(result);
-    return el("section", {}, [el("h2", { class: "display", text: "Sprawdź się" }), box]);
+      box.appendChild(result);
+    }
+
+    // nowe podejście od pierwszego pytania, bez płynnego przewijania
+    function again(list) {
+      round(list);
+      var html = document.documentElement;
+      html.style.scrollBehavior = "auto";
+      section.scrollIntoView({ block: "start" });
+      html.style.scrollBehavior = "";
+    }
+
+    function score(list, wrong, result) {
+      if (opts.key && list === items) {
+        last = quizResult(opts.key, { v: 1, at: new Date().toISOString(), good: list.length - wrong.length, total: list.length,
+          wrong: wrong.map(function (q) { return q.prompt; }) });
+      }
+      result.appendChild(el("p", { class: "quiz-score num", text: (list.length - wrong.length) + " z " + list.length }));
+      result.appendChild(el("p", { class: "muted", text: (wrong.length
+        ? eduStudy.plural(wrong.length, "błąd", "błędy", "błędów") + ". Wyjaśnienia są pod pytaniami."
+        : "Bez błędów.") + (opts.after ? " " + opts.after : "") }));
+      var row = el("div", { class: "quiz-actions" });
+      if (wrong.length) row.appendChild(button("Tylko błędne (" + wrong.length + ")", "btn btn-primary", function () { again(wrong); }));
+      row.appendChild(button("Rozwiąż od nowa", wrong.length ? "btn btn-secondary" : "btn btn-primary", function () { again(items); }));
+      (opts.next || []).forEach(function (n) { row.appendChild(button(n[0], "btn btn-ghost", n[1])); });
+      result.appendChild(row);
+      result.classList.remove("hidden");
+    }
+
+    round(items);
+    return section;
+  }
+
+  // Fiszki do nauki w przeglądarce: prawdziwe fiszki z aplikacji (pole `cards`, gdy aplikacja zacznie je wysyłać),
+  // a do tego czasu pojęcia (termin → definicja) i pytania do nauki (pytanie → odpowiedź)
+  function cardsOf(c) {
+    var out = [];
+    (c.cards || []).forEach(function (k) { if (k.front && k.back) out.push({ front: k.front, back: k.back }); });
+    if (out.length) return out;
+    (c.concepts || []).forEach(function (k) { if (k.term && k.definition) out.push({ front: k.term, back: k.definition }); });
+    (c.questions || []).forEach(function (q) { if (q.question && q.answer) out.push({ front: q.question, back: q.answer }); });
+    return out;
+  }
+
+  function button(text, cls, action) {
+    var b = el("button", { class: cls, type: "button", text: text });
+    b.addEventListener("click", action);
+    return b;
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  // ikona z zestawu w n/index.html przed tekstem przycisku
+  function withIcon(node, id) {
+    var ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), use = document.createElementNS(ns, "use");
+    svg.setAttribute("aria-hidden", "true");
+    use.setAttribute("href", "#" + id);
+    svg.appendChild(use);
+    node.insertBefore(svg, node.firstChild);
+    return node;
   }
 
   function render(data) {
     var c = data.content || {};
-    document.title = (data.topic || data.subject || "Notatka") + " · EduNote";
-    var meta = document.getElementById("meta");
-    meta.appendChild(el("span", { class: "dot" }));
-    meta.appendChild(document.createTextNode([data.subject, formatDate(data.lesson_date)].filter(Boolean).join(" · ")));
-    var made = document.getElementById("made");
-    // „z nagrania” tylko przy notatce z nagrania; minuty to długość nagrania (starsze linki nie mają tych pól)
-    if (made) made.textContent = !c.fromRecording ? "Zrobione w EduNote"
-      : "Zrobione w EduNote z " + (c.minutes > 0 ? c.minutes + "-minutowego nagrania zajęć" : "nagrania zajęć");
-    document.getElementById("topic").textContent = data.topic || data.subject || "Notatka z zajęć";
-    document.getElementById("summary").textContent = c.summary || "";
-    // oznaczenie treści z AI (AI Act, art. 50) przy każdej notatce, którą pisało AI, a nie tylko autor
+    var title = data.topic || data.subject || "Notatka z zajęć";
+    var label = data.topic && data.subject ? data.subject + ": " + data.topic : title;
+    var mac = eduPlatform() === "mac";
+    var url = location.origin + location.pathname + "#" + code;
+    // dokładna data zamiast „do końca sesji”
+    var until = data.expires_at ? "Link działa do " + lastDay(data.expires_at) + "." : "";
+    var cards = cardsOf(c), hasQuiz = !!(c.quiz && c.quiz.length);
+    var what = [cards.length ? eduStudy.plural(cards.length, "fiszka", "fiszki", "fiszek") : "", hasQuiz ? "quiz" : ""]
+      .filter(Boolean).join(" i ");
+    document.title = title + " · EduNote";
+
+    // nagłówek jak w aplikacji: przedmiot z kropką i data, temat, oznaczenie treści z AI (AI Act, art. 50) przy każdej
+    // notatce, którą pisało AI, a nie tylko autor; minuty to długość nagrania (starsze linki nie mają tych pól)
+    if (data.sample) {
+      $("sample").classList.remove("hidden");
+      $("origin").textContent = "Przykładowa notatka przygotowana z pomocą AI na potrzeby tej strony, a nie materiał prowadzącego.";
+    }
+    $("subject").textContent = [data.subject, data.sample ? "przykład" : shortDate(data.lesson_date)].filter(Boolean).join(" · ");
+    $("topic").textContent = title;
     var ai = c.fromRecording || c.summary || (c.sections && c.sections.length) || (c.concepts && c.concepts.length) || c.visual;
-    var aiNote = document.getElementById("ai-note");
-    if (ai) aiNote.textContent = (c.fromRecording ? "Notatka wygenerowana przez AI z nagrania zajęć." : "Notatka przygotowana z pomocą AI.")
-      + " Może zawierać błędy. To nie jest materiał prowadzącego.";
-    else aiNote.classList.add("hidden");
-    var body = document.getElementById("body");
+    if (ai) {
+      $("ai-text").textContent = (c.fromRecording
+        ? "Notatka z AI z " + (c.minutes > 0 ? c.minutes + "-minutowego nagrania" : "nagrania") + " wykładu w EduNote na Macu"
+        : "Notatka przygotowana z pomocą AI") + " · może zawierać błędy";
+    } else {
+      $("ai-note").classList.add("hidden");
+    }
+
+    // Podgląd linku na czacie jest taki sam dla każdej notatki, więc temat i zawartość niesie tekst wiadomości,
+    // razem z uczciwym dopiskiem, że to nieoficjalna notatka z AI (żeby nikt nie wziął jej za materiał prowadzącego)
+    function shareNote() {
+      eduShare(data.sample
+        ? title + " (" + (data.subject || "").toLowerCase() + "): notatka, " + what + " z wyjaśnieniami. Przykład z EduNote, działa w przeglądarce bez logowania:"
+        : label + (what ? " · " + what : "") + ". Nieoficjalna notatka z AI, sprawdźcie z wykładem. Działa w przeglądarce, bez logowania:",
+        url, "Wyślij na grupę roku");
+    }
+    var share = $("share-top");
+    withIcon(share, "i-share").addEventListener("click", shareNote);
+    share.classList.remove("hidden");
+
+    // Zakładki jak przełącznik w aplikacji: Notatka, Fiszki, Quiz. Adres się nie zmienia, bo po „#” stoi kod notatki.
+    var tabs = $("tabs"), panels = { note: $("panel-note"), cards: $("panel-cards"), quiz: $("panel-quiz") }, buttons = {};
+    function tab(id, text, count) {
+      var b = el("button", { type: "button", role: "tab", id: "tab-" + id, "aria-controls": "panel-" + id, "aria-selected": "false" },
+        [document.createTextNode(text), count ? el("span", { class: "count num", text: String(count) }) : null]);
+      b.addEventListener("click", function () { show(id); });
+      buttons[id] = b;
+      tabs.appendChild(b);
+    }
+    // po przełączeniu treść zaczyna się tuż pod zakładkami, także gdy notatka była przewinięta w dół
+    function show(id) {
+      Object.keys(buttons).forEach(function (k) {
+        buttons[k].setAttribute("aria-selected", String(k === id));
+        panels[k].hidden = k !== id;
+      });
+      var name = { cards: "fiszki", quiz: "quiz" }[id];
+      try { history.replaceState(null, "", "#" + code + (name ? "/" + name : "")); } catch (e) {}
+      if (id === "cards" && !panels.cards.firstChild) studyIntro();
+      var top = $("tabs-anchor").getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight;
+      if (window.scrollY > top) window.scrollTo(0, top);
+    }
+    tab("note", "Notatka");
+    if (cards.length) tab("cards", "Fiszki", cards.length);
+    // przy zakładce Fiszki: ile fiszek czeka na powtórkę (z ostatniego razu w tej przeglądarce)
+    function due() {
+      if (!buttons.cards) return;
+      var count = buttons.cards.querySelector(".count"), p = eduStudy.progress(code, cards);
+      count.classList.toggle("due", !!(p && p.hard.length));
+      count.textContent = p && p.hard.length ? p.hard.length + " do powtórki" : String(cards.length);
+    }
+    due();
+    if (hasQuiz) tab("quiz", "Quiz", c.quiz.length);
+    buttons.note.setAttribute("aria-selected", "true");
+    if (cards.length || hasQuiz) tabs.classList.remove("hidden");
+
+    // Fiszki: krótki wstęp z ostatnim wynikiem, a nauka toczy się w tej samej zakładce
+    function studyIntro() {
+      var p = eduStudy.progress(code, cards), resume = p && p.rest.length, again = p && !resume && p.hard.length;
+      var intro = el("div", { class: "study-intro" }, [
+        el("p", { class: "eyebrow", text: !p ? what + " · ok. " + eduStudy.minutes(cards) + " min · bez logowania"
+          : resume ? "Przerobione " + p.seen + " z " + p.total + " fiszek"
+          : "Ostatnio " + p.ok + " z " + p.total + " za pierwszym razem" + (p.fixed ? " · " + p.fixed + " powtórzone" : "") }),
+        el("h2", { text: p ? "Wracasz do fiszek" : "Przepytaj się z tej notatki" }),
+        el("p", { class: "muted", text: "Najpierw spróbuj sobie przypomnieć odpowiedź, potem ją odkryj i oceń się. "
+          + "Fiszki, których nie pamiętasz, wracają na koniec. Zadania liczysz na kartce." })
+      ]);
+      // po powrocie najpierw dokończenie przerwanej nauki albo powtórka tego, czego ostatnio nie było
+      if (resume) intro.appendChild(button("Kontynuuj (zostało " + p.rest.length + ")", "btn btn-primary btn-lg", function () { learn(p.rest, "resume"); }));
+      else if (again) intro.appendChild(button("Powtórz trudne (" + p.hard.length + ")", "btn btn-primary btn-lg", function () { learn(p.hard, "hard"); }));
+      intro.appendChild(button(p ? "Od początku" : "Zacznij", p && (resume || again) ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg",
+        function () { learn(); }));
+      due();
+      // wynik zostaje w przeglądarce, a przeglądarka w Messengerze czy Instagramie potrafi go zgubić
+      if (/FBAN|FBAV|FB_IAB|Messenger|Instagram/i.test(navigator.userAgent)) {
+        intro.appendChild(el("p", { class: "muted small", text: "Otwierasz w Messengerze? Wybierz „Otwórz w przeglądarce”, żeby wynik się zapisał." }));
+      }
+      intro.appendChild(el("p", { class: "export" }, [
+        button("Kopiuj do Quizleta", "link", exportCards), button("Pobierz plik dla Anki (.txt)", "link", downloadCards)
+      ]));
+      panels.cards.innerHTML = "";
+      panels.cards.appendChild(intro);
+    }
+    // Quizlet i Anki przyjmują tekst: pojęcie, tabulator, definicja, każda fiszka w osobnej linii
+    function tsv() {
+      var clean = function (s) { return String(s).replace(/[\t\r\n]+/g, " ").trim(); };
+      return cards.map(function (k) { return clean(k.front) + "\t" + clean(k.back); }).join("\n");
+    }
+    function exportCards() {
+      eduCopy(tsv(), "Fiszki do Quizleta", {
+        hint: "W Quizlecie na komputerze: Utwórz zestaw → Importuj, wklej i zostaw „Tabulator” między pojęciem a definicją.",
+        button: "Kopiuj fiszki", done: "Skopiowano fiszki. Wklej je w Quizlecie.", rows: 6
+      });
+    }
+    // plik dla Anki (Plik → Importuj) i dla tych, którzy wolą wgrać plik do Quizleta
+    function downloadCards() {
+      var a = el("a", { href: URL.createObjectURL(new Blob([tsv()], { type: "text/plain;charset=utf-8" })),
+        download: "fiszki-" + fold(title).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".txt" });
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    }
+    // only i mode: dokończenie przerwanej nauki („resume”) albo same trudne („hard”); bez nich nowe podejście
+    function learn(only, mode) {
+      var stage = el("div", { class: "study-stage" });
+      panels.cards.innerHTML = "";
+      panels.cards.appendChild(stage);
+      eduStudy.start(cards, { container: stage, key: code, only: only, mode: mode, done: afterStudy, onExit: studyIntro,
+        offset: function () { return document.querySelector(".bar").offsetHeight + tabs.offsetHeight; } });
+      // fiszka i przyciski od razu na ekranie, tuż pod paskiem i zakładkami
+      var top = stage.getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight - tabs.offsetHeight - 8;
+      window.scrollTo(0, Math.max(0, top));
+    }
+    function afterStudy(result) {
+      due();
+      var box = el("div", { class: "done-actions" });
+      if (hasQuiz) {
+        box.appendChild(button("Quiz z tej notatki", result.hard.length ? "btn btn-secondary" : "btn btn-primary",
+          function () { show("quiz"); }));
+      }
+      if (!mac && until) box.appendChild(el("p", { class: "muted small", text: "Wróć tu przed kolokwium. " + until }));
+      if (mac) box.appendChild(appInvite(true, "btn btn-secondary"));
+      return box;
+    }
+
+    // Notatka jak w aplikacji: „W skrócie”, działy, wyjaśnienie wzoru, pojęcia na kartach, „Na kolokwium”, pytania
+    if (c.summary) $("summary").textContent = c.summary; else $("brief").classList.add("hidden");
+    var body = $("body");
     (c.sections || []).forEach(function (s) {
-      var sec = el("section", { class: "section" }, [el("h2", { class: "display", text: s.heading })]);
-      (s.body || "").split(/\n+/).forEach(function (p) { if (p.trim()) sec.appendChild(el("p", { text: p })); });
+      var sec = el("section", { class: "section" }, [el("h2", { text: s.heading })]);
+      (s.body || "").split(/\n+/).forEach(function (p) { if (p.trim()) sec.appendChild(el("p", { text: eduStudy.tidy(p) })); });
       body.appendChild(sec);
     });
-    (c.own || []).forEach(function (t) { body.appendChild(el("p", { class: "card", text: t, style: "white-space:pre-wrap" })); });
+    (c.own || []).forEach(function (t) { body.appendChild(el("p", { class: "own", text: t })); });
     if (c.visual && c.visual.slides && c.visual.slides.length) body.appendChild(visual(c.visual));
     if (c.concepts && c.concepts.length) {
-      var dl = el("dl", { class: "concepts" });
-      c.concepts.forEach(function (k) { dl.appendChild(el("dt", { class: k.important ? "key" : "", text: k.term })); dl.appendChild(el("dd", { text: k.definition })); });
-      body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Pojęcia" }), el("div", { class: "card" }, [dl])]));
+      var grid = el("div", { class: "concepts" });
+      c.concepts.forEach(function (k) {
+        grid.appendChild(el("div", { class: "concept" }, [
+          el("p", { class: "term" }, [document.createTextNode(k.term), k.important ? el("span", { class: "key-chip", text: "kluczowe" }) : null]),
+          el("p", { class: "def", text: eduStudy.tidy(k.definition) })
+        ]));
+      });
+      body.appendChild(el("section", { class: "section" }, [el("h2", { text: "Pojęcia" }), grid]));
     }
     if (c.exam && c.exam.length) {
-      var ul = el("ul", { class: "plain" }); c.exam.forEach(function (t) { ul.appendChild(el("li", { text: t })); });
-      body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Na sprawdzian" }), el("div", { class: "mat" }, [ul])]));
+      var ul = el("ul", { class: "plain" });
+      c.exam.forEach(function (t) { ul.appendChild(el("li", { text: t })); });
+      // to wybór AI z wykładu, a nie lista od prowadzącego, więc „może być”, z odesłaniem do sylabusu
+      body.appendChild(el("section", { class: "exam" }, [el("p", { class: "exam-label", text: "Może być na kolokwium" }), ul,
+        el("p", { class: "exam-hint", text: data.sample ? "W prawdziwej notatce AI wybiera to z treści zajęć. Zakres zawsze sprawdź w sylabusie."
+          : "Wybrane przez AI z treści zajęć. Zakres sprawdź w sylabusie." })]));
     }
     if (c.questions && c.questions.length) {
-      var qs = el("div", { class: "card" });
-      c.questions.forEach(function (q) { qs.appendChild(el("details", { class: "q" }, [el("summary", { text: q.question }), el("p", { text: q.answer })])); });
-      body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Pytania do nauki" }), qs]));
-    }
-    var mac = eduPlatform() === "mac";
-    var until = data.expires_at ? "Link działa do " + lastDay(data.expires_at) + "." : "";
-    if (c.quiz && c.quiz.length) {
-      body.appendChild(quiz(c.quiz, mac ? "Chcesz te pytania jako fiszki z powtórkami? EduNote przypomni je, zanim wylecą z głowy."
-        : until && "Wróć tu przed kolokwium. " + until));
+      var qs = el("div", { class: "questions" });
+      c.questions.forEach(function (q) {
+        qs.appendChild(el("details", { class: "q" }, [el("summary", { text: eduStudy.tidy(q.question) }), el("p", { text: eduStudy.tidy(q.answer) })]));
+      });
+      body.appendChild(el("section", { class: "section" }, [el("h2", { text: "Zadania i pytania do nauki" }),
+        el("p", { class: "muted small", text: "Najpierw spróbuj rozwiązać, potem rozwiń odpowiedź." }), qs]));
     }
     if (c.homework && c.homework.length) {
-      var hw = el("ul", { class: "plain" }); c.homework.forEach(function (t) { hw.appendChild(el("li", { text: t })); });
-      body.appendChild(el("section", {}, [el("h2", { class: "display", text: "Zadanie domowe" }), hw]));
+      var hw = el("ul", { class: "plain" });
+      c.homework.forEach(function (t) { hw.appendChild(el("li", { text: t })); });
+      body.appendChild(el("section", { class: "section" }, [el("h2", { text: "Zadanie domowe" }), hw]));
     }
-    // Przycisk pod notatką: do App Store tylko na Macu. Na telefonie i na Windowsie strona „tylko na Maca” w App Store
-    // to ślepa uliczka, więc zamiast niej link do wysłania sobie na Maca i uczciwa informacja o innych wersjach.
-    var cta = document.getElementById("cta");
+    if (hasQuiz) {
+      panels.quiz.appendChild(quiz(c.quiz, {
+        key: code,
+        after: mac ? "Chcesz te pytania jako fiszki z powtórkami? EduNote przypomni je, zanim wylecą z głowy."
+          : until && "Wróć tu przed kolokwium. " + until,
+        next: cards.length ? [["Powtórz fiszki", function () { show("cards"); learn(); }]] : []
+      }));
+    }
+
+    // Zaproszenie na końcu notatki: na Macu do App Store. Bez Maca uczysz się już tutaj, więc zaproszenie jest do
+    // poproszenia osoby z Makiem z roku o nagrywanie (wystarczy jedna na rok), zwykłą prośbą, a nie reklamą.
+    var slot = $("cta-slot");
     if (mac) {
-      cta.href = storeLink("share");
+      slot.appendChild(appInvite(true, "btn btn-primary"));
     } else {
-      document.getElementById("cta-title").textContent = "EduNote jest na razie na Maca";
-      document.getElementById("cta-text").textContent = "Wersje na iPhone'a, iPada, Androida i Windowsa są w planach. "
-        + "Masz Maca? Wyślij sobie link: EduNote robi z wykładu notatki, fiszki i krótkie powtórki.";
-      cta.textContent = "Wyślij sobie link na Maca";
-      cta.href = "mailto:?subject=" + encodeURIComponent("EduNote na Maca")
+      $("cta-title").textContent = "Chcesz takie notatki z innych wykładów?";
+      $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote z nagrań na Macu: wystarczy jedna "
+        + "osoba z Makiem na roku, która za zgodą prowadzącego nagra wykład i wyśle link grupie.";
+      slot.appendChild(button("Poproś kogoś z Makiem", "btn btn-primary", function () {
+        eduShare("Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Teraz jest za darmo. Z nagrania robi notatkę, fiszki i quiz, "
+          + "które można wysłać całej grupie. Tak to wygląda:", url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
+      }));
+      var wait = el("a", { class: "link", text: "Chcę EduNote na Androida lub Windowsa" });
+      wait.href = "mailto:marcin@rozycki.pro?subject=" + encodeURIComponent("EduNote na Androida lub Windowsa")
+        + "&body=" + encodeURIComponent("Cześć, daj znać, gdy EduNote będzie na: Androida / Windowsa / iPhone'a (zostaw, co pasuje).");
+      slot.appendChild(el("p", { class: "cta-links" }, [wait]));
+    }
+    // zapis notatki na później: drukowanie albo PDF z przeglądarki, z rozwiniętymi rozwiązaniami
+    $("print").addEventListener("click", function () {
+      show("note");
+      window.print();
+    });
+    // przykład nie wygasa, więc mówi, jak długo działają prawdziwe linki
+    $("valid").textContent = until || (data.sample
+      ? "Prawdziwe linki działają do końca sesji poprawkowej: z semestru zimowego do 15 marca, z letniego do 30 września." : "");
+    var report = $("report");
+    if (sample) report.classList.add("hidden"); else report.href = "../zglos/#n=" + code;
+    $("loading").classList.add("hidden");
+    $("note").classList.remove("hidden");
+    // po odświeżeniu ta sama zakładka co przedtem
+    var fromHash = { fiszki: "cards", quiz: "quiz" }[startTab];
+    if (fromHash && buttons[fromHash]) show(fromHash);
+  }
+
+  // Na wydruku i w PDF rozwiązania zadań są rozwinięte; po wydruku wracają do stanu sprzed
+  var closed = [];
+  window.addEventListener("beforeprint", function () {
+    closed = Array.prototype.filter.call(document.querySelectorAll("details.q"), function (d) { return !d.open; });
+    closed.forEach(function (d) { d.open = true; });
+  });
+  window.addEventListener("afterprint", function () { closed.forEach(function (d) { d.open = false; }); });
+
+  // Przycisk do EduNote: do App Store tylko na Macu. Na telefonie i na Windowsie strona „tylko na Maca” w App Store
+  // to ślepa uliczka, więc zamiast niej link do wysłania sobie na Maca.
+  function appInvite(mac, cls) {
+    var a = el("a", { class: cls });
+    if (mac) {
+      a.textContent = "Pobierz EduNote na Maca";
+      a.href = storeLink(sample ? "przyklad" : "share");
+    } else {
+      a.textContent = "Wyślij sobie link na Maca";
+      a.href = "mailto:?subject=" + encodeURIComponent("EduNote na Maca")
         + "&body=" + encodeURIComponent("EduNote w Mac App Store: " + storeLink("mail"));
     }
-    document.getElementById("valid").textContent = until;
-    document.getElementById("report").href = "../zglos/#n=" + code;
-    cta.addEventListener("click", function () {
-      // keepalive: zapytanie dojdzie, nawet gdy przeglądarka już przechodzi na stronę EduNote
-      fetch(SUPABASE + "/rest/v1/rpc/record_share_click", {
-        method: "POST", keepalive: true,
-        headers: { "apikey": KEY, "Content-Type": "application/json" },
-        body: JSON.stringify({ p_code: code })
-      }).catch(function () {});
-    });
-    document.getElementById("loading").classList.add("hidden");
-    document.getElementById("note").classList.remove("hidden");
+    a.addEventListener("click", recordClick);
+    return a;
+  }
+
+  // Kliknięcie „EduNote” pod udostępnioną notatką (licznik w aplikacji autora); keepalive: zapytanie dojdzie,
+  // nawet gdy przeglądarka już przechodzi do App Store
+  function recordClick() {
+    if (sample) return;
+    fetch(SUPABASE + "/rest/v1/rpc/record_share_click", {
+      method: "POST", keepalive: true,
+      headers: { "apikey": KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_code: code })
+    }).catch(function () {});
   }
 
   function missing() {
@@ -557,8 +851,12 @@
     document.getElementById("missing").classList.remove("hidden");
   }
 
+  // Przykładowa notatka ze strony głównej (/n/#przyklad) leży obok strony, a nie w bazie
+  var sample = code === "przyklad";
   if (!code) { missing(); return; }
-  rpc("get_shared_note", { p_code: code }).then(function (d) {
+  var load = sample ? fetch("przyklad.json").then(function (r) { return r.ok ? r.json() : null; })
+    : rpc("get_shared_note", { p_code: code });
+  load.then(function (d) {
     if (!d) return missing();
     return (needsMath(d.content || {}) ? loadMath() : Promise.resolve()).then(function () { render(d); });
   }).catch(missing);

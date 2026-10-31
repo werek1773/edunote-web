@@ -5,15 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zgłoś treść · EduNote</title>
 <meta name="description" content="Zgłoszenie udostępnionej notatki, która narusza prawo, i prośba prowadzącego o usunięcie notatek z zajęć.">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="../style.css">
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="brand" href="../"><span class="mark">E</span><span>EduNote</span></a>
+    <a class="brand" href="../"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark" src="../logo.svg" width="128" height="34" alt="EduNote"></a>
   </div>
   <main class="prose">
-    <h1 class="display">Zgłoś treść</h1>
+    <h1>Zgłoś treść</h1>
     <p>Tu zgłosisz udostępnioną notatkę, która narusza prawo, na przykład prawa autorskie albo czyjeś dane osobowe. Jeśli prowadzisz zajęcia i nie chcesz, żeby notatki z nich były udostępniane w EduNote, wybierz ostatnią opcję. Usuniemy wtedy wszystkie notatki z Twoich zajęć, które znajdziemy.</p>
     <p class="muted">Każde zgłoszenie czyta człowiek, a nie automat. Potwierdzenie i decyzję wysyłamy na podany adres, zwykle w ciągu 48 godzin.</p>
 
@@ -46,11 +48,11 @@
       <label class="choice"><input type="checkbox" id="good-faith"> Oświadczam w dobrej wierze, że informacje w zgłoszeniu są prawdziwe i kompletne.</label>
 
       <p id="error" class="form-error hidden" role="alert"></p>
-      <p><button class="button" type="submit" id="send">Wyślij zgłoszenie</button></p>
+      <p><button class="btn btn-primary btn-lg" type="submit" id="send">Wyślij zgłoszenie</button></p>
     </form>
 
     <div id="done" class="sketch hidden" tabindex="-1">
-      <h2 class="display" style="margin-top:0">Zgłoszenie przyjęte</h2>
+      <h2 style="margin-top:0">Zgłoszenie przyjęte</h2>
       <p id="done-text" style="margin-bottom:0"></p>
     </div>
 

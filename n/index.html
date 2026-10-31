@@ -2,53 +2,89 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Notatka z zajęć · EduNote</title>
-<meta name="description" content="Notatka z zajęć udostępniona z aplikacji EduNote.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notatka z wykładu · EduNote</title>
+<meta name="description" content="Notatka z wykładu udostępniona z aplikacji EduNote: streszczenie, pojęcia, fiszki i quiz.">
 <meta name="robots" content="noindex">
-<meta property="og:title" content="Notatka z zajęć · EduNote">
-<meta property="og:description" content="Notatki z wykładu, pojęcia i krótki quiz do sprawdzenia się. Zrobione w EduNote na Macu.">
+<meta name="theme-color" content="#FAF9F5">
+<!-- podgląd na czacie: jeden dla wszystkich notatek (kod notatki stoi po „#”, więc czat go nie widzi) -->
+<meta property="og:title" content="Notatka z wykładu: fiszki i quiz · EduNote">
+<meta property="og:description" content="Ktoś z Twojego roku udostępnił notatkę z wykładu. Ucz się z fiszek i sprawdź się w quizie, w przeglądarce i bez logowania.">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="EduNote">
+<meta property="og:image" content="https://edunote.rozycki.pro/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="EduNote: notatki z wykładu dla całego roku, fiszki i quiz w przeglądarce">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="../style.css">
 </head>
-<body>
-<div class="wrap">
-  <div class="topbar">
-    <a class="brand" href="../"><span class="mark">E</span><span>EduNote</span></a>
-    <a class="button ghost" id="top-cta" href="../">Czym jest EduNote?</a>
-  </div>
+<body class="note-page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+</svg>
 
+<!-- pasek jak w aplikacji: marka po lewej, „Wyślij na grupę” po prawej (jak „Udostępnij” w dokumentach) -->
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="../"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark" src="../logo.svg" width="128" height="34" alt="EduNote"></a>
+    <button class="btn btn-ghost btn-sm hidden" id="share-top" type="button"><span>Wyślij</span><span class="wide">&nbsp;na grupę</span></button>
+  </div>
+</header>
+
+<main class="doc">
   <div id="loading" class="center muted" style="padding:60px 0">Wczytuję notatkę…</div>
 
   <div id="missing" class="hidden center" style="padding:40px 0">
-    <h1 class="display">Tej notatki już nie ma</h1>
-    <p class="muted">Link wygasł albo notatka nie jest już udostępniana. Poproś o nowy link.</p>
+    <h1>Tej notatki już nie ma</h1>
+    <p class="muted">Link wygasł albo notatka nie jest już udostępniana. Poproś o nowy link osobę, która go wysłała.</p>
+    <p><a class="btn btn-secondary" href="../">Czym jest EduNote?</a></p>
   </div>
 
   <article id="note" class="hidden">
-    <div class="meta" id="meta"></div>
-    <p class="made muted" id="made"></p>
-    <h1 class="display" id="topic"></h1>
-    <p class="summary" id="summary"></p>
-    <p class="ai-note" id="ai-note"></p>
-    <div id="body"></div>
+    <p class="sample-note hidden" id="sample">Przykład notatki z EduNote, aplikacji na Maca, która robi notatki z nagrań wykładów. Temat jak z Mikro I, ale to nie notatka z Twoich zajęć.</p>
+    <!-- nagłówek notatki jak w aplikacji: przedmiot z kropką i data, temat, oznaczenie AI -->
+    <p class="subject" id="subject"></p>
+    <h1 id="topic"></h1>
+    <p class="ai-line" id="ai-note"><span class="tag">AI</span><span id="ai-text"></span></p>
 
-    <div class="sketch cta">
-      <h2 class="display" id="cta-title" style="margin:0">Ucz się tego jako fiszki</h2>
-      <p class="muted" id="cta-text">EduNote robi notatki z zajęć, gdy słuchasz wykładu, a potem fiszki i krótkie powtórki, żeby to zostało w głowie. Nagranie nie opuszcza Twojego Maca.</p>
-      <a class="button" id="cta" href="../">Ucz się tego jako fiszki w EduNote</a>
+    <div class="tabs-anchor" id="tabs-anchor"></div>
+    <div class="tabs hidden" id="tabs" role="tablist" aria-label="Notatka, fiszki i quiz"></div>
+
+    <div id="panel-note" role="tabpanel">
+      <div class="brief" id="brief"><p class="brief-label">W skrócie</p><p id="summary"></p></div>
+      <div id="body"></div>
     </div>
-    <p class="note-foot muted"><span id="valid"></span><a id="report" href="../zglos/">Zgłoś treść</a></p>
-  </article>
+    <div id="panel-cards" role="tabpanel" hidden></div>
+    <div id="panel-quiz" role="tabpanel" hidden></div>
 
-  <footer>
-    <span>EduNote · notatki z zajęć na Macu</span>
+    <section class="cta" id="cta">
+      <img class="cta-icon" src="../icon.png" width="56" height="56" alt="">
+      <h2 id="cta-title">Rób takie notatki z własnych wykładów</h2>
+      <p id="cta-text">EduNote słucha zajęć na Twoim Macu i robi z nich notatki, fiszki i quiz. Teraz za darmo, bez karty (<a href="../#cena">cennik</a>).</p>
+      <div id="cta-slot"></div>
+    </section>
+    <div class="note-foot">
+      <span id="origin">Notatka studenta zrobiona z pomocą AI, a nie materiał prowadzącego.</span>
+      <span><span id="valid"></span> <a id="report" href="../zglos/">Zgłoś treść</a></span>
+      <span><button class="link" id="print" type="button">Zapisz jako PDF albo wydrukuj</button></span>
+    </div>
+  </article>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>EduNote · od studenta dla studentów</span>
+    <a href="../">Czym jest EduNote?</a>
     <a href="../prywatnosc/">Polityka prywatności</a>
     <a href="../regulamin/">Regulamin</a>
-  </footer>
-</div>
+  </div>
+</footer>
 <script src="../platform.js"></script>
+<script src="../study.js"></script>
+<script src="../share.js"></script>
 <script src="../note.js"></script>
 </body>
 </html>

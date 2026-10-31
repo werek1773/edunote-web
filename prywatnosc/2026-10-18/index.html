@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polityka prywatności · EduNote</title>
+<meta name="description" content="Jak EduNote przetwarza dane.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="../../favicon.png" type="image/png">
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="brand" href="../../"><img class="brand-icon" src="../../icon.png" width="34" height="34" alt=""><img class="wordmark" src="../../logo.svg" width="128" height="34" alt="EduNote"></a>
+  </div>
+  <main class="prose">
+    <h1>Polityka prywatności EduNote</h1>
+    <p class="muted">Obowiązuje od 18 października 2026 do 5 listopada 2026. Od 6 listopada obowiązuje <a href="../">nowa wersja</a>.</p>
+
+    <h2>1. Kto odpowiada za Twoje dane</h2>
+    <p>Administratorem danych jest Marcin Różycki, e-mail: <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>. W każdej sprawie dotyczącej danych napisz na ten adres.</p>
+
+    <h2>2. Co zostaje na Twoim Macu</h2>
+    <ul>
+      <li><strong>Dźwięk zajęć.</strong> Mikrofon nagrywa tylko po kliknięciu „Rób notatki”. Mowa jest przepisywana na Twoim Macu (model Whisper). Dźwięk nigdy nie opuszcza komputera i jest usuwany po przepisaniu zajęć. Gdy przepisanie się nie udaje, aplikacja ponawia próbę przy kolejnych uruchomieniach, a dźwięk usuwa po 5 próbach albo przy pierwszym uruchomieniu po 7 dniach od zajęć.</li>
+      <li><strong>Podgląd na żywo.</strong> Szary szkic w trakcie zajęć tworzy rozpoznawanie mowy Apple, wyłącznie na urządzeniu.</li>
+      <li><strong>Notatki, transkrypcje, plan zajęć, fiszki, tablice i kopie zapasowe</strong> są zapisane tylko na Twoim Macu, w folderach, które wybierasz.</li>
+      <li><strong>Kalendarz.</strong> Jeśli importujesz plan z Kalendarza Apple, wydarzenia są odczytywane lokalnie i nie są nigdzie wysyłane.</li>
+      <li><strong>Wstępna ocena nagrania.</strong> To, czy nagranie wygląda na zajęcia, czy na prywatną rozmowę, ocenia model Apple na Twoim Macu. Prywatne rozmowy i bardzo krótkie nagrania nie są wysyłane do AI.</li>
+    </ul>
+
+    <h2>3. Co wysyłamy poza Twój Mac i po co</h2>
+    <table>
+      <thead><tr><th>Dane</th><th>Do kogo</th><th>Po co</th><th>Jak długo</th></tr></thead>
+      <tbody>
+        <tr><td data-label="Dane">Tekst zajęć (bez dźwięku) albo zdjęcie lub PDF planu zajęć, gdy sam je wybierzesz</td><td data-label="Do kogo">Serwer EduNote (Supabase, UE, Frankfurt), który przekazuje je do Anthropic (model Claude, USA)</td><td data-label="Po co">Ułożenie notatek, pojęć, pytań, wyjaśnień wizualnych i scenariuszy podcastów oraz odczytanie planu</td><td data-label="Jak długo">Serwer EduNote nie zapisuje treści. Anthropic może przechowywać zapytania przez ograniczony czas zgodnie ze swoimi zasadami dla klientów API i nie używa ich do trenowania modeli</td></tr>
+        <tr><td data-label="Dane">Tekst scenariusza podcastu z lekcji („Posłuchaj”), ułożony przez AI z Twoich notatek (bez dźwięku zajęć)</td><td data-label="Do kogo">Serwer EduNote (Supabase, UE, Frankfurt), który przekazuje go do ElevenLabs (lektor, USA)</td><td data-label="Po co">Zamiana tekstu na mowę głosem lektora w EduNote Pro</td><td data-label="Jak długo">ElevenLabs zwraca nagranie i może przechowywać zapytania przez ograniczony czas zgodnie ze swoimi zasadami dla klientów API</td></tr>
+        <tr><td data-label="Dane">Gotowe nagranie podcastu</td><td data-label="Do kogo">Supabase Storage (UE, Frankfurt), prywatny folder Twojego konta</td><td data-label="Po co">Ponowne odsłuchanie odcinka bez nagrywania go od nowa</td><td data-label="Jak długo">Do usunięcia konta</td></tr>
+        <tr><td data-label="Dane">Zgłoszenie problemu z podcastem (powód i Twój komentarz) oraz liczba znaków nagranych odcinków</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Poprawianie słabych nagrań i rozliczenie lektora</td><td data-label="Jak długo">Zgłoszenia do usunięcia konta; liczba znaków bez powiązania z Tobą</td></tr>
+        <tr><td data-label="Dane">Notatka, którą sam udostępnisz linkiem: przedmiot, temat, data zajęć i treść notatek (bez transkrypcji, dźwięku i zdjęć)</td><td data-label="Do kogo">Supabase (UE, Frankfurt); każdy, kto dostanie od Ciebie link</td><td data-label="Po co">Udostępnienie notatki znajomym na stronie WWW</td><td data-label="Jak długo">30 dni od ostatniego udostępnienia albo do chwili, gdy zatrzymasz udostępnianie</td></tr>
+        <tr><td data-label="Dane">Liczba otwarć udostępnionego linku i kliknięć w przycisk EduNote na tej stronie (bez danych osób, które je otworzyły)</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Pokazanie Ci, ile osób otworzyło notatkę</td><td data-label="Jak długo">Razem z udostępnioną notatką</td></tr>
+        <tr><td data-label="Dane">Anonimowy identyfikator konta (bez imienia, e-maila i hasła)</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Miesięczny limit AI dla Twojego konta i przypisanie udostępnionych notatek do Ciebie</td><td data-label="Jak długo">Do usunięcia konta</td></tr>
+        <tr><td data-label="Dane">Liczba zapytań AI, liczba tokenów i ich koszt w danym miesiącu</td><td data-label="Do kogo">Supabase</td><td data-label="Po co">Limit planu i rozliczenie kosztów</td><td data-label="Jak długo">Do usunięcia konta</td></tr>
+        <tr><td data-label="Dane">Zakup subskrypcji</td><td data-label="Do kogo">Apple</td><td data-label="Po co">Płatność i odnawianie subskrypcji</td><td data-label="Jak długo">Zgodnie z zasadami Apple</td></tr>
+      </tbody>
+    </table>
+    <p>Nie używamy reklam, narzędzi analitycznych ani śledzenia między aplikacjami. Nie sprzedajemy danych.</p>
+
+    <h2>4. Podstawa prawna</h2>
+    <ul>
+      <li>Wykonanie umowy, czyli dostarczenie usługi, o którą prosisz (art. 6 ust. 1 lit. b RODO): przetwarzanie tekstu zajęć przez AI, podcasty z lekcji, udostępnianie notatek linkiem, anonimowe konto i limit.</li>
+      <li>Prawnie uzasadniony interes (art. 6 ust. 1 lit. f RODO): ochrona przed nadużyciami limitu AI.</li>
+    </ul>
+
+    <h2>5. Przekazanie danych poza EOG</h2>
+    <p>Anthropic i ElevenLabs przetwarzają dane w USA. Przekazanie odbywa się na podstawie standardowych klauzul umownych zatwierdzonych przez Komisję Europejską, zawartych w umowach powierzenia z tymi firmami.</p>
+
+    <h2>6. Podcasty i głos na Macu</h2>
+    <p>Podcast z lekcji czyta lektor ElevenLabs tylko w EduNote Pro i tylko wtedy, gdy klikniesz „Posłuchaj”. Do ElevenLabs trafia sam tekst scenariusza ułożony z notatek, nigdy nagranie zajęć. W planie Basic, po wyczerpaniu miesięcznego limitu albo gdy serwer lektora jest niedostępny, podcast czyta głos Apple wbudowany w macOS. Wtedy tekst nie jest wysyłany do ElevenLabs, a mowa powstaje na Twoim Macu.</p>
+
+    <h2>7. Głosy innych osób na zajęciach</h2>
+    <p>Nagrywając zajęcia, nagrywasz też głos prowadzącego i innych osób. Rób to tylko za zgodą prowadzącego i zgodnie z zasadami Twojej szkoły lub uczelni. Dźwięk zostaje na Twoim Macu i jest usuwany po przepisaniu, a do AI trafia sam tekst. Udostępniane są wyłącznie notatki, nigdy nagrania ani transkrypcje.</p>
+
+    <h2>8. Twoje prawa</h2>
+    <p>Masz prawo do dostępu do danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przeniesienia oraz sprzeciwu. Dane z serwera, w tym nagrania podcastów i zgłoszenia, usuniesz sam w aplikacji: <strong>Ustawienia → Kopie danych → Usuń moje dane z serwera</strong>. Udostępnioną notatkę usuniesz w aplikacji przyciskiem „Zatrzymaj udostępnianie”. Dane na Macu usuwasz, kasując notatki albo aplikację. Masz też prawo złożyć skargę do Prezesa Urzędu Ochrony Danych Osobowych.</p>
+
+    <h2>9. Wiek</h2>
+    <p>EduNote jest przeznaczony dla osób, które ukończyły 16 lat. Młodsze osoby mogą korzystać z aplikacji tylko za zgodą rodzica lub opiekuna.</p>
+
+    <h2>10. Zmiany</h2>
+    <p>O ważnych zmianach poinformujemy w aplikacji. Aktualna wersja jest zawsze pod tym adresem.</p>
+  </main>
+  <footer>
+    <span>© 2026 Marcin Różycki</span>
+    <a href="../../prywatnosc/">Polityka prywatności</a>
+    <a href="../../regulamin/">Regulamin</a>
+    <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>
+  </footer>
+</div>
+</body>
+</html>
