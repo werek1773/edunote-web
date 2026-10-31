@@ -131,8 +131,6 @@ mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker
 .hero-art .tile-mustard { right: 0; bottom: 4%; width: 46%; height: 52%; }
 .shot { display: block; border-radius: 12px; border: 1px solid rgba(42, 42, 34, .14); box-shadow: var(--shadow); background: var(--paper); }
 .hero-art .shot-mac { position: absolute; left: 0; top: 14%; width: 84%; height: auto; }
-.phone-shot { display: block; border-radius: 30px; border: 7px solid #151513; box-shadow: 0 26px 50px -24px rgba(0, 0, 0, .55); background: #151513; }
-.hero-art .phone-shot { position: absolute; right: 3%; bottom: 0; width: 30%; height: auto; }
 
 /* zalety: lista z cienkimi liniami na całą szerokość i zrzut obok */
 .feature { display: grid; gap: 36px; align-items: center; padding-top: 72px; padding-bottom: 72px; }
@@ -149,11 +147,8 @@ mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker
 .band-lead { color: #CFCCBF; max-width: 34em; font-size: 18px; margin-bottom: 36px; }
 .phones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; align-items: end; max-width: 980px; margin: 0 auto 36px; }
 .phones figure { margin: 0; text-align: center; }
-.phones .phone-shot { width: 100%; height: auto; border-color: #000; }
 .phones figcaption { margin-top: 12px; font-size: 15px; color: #CFCCBF; }
 .phones figcaption b { color: var(--paper); }
-.phone-live { aspect-ratio: 390 / 844; border-radius: 30px; border: 7px solid #000; background: var(--canvas); overflow: hidden; display: flex; flex-direction: column; padding: 18px 12px 14px; color: var(--ink); }
-.phone-live #demo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 @media (max-width: 760px) {
   .phones { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 72%; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 var(--gutter) 6px; margin: 0 calc(-1 * var(--gutter)) 30px; }
   .phones figure { scroll-snap-align: center; }
@@ -506,3 +501,28 @@ ol.steps .c { color: var(--muted); font-size: 15px; }
 .waitlist-note a { color: var(--muted); }
 .cta .waitlist { margin-top: 22px; }
 details.faq .waitlist { margin: 0 0 18px; }
+/* iPhone z Dynamic Island (jak 15 Pro): ramka z tytanową krawędzią, przyciski boczne, pasek stanu, wyspa i pasek „home”.
+   Wymiary w cqw (procent szerokości ramki), więc telefon wygląda tak samo w każdej wielkości. */
+.iphone {
+  position: relative; container-type: inline-size; aspect-ratio: 716 / 1466; padding: 2.4%; border-radius: 16.8% / 8.2%;
+  background: linear-gradient(150deg, #3a3a3c 0%, #111113 22%, #0a0a0b 60%, #2a2a2c 100%);
+  box-shadow: 0 0 0 1px #6e6e73, 0 0 0 2.5px #c8c8cd, 0 0 0 3.5px #8e8e93, 0 30px 60px -28px rgba(0, 0, 0, .55);
+}
+.iphone-screen { position: relative; height: 100%; overflow: hidden; border-radius: 14.6% / 7%; background: var(--page); display: flex; flex-direction: column; }
+.iphone-screen > img { display: block; width: 100%; height: auto; flex: none; }
+.iphone-status { flex: none; height: 12.6cqw; display: flex; align-items: center; justify-content: space-between; padding: 1.4cqw 7.4cqw 0 9cqw; font: 600 4.1cqw/1 -apple-system, "SF Pro Text", system-ui, sans-serif; color: #000; letter-spacing: -.01em; }
+.iphone-icons { display: inline-flex; align-items: center; gap: 1.5cqw; }
+.iphone-icons svg { height: 2.9cqw; width: auto; fill: currentColor; color: #000; }
+.iphone-icons svg:last-child { height: 3.1cqw; }
+.iphone-island { position: absolute; top: 2.6cqw; left: 50%; transform: translateX(-50%); width: 29.5cqw; height: 8.6cqw; border-radius: 999px; background: #000; }
+.iphone-screen::after { content: ""; position: absolute; left: 50%; bottom: 2cqw; transform: translateX(-50%); width: 33cqw; height: 1.3cqw; border-radius: 999px; background: rgba(0, 0, 0, .78); }
+.iphone-btn { position: absolute; width: 1.1%; border-radius: 2px; background: linear-gradient(90deg, #8e8e93, #d1d1d6 50%, #8e8e93); }
+.iphone-btn.action { left: -1.1%; top: 17%; height: 4.2%; }
+.iphone-btn.vol-up { left: -1.1%; top: 24%; height: 7.4%; }
+.iphone-btn.vol-down { left: -1.1%; top: 33%; height: 7.4%; }
+.iphone-btn.power { right: -1.1%; top: 27%; height: 11.5%; }
+.hero-art .iphone { position: absolute; right: 3%; bottom: 0; width: 30%; }
+.phones .iphone { width: 100%; }
+.phones .iphone-screen { background: var(--canvas); }
+.iphone-app { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 2cqw 4cqw 8cqw; color: var(--ink); }
+.iphone-app #demo { flex: 1; min-height: 0; display: flex; flex-direction: column; }

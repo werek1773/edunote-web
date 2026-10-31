@@ -20,6 +20,12 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="home">
+<!-- ikonki paska stanu iPhone'a (zasięg, Wi-Fi, bateria) dla ramek telefonów -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sb-signal" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></symbol>
+  <symbol id="sb-wifi" viewBox="0 0 16 12"><path d="M1.6 4.6a9.2 9.2 0 0 1 12.8 0M4.2 7.3a5.5 5.5 0 0 1 7.6 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="8" cy="10.2" r="1.6"/></symbol>
+  <symbol id="sb-battery" viewBox="0 0 27 12"><rect x=".6" y=".6" width="22.8" height="10.8" rx="3.2" fill="none" stroke="currentColor" stroke-opacity=".4" stroke-width="1.2"/><rect x="2.4" y="2.4" width="17.6" height="7.2" rx="1.7"/><rect x="24.6" y="4" width="1.9" height="4" rx=".9" fill-opacity=".45"/></symbol>
+</svg>
 <header class="bar" id="bar">
   <div class="bar-in">
     <a class="brand" href="./"><img class="brand-icon" src="icon.png" width="34" height="34" alt=""><img class="wordmark" src="logo.svg" width="128" height="34" alt="EduNote"></a>
@@ -46,7 +52,7 @@
       <div class="tile tile-dots"></div>
       <div class="tile tile-mustard"></div>
       <img class="shot shot-mac" src="img/edunote-mac.jpg" width="1400" height="800" alt="EduNote na Macu: notatka z wykładu z makroekonomii ze streszczeniem i fiszkami">
-      <img class="phone-shot" src="img/telefon-notatka.png" width="390" height="844" alt="Notatka otwarta z linku na telefonie">
+      <div class="iphone hero-phone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-notatka.png" width="390" height="844" alt="Notatka otwarta z linku na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div>
     </div>
   </section>
 
@@ -87,9 +93,9 @@
       <h2>Jeden link i cały rok ma notatki</h2>
       <p class="band-lead">Wrzucasz link na grupę roku. Każdy otwiera notatkę, fiszki i quiz w przeglądarce: bez konta, bez instalowania i bez Maca.</p>
       <div class="phones">
-        <figure><img class="phone-shot" src="img/telefon-notatka.png" width="390" height="844" loading="lazy" alt="Notatka z linku na telefonie"><figcaption><b>Notatka</b> jak w aplikacji</figcaption></figure>
-        <figure><div class="phone-live"><div id="demo"></div></div><figcaption><b>Fiszki</b> · spróbuj tutaj</figcaption></figure>
-        <figure><img class="phone-shot" src="img/telefon-quiz.png" width="390" height="844" loading="lazy" alt="Quiz z wyjaśnieniami na telefonie"><figcaption><b>Quiz</b> z wyjaśnieniami</figcaption></figure>
+        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-notatka.png" width="390" height="844" loading="lazy" alt="Notatka z linku na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Notatka</b> jak w aplikacji</figcaption></figure>
+        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><div class="iphone-app"><div id="demo"></div></div><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Fiszki</b> · spróbuj tutaj</figcaption></figure>
+        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-quiz.png" width="390" height="844" loading="lazy" alt="Quiz z wyjaśnieniami na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Quiz</b> z wyjaśnieniami</figcaption></figure>
       </div>
       <a class="btn btn-light" href="n/#przyklad">Otwórz przykładową notatkę</a>
     </div>
