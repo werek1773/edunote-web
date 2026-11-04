@@ -14,10 +14,17 @@
     return e;
   }
 
+  // Okienko i komunikat wchodzą i znikają płynnie (style.css, klasa leaving), a przy wyłączonych animacjach od razu
+  function gone(nodes, ms) {
+    var calm = !window.matchMedia || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    nodes.forEach(function (n) { n.classList.add("leaving"); });
+    setTimeout(function () { nodes.forEach(function (n) { n.remove(); }); }, calm ? 0 : ms);
+  }
+
   function toast(text) {
     var t = el("div", { class: "toast", role: "status", text: text });
     document.body.appendChild(t);
-    setTimeout(function () { t.remove(); }, 2800);
+    setTimeout(function () { gone([t], 320); }, 2600);
   }
 
   // Schowek, a gdy przeglądarka go nie da: zaznaczony tekst i stare „kopiuj” (działa też bez HTTPS)
@@ -48,8 +55,8 @@
       area, copyBtn, closeBtn
     ]);
     function close() {
-      back.remove();
-      box.remove();
+      if (box.classList.contains("leaving")) return;
+      gone([back, box], 300);
       document.removeEventListener("keydown", onKey);
       if (opener && opener.focus) opener.focus({ preventScroll: true });
     }
@@ -79,9 +86,10 @@
     }
   }
 
-  // Dwa gotowe teksty dla roku bez Maca: prośba do osoby z Makiem (co nagrywający ma z tego dla siebie, bez
-  // obiecywania ceny) i prośba do prowadzącego o zgodę na nagrywanie, zgodna z tym, co naprawdę robi aplikacja
-  // (nagranie zostaje na komputerze, do AI trafia sam tekst, link tylko dla roku i wygasa po sesji poprawkowej)
+  // Dwa gotowe teksty dla roku bez Maca: prośba do osoby z Makiem (co notujący ma z tego dla siebie, bez obiecywania
+  // ceny; „notuj”, a nie „nagrywaj”, jak w aplikacji, CLAUDE.md) i prośba do prowadzącego o zgodę na nagrywanie, która
+  // mówi o nagrywaniu wprost i zgodnie z tym, co naprawdę robi aplikacja (nagranie zostaje na komputerze, do AI trafia
+  // sam tekst, link tylko dla roku i wygasa po sesji poprawkowej)
   var ASK_LECTURER = "Dzień dobry,\n\n"
     + "czy możemy nagrywać Pani/Pana wykłady z [przedmiot], żeby się z nich uczyć? Nagrywa jedna osoba z roku "
     + "na swoim komputerze i nagranie tam zostaje. Aplikacja EduNote robi z niego notatkę i fiszki z pomocą AI "
@@ -90,8 +98,8 @@
     + "oczywiście jej nie nagramy.\n\n"
     + "Z wyrazami szacunku\n[imię i nazwisko], [kierunek, rok]";
   window.eduAsk = {
-    mac: "Hej, nagrasz nam wykład w EduNote, jeśli prowadzący się zgodzi? Ty masz z nagrania gotową notatkę, fiszki i quiz, "
-      + "a reszta roku uczy się z linku, bez instalowania. Tak to wygląda:",
+    mac: "Hej, możesz notować nam wykład w EduNote, jeśli prowadzący się zgodzi? EduNote słucha zajęć i od razu robi z nich "
+      + "notatki. Ty masz gotową notatkę, fiszki i quiz, a reszta roku uczy się z linku, bez instalowania. Tak to wygląda:",
     lecturer: function () {
       sheet(ASK_LECTURER, "Prośba do prowadzącego", {
         hint: "Uzupełnij przedmiot i podpis, a potem wyślij z poczty uczelnianej albo zapytaj po zajęciach.",

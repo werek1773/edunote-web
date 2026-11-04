@@ -5,8 +5,12 @@
 // (localStorage, bez konta i bez serwera): przerwaną naukę można dokończyć, a po powrocie powtórzyć same trudne.
 // Powtórka trudnych nie poprawia wyniku pierwszego podejścia, tylko oznacza fiszki jako powtórzone. Postęp na
 // serwerze to etap 2 planu strony (docs/strona-plan-po-badaniu.md). Klawiatura: spacja pokazuje odpowiedź, 1 i 2 oceniają.
+// Ruch (motion.js): oceniona fiszka odlatuje w stronę przycisku (w prawo „Pamiętam”, w lewo „Jeszcze raz”), następna
+// wchodzi spod niej, odpowiedź wyłania się spod rysowanej linii, a pasek postępu i wynik dochodzą płynnie.
 (function () {
   "use strict";
+
+  function motion() { var m = window.eduMotion; return m && m.ok() ? m : null; }
 
   function el(tag, attrs, children) {
     var e = document.createElement(tag);
@@ -96,6 +100,8 @@
     var root = opts.container, compact = !!opts.compact, mode = opts.mode || "fresh";
     var inner = el("div", { class: "study-box" + (compact ? " compact" : ""), tabindex: "-1" });
     var cards, queue, first, flipped, saved = false, back = false;
+    // ile procent pokazywał pasek postępu (pasek dochodzi płynnie od tej wartości); null = nowe podejście
+    var shownPct = null;
 
     // first: przód fiszki → pierwsza odpowiedź w tej sesji (true = „Pamiętam”)
     function reset(list) {
@@ -103,6 +109,7 @@
       queue = list.slice();
       first = {};
       flipped = false;
+      shownPct = null;
     }
 
     // nowe podejście zaczyna wynik od zera, żeby nie mieszał się ze starym
@@ -111,7 +118,30 @@
       if (opts.key) saved = save(opts.key, { v: 1, at: new Date().toISOString(), cards: {} }) || saved;
     }
 
-    function flip() { if (!flipped) { flipped = true; render(); } }
+    // pierwsza fiszka (start, „Od początku”, „Powtórz trudne”): licznik, pasek i karta wchodzą po kolei
+    function begin() {
+      render();
+      var m = motion();
+      if (m) m.stagger(inner.children, { y: 12, step: 60, max: 5 });
+    }
+
+    function flip() {
+      if (flipped) return;
+      flipped = true;
+      render();
+      // odpowiedź wyłania się spod przerywanej linii (style.css ją rysuje), a przyciski oceny wchodzą po kolei
+      var m = motion();
+      if (!m) return;
+      m.enter(inner.querySelector(".flash .back"), { y: -6, duration: 460 });
+      var g = inner.querySelector(".grades");
+      if (g) m.stagger(g.children, { y: 8, step: 50, duration: 420 });
+    }
+
+    // miejsce karty względem ramki nauki (tam odlatuje jej kopia), zmierzone przed podmianą treści
+    function boxOf(n) {
+      var r = n.getBoundingClientRect(), base = root.getBoundingClientRect();
+      return { top: r.top - base.top, left: r.left - base.left, width: r.width, height: r.height };
+    }
 
     function grade(ok) {
       var c = queue.shift();
@@ -119,7 +149,17 @@
       if (!ok) queue.push(c);
       flipped = false;
       back = !ok && queue.length > 1;
+      var m = motion(), old = m && inner.querySelector(".flash"), box = old && boxOf(old);
       if (queue.length) render(); else finish();
+      if (!old) return;
+      // oceniona karta odlatuje w stronę przycisku, a następna wchodzi spod niej (stan zmienia się od razu, więc
+      // szybkie oceny z klawiatury niczego nie gubią)
+      m.fling(old, box, root, ok ? 1 : -1);
+      var card = inner.querySelector(".flash");
+      if (card) {
+        m.enter(card, { y: 14, scale: 0.97, duration: 520, delay: 70 });
+        m.enter(inner.querySelector(".study-box > .btn-block"), { y: 6, duration: 380, delay: 110 });
+      }
     }
 
     // od razu po ocenie, żeby przerwana nauka nie gubiła wyniku; powtórka trudnych nie poprawia pierwszego podejścia
@@ -151,7 +191,8 @@
         opts.onExit ? button("Zakończ", "link", exit) : el("span"),
         el("span", { class: "count num", text: left(queue.length) })
       ]);
-      var bar = el("div", { class: "progress" }, [el("i", { style: "width:" + Math.round((cards.length - queue.length) / cards.length * 100) + "%" })]);
+      var pct = Math.round((cards.length - queue.length) / cards.length * 100), fill = el("i", { style: "width:" + pct + "%" });
+      var bar = el("div", { class: "progress" }, [fill]);
       // po „Jeszcze raz” licznik stoi, więc mówimy wprost, co się stało z tamtą fiszką
       var note = back ? el("p", { class: "back-note", role: "status", text: "Poprzednia fiszka wróci na koniec." }) : null;
       back = false;
@@ -169,6 +210,12 @@
         : button(task ? "Pokaż rozwiązanie" : "Pokaż odpowiedź", "btn btn-primary btn-block btn-lg", flip);
       [head, bar, note, card, controls].forEach(function (n) { if (n) inner.appendChild(n); });
       if (!compact) inner.appendChild(el("p", { class: "keys", text: "Spacja: odpowiedź · 1: jeszcze raz · 2: pamiętam" }));
+      // pasek dochodzi do nowej wartości od poprzedniej, zamiast przeskakiwać
+      var m = motion();
+      if (m && shownPct !== null && shownPct !== pct) {
+        fill.animate([{ width: shownPct + "%" }, { width: pct + "%" }], { duration: 560, easing: m.EASE });
+      }
+      shownPct = pct;
       keepInView();
     }
 
@@ -183,10 +230,10 @@
       }
       var result = { ok: ok, hard: hard };
       var title = hard.length ? "Gotowe" : mode === "hard" ? "Trudne powtórzone" : "Wszystko pamiętasz";
-      var score = mode === "hard"
-        ? ok + " z " + total + " trudnych już pamiętasz"
-        : ok + " z " + total + " za pierwszym razem";
-      var box = el("div", { class: "done" }, [el("h2", { text: title }), el("p", { class: "score num", text: score })]);
+      var hardMode = mode === "hard";
+      var scoreText = function (n) { return hardMode ? n + " z " + total + " trudnych już pamiętasz" : n + " z " + total + " za pierwszym razem"; };
+      var scoreLine = el("p", { class: "score num", text: scoreText(ok) });
+      var box = el("div", { class: "done" }, [el("h2", { text: title }), scoreLine]);
       if (hard.length && !compact) {
         var list = el("ul", { class: "hard-list" });
         hard.slice(0, 5).forEach(function (c) { list.appendChild(el("li", { text: c.front })); });
@@ -195,18 +242,24 @@
       }
       if (hard.length) {
         box.appendChild(button("Powtórz trudne (" + hard.length + ")", compact ? "btn btn-ghost" : "btn btn-primary", function () {
-          mode = "hard"; reset(hard); render(); if (!compact) inner.focus({ preventScroll: true });
+          mode = "hard"; reset(hard); begin(); if (!compact) inner.focus({ preventScroll: true });
         }));
       }
       var extra = opts.done && opts.done(result);
       if (extra) box.appendChild(extra);
-      var links = el("div", { class: "done-links" }, [button("Od początku", "link", function () { fresh(); reset(all); render(); })]);
+      var links = el("div", { class: "done-links" }, [button("Od początku", "link", function () { fresh(); reset(all); begin(); })]);
       if (opts.onExit) links.appendChild(button("Zakończ", "link", exit));
       box.appendChild(links);
       if (saved) box.appendChild(el("p", { class: "saved", text: "Wynik zostaje tylko w tej przeglądarce." }));
       inner.appendChild(box);
       if (!compact) inner.focus({ preventScroll: true });
       keepInView();
+      // ekran końcowy wchodzi po kolei, a wynik dolicza się do swojej liczby
+      var m = motion();
+      if (m) {
+        m.stagger(box.children, { y: 12, step: 60, max: 6 });
+        m.count(scoreLine, ok, scoreText);
+      }
     }
 
     function onKey(e) {
@@ -226,7 +279,7 @@
     root.innerHTML = "";
     root.appendChild(inner);
     document.addEventListener("keydown", onKey);
-    render();
+    begin();
     if (!compact) inner.focus({ preventScroll: true });
   }
 

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notatki z przedmiotu · EduNote</title>
+<meta name="description" content="Notatki z całego przedmiotu udostępnione z aplikacji EduNote: wykłady i ćwiczenia osobno, fiszki i quiz z całości.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FAF9F5">
+<!-- podgląd na czacie: jeden dla wszystkich przedmiotów (kod stoi po „#”, więc czat go nie widzi) -->
+<meta property="og:title" content="Notatki z całego przedmiotu: fiszki i quiz · EduNote">
+<meta property="og:description" content="Ktoś z Twojego roku udostępnił notatki z wykładów i ćwiczeń. Ucz się z fiszek i sprawdź się w quizie przed kolokwium, w przeglądarce i bez logowania.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="EduNote">
+<meta property="og:image" content="https://edunote.rozycki.pro/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="EduNote: notatki z wykładu dla całego roku, fiszki i quiz w przeglądarce">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../style.css?v=3b70ceaa97">
+<!-- ruch na stronie (style.css, motion.js): włączony, chyba że system prosi o mniej ruchu -->
+<script>if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) document.documentElement.classList.add("motion");</script>
+</head>
+<body class="note-page subject-page">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+</svg>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="../"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark" src="../logo.svg" width="128" height="34" alt="EduNote"></a>
+    <button class="btn btn-ghost btn-sm hidden" id="share-top" type="button">Wyślij na grupę</button>
+  </div>
+</header>
+
+<main class="doc">
+  <!-- szkic listy zajęć z połyskiem, zanim się wczyta (style.css: pojawia się dopiero po chwili, żeby nie mignąć) -->
+  <div id="loading" class="skeleton" aria-busy="true"><span class="sr">Wczytuję notatki…</span><span class="sk sk-sub"></span><span class="sk sk-h1 short"></span><span class="sk sk-tabs"></span><span class="sk sk-box"></span><span class="sk sk-line"></span><span class="sk sk-line short"></span><span class="sk sk-line"></span><span class="sk sk-line short"></span></div>
+
+  <div id="missing" class="hidden center" style="padding:40px 0">
+    <h1>Tego linku już nie ma</h1>
+    <p class="muted">Link wygasł albo notatki nie są już udostępniane. Poproś o nowy link osobę, która go wysłała.</p>
+    <p><a class="btn btn-secondary" href="../">Czym jest EduNote?</a></p>
+  </div>
+
+  <article id="course" class="hidden">
+    <!-- nagłówek jak w notatce: kto udostępnił, przedmiot, oznaczenie AI -->
+    <p class="subject" id="byline"></p>
+    <h1 id="title"></h1>
+    <p class="ai-line"><span class="tag">AI</span><span>Notatki z AI z zajęć w EduNote · mogą zawierać błędy</span></p>
+
+    <div class="tabs-anchor" id="tabs-anchor"></div>
+    <div class="tabs hidden" id="tabs" role="tablist" aria-label="Rodzaje zajęć"></div>
+
+    <!-- lista zajęć z kartą nauki; w czasie fiszek albo quizu tu toczy się nauka -->
+    <div id="panel"></div>
+
+    <section class="cta" id="cta">
+      <img class="cta-icon" src="../icon.png" width="56" height="56" alt="">
+      <h2 id="cta-title">Rób takie notatki z własnych zajęć</h2>
+      <p id="cta-text">EduNote słucha zajęć na Twoim Macu i od razu robi z nich notatki, fiszki i quiz. Teraz za darmo, bez karty (<a href="../#cena">cennik</a>).</p>
+      <div id="cta-slot"></div>
+    </section>
+    <div class="note-foot">
+      <span>Notatki studenta zrobione z pomocą AI, a nie materiał prowadzącego.</span>
+      <span><span id="valid"></span> <a id="report" href="../zglos/">Zgłoś treść</a></span>
+    </div>
+  </article>
+
+  <!-- „Zapisz jako PDF”: wybrane zajęcia jedne pod drugimi, tylko na wydruku -->
+  <div id="print-area" class="print-area"></div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>EduNote · od studenta dla studentów</span>
+    <a href="../">Czym jest EduNote?</a>
+    <a href="../prywatnosc/">Polityka prywatności</a>
+    <a href="../regulamin/">Regulamin</a>
+  </div>
+</footer>
+<script src="../motion.js?v=3b70ceaa97"></script>
+<script src="../platform.js?v=3b70ceaa97"></script>
+<script src="../study.js?v=3b70ceaa97"></script>
+<script src="../share.js?v=3b70ceaa97"></script>
+<script src="../waitlist.js?v=3b70ceaa97"></script>
+<script src="../note.js?v=3b70ceaa97"></script>
+<script src="../subject.js?v=3b70ceaa97"></script>
+</body>
+</html>

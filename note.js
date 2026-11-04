@@ -1,5 +1,7 @@
 // Strona udostępnionej notatki: czyta ją z Supabase po kodzie z adresu (…/n/#kod) i rysuje jak w aplikacji, z nauką
 // fiszek w przeglądarce (study.js). Przykładowa notatka ze strony głównej (…/n/#przyklad) leży w n/przyklad.json.
+// Notatka z linku do przedmiotu ma adres …/n/#KODPRZEDMIOTU-1a2b3c4d (początek identyfikatora notatki) i wraca do
+// listy zajęć (…/p/#KODPRZEDMIOTU). Strona przedmiotu (subject.js) korzysta z tych samych funkcji (window.eduNoteView).
 (function () {
   "use strict";
   var SUPABASE = "https://fjpbdwsbktiylkborxvf.supabase.co";
@@ -7,7 +9,11 @@
   var KEY = "sb_publishable_XtknqXVtb-T-5Wd-oKFxEA_NINWbDsE";
   // adres: …/n/#KOD, a po przełączeniu zakładki …/n/#KOD/fiszki albo …/n/#KOD/quiz (odświeżenie wraca do tej zakładki)
   var hashParts = (location.hash || "").replace(/^#/, "").split("/");
-  var code = hashParts[0].replace(/[^A-Za-z0-9]/g, ""), startTab = hashParts[1] || "";
+  var code = hashParts[0].replace(/[^A-Za-z0-9-]/g, ""), startTab = hashParts[1] || "";
+  var inSubject = /^([A-Za-z0-9]+)-([0-9a-f]{8})$/.exec(code);
+  var subjectCode = inSubject ? inSubject[1] : "";
+  // ruch (motion.js); bez niego wszystko działa tak samo, tylko bez animacji
+  var M = window.eduMotion || null;
 
   function rpc(name, args) {
     return fetch(SUPABASE + "/rest/v1/rpc/" + name, {
@@ -51,6 +57,61 @@
     var d = new Date(iso + "T12:00:00"), opts = { day: "numeric", month: "long" };
     if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
     return d.toLocaleDateString("pl-PL", opts);
+  }
+
+  // MARK: link do przedmiotu
+
+  // Rodzaje zajęć w kolejności zakładek: [nazwa zakładki, pojedyncze zajęcia]
+  var TYPES = [["wykład", "Wykłady", "Wykład"], ["ćwiczenia", "Ćwiczenia", "Ćwiczenia"], ["laboratorium", "Laboratoria", "Laboratorium"],
+               ["seminarium", "Seminaria", "Seminarium"], ["", "Pozostałe", "Zajęcia"]];
+  function typeInfo(type) {
+    for (var i = 0; i < TYPES.length; i++) if (TYPES[i][0] === (type || "")) return { tab: TYPES[i][1], one: TYPES[i][2], order: i };
+    return { tab: "Pozostałe", one: "Zajęcia", order: TYPES.length };
+  }
+
+  // Numer zajęć w swoim rodzaju, od najstarszych („wykład 5”): { id notatki: numer }
+  function numbers(notes) {
+    var count = {}, out = {};
+    notes.slice().sort(function (a, b) {
+      return (a.lesson_date || "").localeCompare(b.lesson_date || "") || (a.start || 0) - (b.start || 0);
+    }).forEach(function (n) {
+      var t = n.type || "";
+      count[t] = (count[t] || 0) + 1;
+      out[n.id] = count[t];
+    });
+    return out;
+  }
+
+  // Przedmiot z linku do przedmiotu: z pamięci tej karty (strona przedmiotu właśnie go wczytała), a bez niej z serwera.
+  // Pamięć żyje 10 minut, więc powrót do listy i otwarcie kolejnej notatki są od razu, bez czekania na sieć.
+  function subjectData(sc, fresh) {
+    var key = "edunote.przedmiot." + sc;
+    if (!fresh) {
+      try {
+        var cached = JSON.parse(sessionStorage.getItem(key) || "null");
+        if (cached && Date.now() - cached.at < 10 * 60 * 1000) return Promise.resolve(cached.data);
+      } catch (e) {}
+    }
+    return rpc("get_shared_subject", { p_code: sc }).then(function (d) {
+      if (d) { try { sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), data: d })); } catch (e) {} }
+      return d;
+    });
+  }
+
+  // Notatka z przedmiotu w tym samym kształcie co z get_shared_note, z numerem zajęć i sąsiednimi zajęciami tego rodzaju
+  function noteFromSubject(s, key) {
+    var notes = s.notes || [], nums = numbers(notes);
+    var n = notes.filter(function (x) { return String(x.id).slice(0, 8) === key; })[0];
+    if (!n) return null;
+    var info = typeInfo(n.type);
+    function near(step) {
+      var m = notes.filter(function (x) { return (x.type || "") === (n.type || "") && nums[x.id] === nums[n.id] + step; })[0];
+      return m ? { key: String(m.id).slice(0, 8), label: info.one + " " + nums[m.id], topic: m.topic } : null;
+    }
+    // powrót do zakładki tych zajęć (…/p/#KOD/cwiczenia), tak jak w subject.js
+    var tab = fold(info.tab).replace(/[^a-z]+/g, "-");
+    return { subject: s.subject, topic: n.topic, lesson_date: n.lesson_date, content: n.content, updated_at: n.updated_at,
+             expires_at: s.expires_at, inSubject: { code: subjectCode, tab: tab, label: info.one + " " + nums[n.id], prev: near(-1), next: near(1) } };
   }
 
   // MARK: wykres – ta sama prosta składnia wzorów co w aplikacji (MathExpression.swift)
@@ -420,6 +481,90 @@
     return wrap;
   }
 
+  // Tablica z zajęć (tylko w linku do przedmiotu, gdy autor ją dodał): obrazek na całą szerokość, stuknięcie powiększa.
+  // Wymiary z danych rezerwują miejsce, więc strona nie skacze, gdy obrazek się wczyta.
+  function boardFigure(b) {
+    var label = b.title ? "Tablica: " + b.title : "Tablica z zajęć";
+    var img = el("img", { src: b.url, alt: label, loading: "lazy", decoding: "async" });
+    if (b.width > 0 && b.height > 0) { img.width = b.width; img.height = b.height; }
+    var open = el("a", { class: "board-open", href: b.url, target: "_blank", rel: "noopener" }, [img]);
+    open.addEventListener("click", function (e) { e.preventDefault(); zoomBoard(b, label, img); });
+    // do wczytania w ramce jest „Wczytuję tablicę…” z połyskiem, wczytany obrazek wyłania się z niej (style.css),
+    // a gdy się nie wczyta, prośba o odświeżenie
+    var fig = el("figure", { class: "board" }, [open, el("figcaption", {}, [
+      el("span", { class: "board-title", text: label }), el("span", { class: "board-hint", text: "Stuknij, żeby powiększyć" })])]);
+    img.addEventListener("load", function () { fig.classList.add("ready"); });
+    img.addEventListener("error", function () { fig.classList.add("failed"); });
+    return fig;
+  }
+
+  // Powiększenie na cały ekran: tablica wyrasta z miniatury (motion.js), najpierw cała, a stuknięcie w nią pokazuje
+  // pełną rozdzielczość tak, że stuknięte miejsce zostaje pod palcem (przewijanie w obie strony, na telefonie też
+  // szczypanie). Esc albo „Zamknij” wraca do notatki, a tablica wraca na swoje miejsce w notatce.
+  function zoomBoard(b, label, thumb) {
+    var opener = document.activeElement, moving = !!(M && M.ok());
+    var img = el("img", { src: b.url, alt: label });
+    if (b.width > 0 && b.height > 0) { img.width = b.width; img.height = b.height; }
+    var close = el("button", { class: "btn btn-light btn-sm zoom-close", type: "button", text: "Zamknij" });
+    var hint = el("p", { class: "zoom-hint", "aria-hidden": "true", text: "Stuknij w tablicę, żeby powiększyć" });
+    var bg = el("div", { class: "zoom-bg" });
+    var box = el("div", { class: "zoom", role: "dialog", "aria-modal": "true", "aria-label": label }, [
+      bg, el("div", { class: "zoom-in" }, [img]), close, hint]);
+    var closing = false;
+    function shut() {
+      if (closing) return;
+      closing = true;
+      document.removeEventListener("keydown", onKey);
+      function gone() {
+        box.remove();
+        if (thumb) thumb.style.visibility = "";
+        document.documentElement.classList.remove("zoomed");
+        if (opener && opener.focus) opener.focus({ preventScroll: true });
+      }
+      if (!moving) return gone();
+      var home = thumb && thumb.getBoundingClientRect();
+      M.fade(close, false, { duration: 140 });
+      M.fade(hint, false, { duration: 140 });
+      if (!box.classList.contains("full") && M.onScreen(home)) {
+        thumb.style.visibility = "hidden";
+        M.fade(bg, false, { duration: 360 });
+        M.morphTo(img, home, { duration: 400 }).then(gone);
+      } else {
+        M.fade(box, false, { duration: 220 }).then(gone);
+      }
+    }
+    function onKey(e) { if (e.key === "Escape") shut(); }
+    img.addEventListener("click", function (e) {
+      var before = img.getBoundingClientRect();
+      var full = box.classList.toggle("full");
+      hint.textContent = full ? "Stuknij, żeby zobaczyć całą tablicę" : "Stuknij w tablicę, żeby powiększyć";
+      // w pełnej rozdzielczości stuknięte miejsce zostaje tam, gdzie był palec
+      var now = img.getBoundingClientRect();
+      if (full && before.width && before.height) {
+        box.scrollLeft += now.left + (e.clientX - before.left) / before.width * now.width - e.clientX;
+        box.scrollTop += now.top + (e.clientY - before.top) / before.height * now.height - e.clientY;
+        now = img.getBoundingClientRect();
+      }
+      if (moving) M.morph(img, before, now, { duration: 460 });
+    });
+    close.addEventListener("click", shut);
+    document.addEventListener("keydown", onKey);
+    var from = thumb && thumb.getBoundingClientRect();
+    document.documentElement.classList.add("zoomed");
+    document.body.appendChild(box);
+    close.focus({ preventScroll: true });
+    if (!moving) return;
+    M.fade(bg, true, { duration: 380 });
+    if (M.onScreen(from)) {
+      thumb.style.visibility = "hidden";
+      M.morph(img, from, img.getBoundingClientRect(), { duration: 520 });
+    } else {
+      M.enter(img, { y: 16, scale: 0.97 });
+    }
+    M.fade(close, true, { delay: 180 });
+    M.fade(hint, true, { delay: 300 });
+  }
+
   // Link do EduNote w Mac App Store z kampanią (ct): „share” z przycisku pod notatką, „mail” z linku wysłanego sobie
   // na Maca. App Store Connect pokazuje pobrania z każdej kampanii. Ten sam identyfikator co w aplikacji
   // (ProAccess.appStoreURL) i na stronie głównej.
@@ -522,7 +667,9 @@
               if (x.dataset.right) mark(x, true);
             });
             if (!ok) mark(b, false);
-            if (q.explanation) why.classList.remove("hidden");
+            // dobra odpowiedź lekko się nadyma, zła kręci głową, a wyjaśnienie rozwija się pod pytaniem
+            if (M) { if (ok) M.pop(b); else M.shake(b); }
+            if (q.explanation) { why.classList.remove("hidden"); if (M) M.expand(why); }
             if (++answered === list.length) score(list, wrong, result);
           });
           options.appendChild(b);
@@ -532,21 +679,25 @@
       box.appendChild(result);
     }
 
-    // nowe podejście od pierwszego pytania, bez płynnego przewijania
+    // nowe podejście od pierwszego pytania, bez płynnego przewijania; pytania wchodzą po kolei
     function again(list) {
       round(list);
       var html = document.documentElement;
       html.style.scrollBehavior = "auto";
       section.scrollIntoView({ block: "start" });
       html.style.scrollBehavior = "";
+      if (M) M.stagger(box.children, { y: 10, step: 45, max: 5 });
     }
 
     function score(list, wrong, result) {
+      var good = list.length - wrong.length;
       if (opts.key && list === items) {
-        last = quizResult(opts.key, { v: 1, at: new Date().toISOString(), good: list.length - wrong.length, total: list.length,
+        last = quizResult(opts.key, { v: 1, at: new Date().toISOString(), good: good, total: list.length,
           wrong: wrong.map(function (q) { return q.prompt; }) });
       }
-      result.appendChild(el("p", { class: "quiz-score num", text: (list.length - wrong.length) + " z " + list.length }));
+      // wynik dochodzi do liczby (motion.js); czytnik ekranu dostaje od razu cały wynik
+      var counter = el("span", { "aria-hidden": "true", text: good + " z " + list.length });
+      result.appendChild(el("p", { class: "quiz-score num" }, [counter, el("span", { class: "sr", text: good + " z " + list.length })]));
       result.appendChild(el("p", { class: "muted", text: (wrong.length
         ? eduStudy.plural(wrong.length, "błąd", "błędy", "błędów") + ". Wyjaśnienia są pod pytaniami."
         : "Bez błędów.") + (opts.after ? " " + opts.after : "") }));
@@ -556,6 +707,12 @@
       (opts.next || []).forEach(function (n) { row.appendChild(button(n[0], "btn btn-ghost", n[1])); });
       result.appendChild(row);
       result.classList.remove("hidden");
+      if (!M || !M.ok()) return;
+      // wynik pod ostatnim pytaniem: gdy jest pod ekranem, strona płynnie zjeżdża tak, żeby było go widać
+      var r = result.getBoundingClientRect(), over = r.bottom - window.innerHeight + 24;
+      if (over > 0) window.scrollBy({ top: Math.max(0, Math.min(over, r.top - 150)), behavior: "smooth" });
+      M.expand(result);
+      M.count(counter, good, function (n) { return n + " z " + list.length; });
     }
 
     round(items);
@@ -570,6 +727,83 @@
     if (out.length) return out;
     (c.concepts || []).forEach(function (k) { if (k.term && k.definition) out.push({ front: k.term, back: k.definition }); });
     (c.questions || []).forEach(function (q) { if (q.question && q.answer) out.push({ front: q.question, back: q.answer }); });
+    return out;
+  }
+
+  // Quizlet i Anki przyjmują tekst: pojęcie, tabulator, definicja, każda fiszka w osobnej linii. Te same funkcje
+  // ma strona przedmiotu dla fiszek z całego zakresu (eduNoteView.copyCards i downloadCards).
+  function tsv(cards) {
+    var clean = function (s) { return String(s).replace(/[\t\r\n]+/g, " ").trim(); };
+    return cards.map(function (k) { return clean(k.front) + "\t" + clean(k.back); }).join("\n");
+  }
+  function copyCards(cards) {
+    eduCopy(tsv(cards), "Fiszki do Quizleta", {
+      hint: "W Quizlecie na komputerze: Utwórz zestaw → Importuj, wklej i zostaw „Tabulator” między pojęciem a definicją.",
+      button: "Kopiuj fiszki", done: "Skopiowano fiszki. Wklej je w Quizlecie.", rows: 6
+    });
+  }
+  // plik dla Anki (Plik → Importuj) i dla tych, którzy wolą wgrać plik do Quizleta; name: z czego są fiszki
+  function downloadCards(cards, name) {
+    var a = el("a", { href: URL.createObjectURL(new Blob([tsv(cards)], { type: "text/plain;charset=utf-8" })),
+      download: "fiszki-" + (fold(name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "edunote") + ".txt" });
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  // Treść notatki jak w aplikacji: działy, własne dopiski, tablice, wyjaśnienie wizualne, pojęcia na kartach, „Może być
+  // na kolokwium”, zadania i pytania, zadanie domowe. „W skrócie” każda strona stawia sama. Pojęcia i pytania są
+  // zwinięte: rozwinięte wydłużały notatkę na telefonie o kilka ekranów, a gdy fiszki powstają z nich samych
+  // (aplikacja nie wysłała własnych), te same definicje i zadania są w zakładce Fiszki.
+  // opts.sample: przykładowa notatka (inny dopisek pod „Może być na kolokwium”)
+  function noteBody(c, opts) {
+    opts = opts || {};
+    var out = [], cards = cardsOf(c), fromNote = !(c.cards || []).some(function (k) { return k.front && k.back; });
+    function folded(title, meta, children) {
+      return el("section", { class: "section" }, [el("details", { class: "fold" }, [
+        el("summary", {}, [el("span", { class: "fold-title", text: title }),
+          el("span", { class: "fold-meta", text: meta + (fromNote && cards.length ? " · są też w fiszkach" : "") })])
+      ].concat(children))]);
+    }
+    (c.sections || []).forEach(function (s) {
+      var sec = el("section", { class: "section" }, [el("h2", { text: s.heading })]);
+      (s.body || "").split(/\n+/).forEach(function (p) { if (p.trim()) sec.appendChild(el("p", { text: eduStudy.tidy(p) })); });
+      out.push(sec);
+    });
+    (c.own || []).forEach(function (t) { out.push(el("p", { class: "own", text: t })); });
+    (c.boards || []).forEach(function (b) { if (b && b.url) out.push(boardFigure(b)); });
+    if (c.visual && c.visual.slides && c.visual.slides.length) out.push(visual(c.visual));
+    if (c.concepts && c.concepts.length) {
+      var grid = el("div", { class: "concepts" });
+      c.concepts.forEach(function (k) {
+        grid.appendChild(el("div", { class: "concept" }, [
+          el("p", { class: "term" }, [document.createTextNode(k.term), k.important ? el("span", { class: "key-chip", text: "kluczowe" }) : null]),
+          el("p", { class: "def", text: eduStudy.tidy(k.definition) })
+        ]));
+      });
+      out.push(folded("Pojęcia", eduStudy.plural(c.concepts.length, "definicja", "definicje", "definicji"), [grid]));
+    }
+    if (c.exam && c.exam.length) {
+      var ul = el("ul", { class: "plain" });
+      c.exam.forEach(function (t) { ul.appendChild(el("li", { text: t })); });
+      // to wybór AI z wykładu, a nie lista od prowadzącego, więc „może być”, z odesłaniem do sylabusu
+      out.push(el("section", { class: "exam" }, [el("p", { class: "exam-label", text: "Może być na kolokwium" }), ul,
+        el("p", { class: "exam-hint", text: opts.sample ? "W prawdziwej notatce AI wybiera to z treści zajęć. Zakres zawsze sprawdź w sylabusie."
+          : "Wybrane przez AI z treści zajęć. Zakres sprawdź w sylabusie." })]));
+    }
+    if (c.questions && c.questions.length) {
+      var qs = el("div", { class: "questions" });
+      c.questions.forEach(function (q) {
+        qs.appendChild(el("details", { class: "q" }, [el("summary", { text: eduStudy.tidy(q.question) }), el("p", { text: eduStudy.tidy(q.answer) })]));
+      });
+      out.push(folded("Zadania i pytania do nauki", eduStudy.plural(c.questions.length, "pytanie", "pytania", "pytań") + " z odpowiedziami",
+        [el("p", { class: "muted small", text: "Najpierw spróbuj rozwiązać, potem rozwiń odpowiedź." }), qs]));
+    }
+    if (c.homework && c.homework.length) {
+      var hw = el("ul", { class: "plain" });
+      c.homework.forEach(function (t) { hw.appendChild(el("li", { text: t })); });
+      out.push(el("section", { class: "section" }, [el("h2", { text: "Zadanie domowe" }), hw]));
+    }
     return out;
   }
 
@@ -615,12 +849,20 @@
       origin.appendChild(el("a", { href: "mailto:marcin@rozycki.pro?subject=" + encodeURIComponent("Błąd w przykładowej notatce"),
         text: "Napisz do autora EduNote" }));
     }
-    $("subject").textContent = [data.subject, data.sample ? "przykład" : shortDate(data.lesson_date)].filter(Boolean).join(" · ");
+    // notatka z linku do przedmiotu: powrót do listy zajęć, a w nagłówku „Wykład 5 · 12 listopada”
+    if (data.inSubject) {
+      var back = $("back");
+      back.href = "../p/#" + data.inSubject.code + "/" + data.inSubject.tab;
+      back.textContent = "← " + (data.subject || "Przedmiot") + ": wszystkie zajęcia";
+      back.classList.remove("hidden");
+    }
+    $("subject").textContent = [data.inSubject ? data.inSubject.label : data.subject,
+      data.sample ? "przykład" : shortDate(data.lesson_date)].filter(Boolean).join(" · ");
     $("topic").textContent = title;
     var ai = c.fromRecording || c.summary || (c.sections && c.sections.length) || (c.concepts && c.concepts.length) || c.visual;
     if (ai && !data.sample) {
       $("ai-text").textContent = (c.fromRecording
-        ? "Notatka z AI z " + (c.minutes > 0 ? c.minutes + "-minutowego nagrania" : "nagrania") + " wykładu w EduNote na Macu"
+        ? "Notatka z AI z " + (c.minutes > 0 ? (c.minutes === 1 ? "1 minuty" : c.minutes + " minut") + " zajęć" : "zajęć") + " w EduNote na Macu"
         : "Notatka przygotowana z pomocą AI") + " · może zawierać błędy";
     } else {
       $("ai-note").classList.add("hidden");
@@ -640,25 +882,31 @@
     share.classList.remove("hidden");
 
     // Zakładki jak przełącznik w aplikacji: Notatka, Fiszki, Quiz. Adres się nie zmienia, bo po „#” stoi kod notatki.
+    // Pigułka pod wybraną zakładką przesuwa się do nowej, a nowa zakładka wsuwa się z boku, z którego przyszła.
     var tabs = $("tabs"), panels = { note: $("panel-note"), cards: $("panel-cards"), quiz: $("panel-quiz") }, buttons = {};
+    var current = "note", order = ["note", "cards", "quiz"], place = null;
     function tab(id, text, count) {
       var b = el("button", { type: "button", role: "tab", id: "tab-" + id, "aria-controls": "panel-" + id, "aria-selected": "false" },
         [document.createTextNode(text), count ? el("span", { class: "count num", text: String(count) }) : null]);
-      b.addEventListener("click", function () { show(id); });
+      b.addEventListener("click", function () { show(id, true); });
       buttons[id] = b;
       tabs.appendChild(b);
     }
     // po przełączeniu treść zaczyna się tuż pod zakładkami, także gdy notatka była przewinięta w dół
-    function show(id) {
+    function show(id, byUser) {
+      var dir = order.indexOf(id) - order.indexOf(current);
+      current = id;
       Object.keys(buttons).forEach(function (k) {
         buttons[k].setAttribute("aria-selected", String(k === id));
         panels[k].hidden = k !== id;
       });
+      if (place) place(!!byUser);
       var name = { cards: "fiszki", quiz: "quiz" }[id];
       try { history.replaceState(null, "", "#" + code + (name ? "/" + name : "")); } catch (e) {}
       if (id === "cards" && !panels.cards.firstChild) studyIntro();
       var top = $("tabs-anchor").getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight;
       if (window.scrollY > top) window.scrollTo(0, top);
+      if (byUser && dir && M) M.swap(panels[id], dir > 0 ? 1 : -1);
     }
     tab("note", "Notatka");
     if (cards.length) tab("cards", "Fiszki", cards.length);
@@ -674,8 +922,9 @@
     buttons.note.setAttribute("aria-selected", "true");
     if (cards.length || hasQuiz) tabs.classList.remove("hidden");
 
-    // Fiszki: krótki wstęp z ostatnim wynikiem, a nauka toczy się w tej samej zakładce
-    function studyIntro() {
+    // Fiszki: krótki wstęp z ostatnim wynikiem, a nauka toczy się w tej samej zakładce. animate: po „Zakończ”
+    // wstęp wraca płynnie (przy przełączeniu zakładki wsuwa się cała zakładka).
+    function studyIntro(animate) {
       var p = eduStudy.progress(code, cards), resume = p && p.rest.length, again = p && !resume && p.hard.length;
       var intro = el("div", { class: "study-intro" }, [
         el("p", { class: "eyebrow", text: !p ? what + " · ok. " + eduStudy.minutes(cards) + " min · bez logowania"
@@ -696,39 +945,22 @@
         intro.appendChild(el("p", { class: "muted small", text: "Otwierasz w Messengerze? Wybierz „Otwórz w przeglądarce”, żeby wynik się zapisał." }));
       }
       intro.appendChild(el("p", { class: "export" }, [
-        button("Kopiuj do Quizleta", "link", exportCards), button("Pobierz plik dla Anki (.txt)", "link", downloadCards)
+        button("Kopiuj do Quizleta", "link", function () { copyCards(cards); }),
+        button("Pobierz plik dla Anki (.txt)", "link", function () { downloadCards(cards, title); })
       ]));
       panels.cards.innerHTML = "";
       panels.cards.appendChild(intro);
       // po „Zakończ” wstęp zaczyna się tuż pod zakładkami, a nie gdzieś w połowie ekranu
       var top = $("tabs-anchor").getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight;
       if (window.scrollY > top) window.scrollTo(0, top);
-    }
-    // Quizlet i Anki przyjmują tekst: pojęcie, tabulator, definicja, każda fiszka w osobnej linii
-    function tsv() {
-      var clean = function (s) { return String(s).replace(/[\t\r\n]+/g, " ").trim(); };
-      return cards.map(function (k) { return clean(k.front) + "\t" + clean(k.back); }).join("\n");
-    }
-    function exportCards() {
-      eduCopy(tsv(), "Fiszki do Quizleta", {
-        hint: "W Quizlecie na komputerze: Utwórz zestaw → Importuj, wklej i zostaw „Tabulator” między pojęciem a definicją.",
-        button: "Kopiuj fiszki", done: "Skopiowano fiszki. Wklej je w Quizlecie.", rows: 6
-      });
-    }
-    // plik dla Anki (Plik → Importuj) i dla tych, którzy wolą wgrać plik do Quizleta
-    function downloadCards() {
-      var a = el("a", { href: URL.createObjectURL(new Blob([tsv()], { type: "text/plain;charset=utf-8" })),
-        download: "fiszki-" + fold(title).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".txt" });
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      if (animate && M) M.swap(intro, 0);
     }
     // only i mode: dokończenie przerwanej nauki („resume”) albo same trudne („hard”); bez nich nowe podejście
     function learn(only, mode) {
       var stage = el("div", { class: "study-stage" });
       panels.cards.innerHTML = "";
       panels.cards.appendChild(stage);
-      eduStudy.start(cards, { container: stage, key: code, only: only, mode: mode, done: afterStudy, onExit: studyIntro,
+      eduStudy.start(cards, { container: stage, key: code, only: only, mode: mode, done: afterStudy, onExit: function () { studyIntro(true); },
         offset: function () { return document.querySelector(".bar").offsetHeight + tabs.offsetHeight; } });
       // fiszka i przyciski od razu na ekranie, tuż pod paskiem i zakładkami
       var top = stage.getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight - tabs.offsetHeight - 8;
@@ -739,85 +971,50 @@
       var box = el("div", { class: "done-actions" });
       if (hasQuiz) {
         box.appendChild(button("Quiz z tej notatki", result.hard.length ? "btn btn-secondary" : "btn btn-primary",
-          function () { show("quiz"); }));
+          function () { show("quiz", true); }));
       }
       if (!mac && until) box.appendChild(el("p", { class: "muted small", text: "Wróć tu przed kolokwium. " + until }));
       if (mac) box.appendChild(appInvite(true, "btn btn-secondary"));
       return box;
     }
 
-    // Notatka jak w aplikacji: „W skrócie”, działy, wyjaśnienie wzoru, pojęcia na kartach, „Na kolokwium”, pytania
-    // Pojęcia i pytania są zwinięte: rozwinięte wydłużały notatkę na telefonie o kilka ekranów, a gdy fiszki powstają
-    // z nich samych (aplikacja nie wysłała własnych), te same definicje i zadania są w zakładce Fiszki
-    var fromNote = !(c.cards || []).some(function (k) { return k.front && k.back; });
-    function fold(title, meta, children) {
-      return el("section", { class: "section" }, [el("details", { class: "fold" }, [
-        el("summary", {}, [el("span", { class: "fold-title", text: title }),
-          el("span", { class: "fold-meta", text: meta + (fromNote && cards.length ? " · są też w fiszkach" : "") })])
-      ].concat(children))]);
-    }
     if (c.summary) $("summary").textContent = c.summary; else $("brief").classList.add("hidden");
     var body = $("body");
-    (c.sections || []).forEach(function (s) {
-      var sec = el("section", { class: "section" }, [el("h2", { text: s.heading })]);
-      (s.body || "").split(/\n+/).forEach(function (p) { if (p.trim()) sec.appendChild(el("p", { text: eduStudy.tidy(p) })); });
-      body.appendChild(sec);
-    });
-    (c.own || []).forEach(function (t) { body.appendChild(el("p", { class: "own", text: t })); });
-    if (c.visual && c.visual.slides && c.visual.slides.length) body.appendChild(visual(c.visual));
-    if (c.concepts && c.concepts.length) {
-      var grid = el("div", { class: "concepts" });
-      c.concepts.forEach(function (k) {
-        grid.appendChild(el("div", { class: "concept" }, [
-          el("p", { class: "term" }, [document.createTextNode(k.term), k.important ? el("span", { class: "key-chip", text: "kluczowe" }) : null]),
-          el("p", { class: "def", text: eduStudy.tidy(k.definition) })
-        ]));
+    noteBody(c, { sample: data.sample }).forEach(function (n) { body.appendChild(n); });
+    // notatka z przedmiotu: poprzednie i następne zajęcia tego rodzaju, żeby czytać po kolei
+    if (data.inSubject && (data.inSubject.prev || data.inSubject.next)) {
+      var nav = el("nav", { class: "lesson-nav", "aria-label": "Sąsiednie zajęcia" });
+      [["prev", "← "], ["next", ""]].forEach(function (p) {
+        var s = data.inSubject[p[0]];
+        if (!s) { nav.appendChild(el("span")); return; }
+        nav.appendChild(el("a", { class: "lesson-nav-" + p[0], href: "#" + subjectCode + "-" + s.key }, [
+          el("span", { class: "lesson-nav-label", text: p[1] + s.label + (p[0] === "next" ? " →" : "") }),
+          el("span", { class: "lesson-nav-topic", text: s.topic || "" })]));
       });
-      body.appendChild(fold("Pojęcia", eduStudy.plural(c.concepts.length, "definicja", "definicje", "definicji"), [grid]));
-    }
-    if (c.exam && c.exam.length) {
-      var ul = el("ul", { class: "plain" });
-      c.exam.forEach(function (t) { ul.appendChild(el("li", { text: t })); });
-      // to wybór AI z wykładu, a nie lista od prowadzącego, więc „może być”, z odesłaniem do sylabusu
-      body.appendChild(el("section", { class: "exam" }, [el("p", { class: "exam-label", text: "Może być na kolokwium" }), ul,
-        el("p", { class: "exam-hint", text: data.sample ? "W prawdziwej notatce AI wybiera to z treści zajęć. Zakres zawsze sprawdź w sylabusie."
-          : "Wybrane przez AI z treści zajęć. Zakres sprawdź w sylabusie." })]));
-    }
-    if (c.questions && c.questions.length) {
-      var qs = el("div", { class: "questions" });
-      c.questions.forEach(function (q) {
-        qs.appendChild(el("details", { class: "q" }, [el("summary", { text: eduStudy.tidy(q.question) }), el("p", { text: eduStudy.tidy(q.answer) })]));
-      });
-      body.appendChild(fold("Zadania i pytania do nauki", eduStudy.plural(c.questions.length, "pytanie", "pytania", "pytań") + " z odpowiedziami",
-        [el("p", { class: "muted small", text: "Najpierw spróbuj rozwiązać, potem rozwiń odpowiedź." }), qs]));
-    }
-    if (c.homework && c.homework.length) {
-      var hw = el("ul", { class: "plain" });
-      c.homework.forEach(function (t) { hw.appendChild(el("li", { text: t })); });
-      body.appendChild(el("section", { class: "section" }, [el("h2", { text: "Zadanie domowe" }), hw]));
+      body.appendChild(nav);
     }
     if (hasQuiz) {
       panels.quiz.appendChild(quiz(c.quiz, {
         key: code,
         after: mac ? "Chcesz te pytania jako fiszki z powtórkami? EduNote przypomni je, zanim wylecą z głowy."
           : until && "Wróć tu przed kolokwium. " + until,
-        next: cards.length ? [["Powtórz fiszki", function () { show("cards"); learn(); }]] : []
+        next: cards.length ? [["Powtórz fiszki", function () { show("cards", true); learn(); }]] : []
       }));
     }
 
     // Zaproszenie na końcu notatki: na Macu do App Store. Bez Maca uczysz się już tutaj, więc zaproszenie jest do
-    // poproszenia osoby z Makiem z roku o nagrywanie (wystarczy jedna na rok), zwykłą prośbą, a nie reklamą.
+    // poproszenia osoby z Makiem z roku, żeby notowała zajęcia (wystarczy jedna na rok), zwykłą prośbą, a nie reklamą.
     var slot = $("cta-slot");
     if (mac) {
       slot.appendChild(appInvite(true, "btn btn-primary"));
     } else {
       $("cta-title").textContent = "Chcesz takie notatki z innych wykładów?";
-      $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote z nagrań na Macu: wystarczy jedna "
-        + "osoba z Makiem na roku, która za zgodą prowadzącego nagra wykład i wyśle link grupie.";
+      $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote na Macu: wystarczy jedna osoba "
+        + "z Makiem na roku. Za zgodą prowadzącego EduNote słucha zajęć, od razu robi z nich notatki, a link dostaje cała grupa.";
       slot.appendChild(button("Poproś kogoś z Makiem", "btn btn-primary", function () {
         eduShare(eduAsk.mac, url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
       }));
-      // drugi gotowy tekst: prośba do prowadzącego o zgodę, bez której nikt nie nagra (share.js)
+      // drugi gotowy tekst: prośba do prowadzącego o zgodę, bez której nikt nie notuje zajęć (share.js)
       slot.appendChild(el("p", { class: "cta-links" }, [button("Prośba do prowadzącego o zgodę", "link", eduAsk.lecturer)]));
       // zapis na EduNote na Androida, Windowsa albo iPhone'a jednym kliknięciem (waitlist.js)
       eduWaitlist(slot, { privacy: "../prywatnosc/" });
@@ -831,12 +1028,21 @@
     $("valid").textContent = until || (data.sample
       ? "Prawdziwe linki działają do końca sesji poprawkowej: z semestru zimowego do 15 marca, z letniego do 30 września." : "");
     var report = $("report");
-    if (sample) report.classList.add("hidden"); else report.href = "../zglos/#n=" + code;
+    if (sample) report.classList.add("hidden"); else report.href = "../zglos/#n=" + (subjectCode || code);
     $("loading").classList.add("hidden");
     $("note").classList.remove("hidden");
+    if (M && (cards.length || hasQuiz)) place = M.pill(tabs);
     // po odświeżeniu ta sama zakładka co przedtem
     var fromHash = { fiszki: "cards", quiz: "quiz" }[startTab];
     if (fromHash && buttons[fromHash]) show(fromHash);
+    // nagłówek, zakładki i treść wchodzą po kolei, a zakreślacz pod „W skrócie” przeciąga się tylko przy tym pierwszym
+    // wejściu, nie po każdym powrocie do zakładki (style.css: #note.entering)
+    if (M && M.ok()) {
+      M.stagger([$("sample"), $("back"), $("subject"), $("topic"), $("ai-note"), tabs, panels[current]], { step: 50, y: 12 });
+      var article = $("note");
+      article.classList.add("entering");
+      setTimeout(function () { article.classList.remove("entering"); }, 1600);
+    }
   }
 
   // Na wydruku i w PDF rozwiązania zadań są rozwinięte; po wydruku wracają do stanu sprzed
@@ -850,39 +1056,77 @@
   // Przycisk do EduNote: do App Store tylko na Macu. Na telefonie i na Windowsie strona „tylko na Maca” w App Store
   // to ślepa uliczka, więc zamiast niej link do wysłania sobie na Maca.
   function appInvite(mac, cls) {
+    return invite(mac, cls, sample ? "przyklad" : subjectCode ? "przedmiot" : "share", recordClick);
+  }
+
+  // campaign: kampania w App Store („share”, „przedmiot”, „przyklad”), onClick: licznik kliknięć w aplikacji autora
+  function invite(mac, cls, campaign, onClick) {
     var a = el("a", { class: cls });
     if (mac) {
       a.textContent = "Pobierz EduNote na Maca";
-      a.href = storeLink(sample ? "przyklad" : "share");
+      a.href = storeLink(campaign);
     } else {
       a.textContent = "Wyślij sobie link na Maca";
       a.href = "mailto:?subject=" + encodeURIComponent("EduNote na Maca")
         + "&body=" + encodeURIComponent("EduNote w Mac App Store: " + storeLink("mail"));
     }
-    a.addEventListener("click", recordClick);
+    if (onClick) a.addEventListener("click", onClick);
     return a;
   }
 
   // Kliknięcie „EduNote” pod udostępnioną notatką (licznik w aplikacji autora); keepalive: zapytanie dojdzie,
-  // nawet gdy przeglądarka już przechodzi do App Store
+  // nawet gdy przeglądarka już przechodzi do App Store. Notatka z przedmiotu liczy się do linku przedmiotu.
   function recordClick() {
     if (sample) return;
-    fetch(SUPABASE + "/rest/v1/rpc/record_share_click", {
+    recordAppClick(subjectCode ? "record_subject_click" : "record_share_click", subjectCode || code);
+  }
+
+  function recordAppClick(fn, c) {
+    fetch(SUPABASE + "/rest/v1/rpc/" + fn, {
       method: "POST", keepalive: true,
       headers: { "apikey": KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ p_code: code })
+      body: JSON.stringify({ p_code: c })
     }).catch(function () {});
   }
 
   function missing() {
     document.getElementById("loading").classList.add("hidden");
     document.getElementById("missing").classList.remove("hidden");
+    if (M) M.enter(document.getElementById("missing"));
   }
+
+  // Wspólne funkcje dla strony przedmiotu (subject.js): treść notatki, quiz, fiszki, eksport fiszek, przedmiot z serwera
+  window.eduNoteView = {
+    el: el, button: button, withIcon: withIcon, body: noteBody, quiz: quiz, cardsOf: cardsOf, needsMath: needsMath,
+    loadMath: loadMath, lastDay: lastDay, shortDate: shortDate, fold: fold, shuffle: shuffle, invite: invite,
+    recordClick: recordAppClick, subjectData: subjectData, numbers: numbers, typeInfo: typeInfo, types: TYPES,
+    copyCards: copyCards, downloadCards: downloadCards
+  };
+  // dalej już tylko strona jednej notatki
+  if (!document.getElementById("note")) return;
 
   // Przykładowa notatka ze strony głównej (/n/#przyklad) leży obok strony, a nie w bazie
   var sample = code === "przyklad";
   if (!code) { missing(); return; }
+  // Notatka z przedmiotu: z przedmiotu w pamięci karty, a gdy jej tam nie ma (nowa notatka), z serwera
+  function fromSubject() {
+    var key = inSubject[2];
+    return subjectData(subjectCode).then(function (s) {
+      return (s && noteFromSubject(s, key)) || subjectData(subjectCode, true).then(function (f) { return f && noteFromSubject(f, key); });
+    });
+  }
+  if (inSubject) {
+    // „← Wykład 4” i „Wykład 6 →” zmieniają tylko adres po „#”: obecna notatka gaśnie, a nowa wchodzi od góry strony
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.addEventListener("hashchange", function () {
+      var next = (location.hash || "").replace(/^#/, "").split("/")[0];
+      if (next === code) return;
+      var go = function () { window.scrollTo(0, 0); location.reload(); };
+      if (M) M.leave(document.getElementById("note"), { y: -8, duration: 180 }).then(go); else go();
+    });
+  }
   var load = sample ? fetch("przyklad.json").then(function (r) { return r.ok ? r.json() : null; })
+    : inSubject ? fromSubject()
     : rpc("get_shared_note", { p_code: code });
   load.then(function (d) {
     if (!d) return missing();

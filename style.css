@@ -42,6 +42,13 @@
   --gutter: max(20px, env(safe-area-inset-left, 0px));
   --bar-h: 64px;
   --shadow: 0 1px 2px rgba(42, 42, 34, .05), 0 18px 40px -22px rgba(42, 42, 34, .35);
+  --lift: 0 1px 2px rgba(42, 42, 34, .05), 0 14px 30px -18px rgba(42, 42, 34, .3);
+  /* ruch (motion.js i przejścia poniżej): wejście z długim, miękkim hamowaniem, zmiana stanu miękko w obie strony,
+     wyjście z rozpędu, małe sprężyste „pyknięcie” przy naciśnięciu */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-move: cubic-bezier(.65, 0, .35, 1);
+  --ease-exit: cubic-bezier(.5, 0, .75, 0);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -63,17 +70,19 @@ h1, h2, .disp { font-family: var(--display); font-stretch: 125%; font-weight: 80
 h1 { font-size: clamp(32px, 7vw, 44px); line-height: 1.04; margin: 6px 0 10px; }
 h2 { font-size: clamp(26px, 4.4vw, 44px); line-height: 1.06; margin: 0 0 16px; }
 h3 { font: 700 19px/1.3 var(--sans); margin: 0 0 6px; letter-spacing: -.01em; }
-mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker) 56%, var(--marker) 94%, transparent 94%); padding: 0 .04em; }
+mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker) 56%, var(--marker) 94%, transparent 94%) no-repeat 0 0 / 100% 100%; padding: 0 .04em; }
 
 /* MARK: przyciski: okrągłe jak w aplikacji, jeden główny (mech) na ekran */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-height: 52px; padding: 0 26px; border-radius: 999px; border: 1px solid transparent;
   font: 650 16.5px/1.2 var(--sans); text-decoration: none; cursor: pointer; text-align: center;
-  -webkit-tap-highlight-color: transparent; transition: background .15s ease, transform .1s ease, border-color .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), transform .4s var(--ease-spring);
 }
-.btn:active { transform: scale(.97); }
-.btn svg { width: 19px; height: 19px; flex: none; }
+/* naciśnięcie szybkie, a powrót z małym sprężystym odbiciem */
+.btn:active { transform: scale(.96); transition-duration: .08s; }
+.btn svg { width: 19px; height: 19px; flex: none; transition: transform .35s var(--ease); }
 .btn-primary { background: var(--moss); color: var(--paper); }
 .btn-primary:hover { background: var(--moss-dark); }
 .btn-secondary { background: var(--mat); color: var(--moss-dark); }
@@ -89,7 +98,12 @@ mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker
 .link {
   font: 600 16px var(--sans); color: var(--moss-dark); background: none; border: 0; padding: 10px 0; cursor: pointer;
   text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px;
+  -webkit-tap-highlight-color: transparent;
 }
+/* podkreślenie linków przygaszone, a pod kursorem nabiera koloru i odsuwa się od tekstu */
+a, .link { transition: color .25s var(--ease), text-decoration-color .25s var(--ease), text-underline-offset .25s var(--ease); }
+.link, .doc p a, .prose a { text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+.link:hover, .doc p a:hover, .prose a:hover { text-decoration-color: currentColor; text-underline-offset: 5px; }
 
 /* MARK: marka jak w aplikacji: ikona z ołówkiem i napis pisany ołówkiem (logo.svg z PencilScript w EduNote/App/Ink.swift) */
 .brand { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); flex: none; }
@@ -100,7 +114,8 @@ mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker
 .bar { position: sticky; top: 0; z-index: 20; padding: 8px var(--gutter) 0; }
 .bar-in {
   max-width: 1200px; margin: 0 auto; height: calc(var(--bar-h) - 8px); display: flex; align-items: center; gap: 20px;
-  padding: 0 8px 0 10px; border-radius: 999px; border: 1px solid transparent; transition: background .2s, border-color .2s, box-shadow .2s;
+  padding: 0 8px 0 10px; border-radius: 999px; border: 1px solid transparent;
+  transition: background-color .4s var(--ease), border-color .4s var(--ease), box-shadow .4s var(--ease);
 }
 .bar.stuck .bar-in, .note-page .bar-in { background: rgba(255, 254, 250, .86); border-color: var(--line); box-shadow: 0 8px 24px -16px rgba(42, 42, 34, .35); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
 .bar-in .btn { margin-left: auto; }
@@ -169,7 +184,7 @@ mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker
   .phases-title { margin-left: calc(25% + 40px); }
   .phases-grid { grid-template-columns: 25% 1fr; }
   .phases-nav { display: flex; flex-direction: column; position: sticky; top: calc(var(--bar-h) + 40px); align-self: start; }
-  .phases-nav a { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--faint); text-decoration: none; font-size: 15.5px; }
+  .phases-nav a { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--faint); text-decoration: none; font-size: 15.5px; transition: color .4s var(--ease), border-color .4s var(--ease); }
   .phases-nav a.on { color: var(--ink); border-bottom-color: var(--ink); }
 }
 
@@ -188,10 +203,16 @@ mark { color: inherit; background: linear-gradient(transparent 56%, var(--marker
 @media (min-width: 1000px) { .faq-wrap { grid-template-columns: 1fr 1.4fr; gap: 64px; } }
 details.faq { border-bottom: 1px solid var(--line); }
 details.faq:first-of-type { border-top: 1px solid var(--line); }
-details.faq summary { cursor: pointer; font-weight: 650; list-style: none; padding: 18px 36px 18px 0; position: relative; }
+details.faq summary { cursor: pointer; font-weight: 650; list-style: none; padding: 18px 36px 18px 0; position: relative; transition: color .25s var(--ease); }
+details.faq summary:hover { color: var(--moss-dark); }
 details.faq summary::-webkit-details-marker { display: none; }
-details.faq summary::after { content: "+"; position: absolute; right: 4px; top: 13px; font-size: 24px; font-weight: 400; color: var(--muted); }
-details.faq[open] summary::after { content: "–"; }
+/* „+” z dwóch kresek: przy otwieraniu pionowa obraca się do poziomej i zostaje „–” (closing: od razu przy zwijaniu) */
+details.faq summary::before, details.faq summary::after {
+  content: ""; position: absolute; right: 5px; top: 31px; width: 14px; height: 2px; margin-top: -1px; border-radius: 1px;
+  background: var(--muted); transition: transform .45s var(--ease);
+}
+details.faq summary::after { transform: rotate(90deg); }
+details.faq[open]:not(.closing) summary::before, details.faq[open]:not(.closing) summary::after { transform: rotate(180deg); }
 details.faq p { margin: 0 0 18px; color: var(--muted); }
 
 /* stopka w kolumnach */
@@ -220,18 +241,27 @@ details.faq p { margin: 0 0 18px; color: var(--muted); }
 /* zakładki Notatka, Fiszki, Quiz: przyklejone pod paskiem, jak przełącznik w aplikacji */
 .tabs { position: sticky; top: var(--bar-h); z-index: 10; display: flex; gap: 6px; margin: 22px calc(-1 * var(--gutter)) 0; padding: 10px var(--gutter); background: var(--page); border-bottom: 1px solid var(--line); }
 .tabs button {
-  display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 16px; border: 0; border-radius: 999px;
-  background: transparent; color: var(--muted); font: 650 15.5px var(--sans); cursor: pointer;
+  position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 16px;
+  border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: 650 15.5px var(--sans); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: color .3s var(--ease), background-color .3s var(--ease), transform .4s var(--ease-spring);
 }
 .tabs button:hover { color: var(--ink); }
+.tabs button:active { transform: scale(.96); transition-duration: .08s; }
 .tabs button[aria-selected="true"] { background: var(--mat); color: var(--moss-dark); }
-.tabs .count { font-size: 12.5px; font-weight: 700; background: rgba(42, 42, 34, .07); border-radius: 999px; padding: 1px 8px; }
+.tabs .count { font-size: 12.5px; font-weight: 700; background: rgba(42, 42, 34, .07); border-radius: 999px; padding: 1px 8px; transition: background-color .3s var(--ease), color .3s var(--ease); }
 .tabs button[aria-selected="true"] .count { background: rgba(78, 95, 34, .14); }
+/* pigułka pod wybraną zakładką (motion.js) przesuwa się do nowej; bez skryptu tło ma sama zakładka */
+.tab-pill {
+  position: absolute; left: 0; top: 0; z-index: 0; border-radius: 999px; background: var(--mat); pointer-events: none; opacity: 0;
+  transition: transform .5s var(--ease), width .5s var(--ease), height .5s var(--ease);
+}
+.tab-pill.on { opacity: 1; }
+.tabs.has-pill button[aria-selected="true"] { background: transparent; }
 #panel-note, #panel-cards, #panel-quiz { padding-top: 22px; scroll-margin-top: calc(var(--bar-h) + 64px); }
 #quiz { scroll-margin-top: calc(var(--bar-h) + 70px); }
 
 .brief { background: var(--brief); border-radius: 16px; padding: 16px 20px; }
-.brief-label { display: inline-block; font-weight: 800; margin: 0 0 4px; background: linear-gradient(transparent 60%, var(--marker) 60%); }
+.brief-label { display: inline-block; font-weight: 800; margin: 0 0 4px; background: linear-gradient(transparent 60%, var(--marker) 60%) no-repeat 0 0 / 100% 100%; }
 .brief p:last-child { margin: 0; font-size: 17.5px; line-height: 1.55; }
 .section h2, #body > section > h2 { font-size: 23px; margin: 34px 0 10px; }
 .section p { margin: 0 0 12px; }
@@ -249,11 +279,17 @@ ul.plain { margin: 0; padding-left: 20px; }
 ul.plain li { margin-bottom: 6px; }
 .questions { border-top: 1px solid var(--line); }
 details.q { border-bottom: 1px solid var(--line); padding: 14px 0; }
-details.q summary { cursor: pointer; font-weight: 650; list-style: none; }
+details.q summary { cursor: pointer; font-weight: 650; list-style: none; position: relative; padding-left: 24px; transition: color .25s var(--ease); }
+details.q summary:hover { color: var(--moss-dark); }
 details.q summary::-webkit-details-marker { display: none; }
-details.q summary::before { content: "+"; display: inline-block; width: 22px; color: var(--muted); }
-details.q[open] summary::before { content: "–"; }
-details.q p { margin: 6px 0 0 22px; color: var(--muted); }
+/* ten sam „+”, który obraca się w „–”, co w pytaniach na stronie głównej */
+details.q summary::before, details.q summary::after {
+  content: ""; position: absolute; left: 1px; top: .82em; width: 11px; height: 2px; margin-top: -1px; border-radius: 1px;
+  background: var(--muted); transition: transform .45s var(--ease);
+}
+details.q summary::after { transform: rotate(90deg); }
+details.q[open]:not(.closing) summary::before, details.q[open]:not(.closing) summary::after { transform: rotate(180deg); }
+details.q p { margin: 6px 0 0 24px; color: var(--muted); }
 
 /* quiz */
 .quiz-sub { margin: -6px 0 16px; font-size: 15px; }
@@ -265,8 +301,11 @@ details.q p { margin: 6px 0 0 22px; color: var(--muted); }
 .quiz-option {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; min-height: 52px;
   padding: 12px 18px; border-radius: 16px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease), transform .4s var(--ease-spring);
 }
 .quiz-option:hover:not(:disabled) { border-color: var(--faint); }
+.quiz-option:active:not(:disabled) { transform: scale(.985); transition-duration: .08s; }
 .quiz-option:disabled { cursor: default; }
 .quiz-option:disabled:not(.right):not(.wrong) { color: var(--muted); }
 .quiz-option.right { background: var(--mat); border-color: var(--moss); }
@@ -298,9 +337,15 @@ details.q p { margin: 6px 0 0 22px; color: var(--muted); }
   flex: 1; min-height: 280px; width: 100%; display: flex; flex-direction: column; justify-content: center; gap: 16px;
   text-align: center; cursor: pointer; font: inherit; color: inherit; padding: 28px 22px;
   background: var(--paper); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow);
+  -webkit-tap-highlight-color: transparent; transition: border-color .3s var(--ease), transform .4s var(--ease-spring);
 }
+@media (hover: hover) { .flash:hover { border-color: #D3CFC1; } }
+.flash:active { transform: scale(.99); transition-duration: .1s; }
 .flash .front { font: 800 24px/1.25 var(--display); font-stretch: 125%; letter-spacing: -.01em; }
-.flash .back { font-size: 18px; line-height: 1.5; color: var(--muted); border-top: 1px dashed var(--faint); padding-top: 16px; }
+.flash .back { font-size: 18px; line-height: 1.5; color: var(--muted); }
+/* przerywana linia nad odpowiedzią: rysuje się od środka (przy długich zadaniach od lewej), gdy odpowiedź się odkrywa */
+.flash .back::before { content: ""; display: block; border-top: 1px dashed var(--faint); margin: 0 0 16px; transform-origin: 50% 0; }
+.motion .flash .back::before { animation: draw .7s var(--ease) backwards; }
 .flash .hint { font-size: 14px; color: var(--faint); }
 .flash .again-tag { align-self: center; font-size: 12.5px; font-weight: 700; color: #6E5110; background: var(--mustard-soft); border-radius: 999px; padding: 3px 11px; }
 .grades { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -325,7 +370,8 @@ details.q p { margin: 6px 0 0 22px; color: var(--muted); }
 .compact .progress { height: 4px; }
 .compact .flash { min-height: 0; padding: 18px 14px; border-radius: 20px; }
 .compact .flash .front { font-size: 18px; }
-.compact .flash .back { font-size: 15px; padding-top: 12px; }
+.compact .flash .back { font-size: 15px; }
+.compact .flash .back::before { margin-bottom: 12px; }
 .compact .btn, .compact .grades .btn { min-height: 44px; font-size: 14.5px; padding: 0 10px; }
 .compact .done h2 { font-size: 21px; }
 .compact .done .score { font-size: 15px; }
@@ -427,7 +473,10 @@ ol.steps .c { color: var(--muted); font-size: 15px; }
   .brand .wordmark { height: 30px; }
   .brand-icon { width: 30px; height: 30px; }
 }
-@media (prefers-reduced-motion: reduce) { *, *::before { transition: none !important; } }
+/* kto wyłączył animacje w systemie, dostaje wszystko od razu (motion.js też wtedy nic nie animuje) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
 .note-page .bar { background: var(--page); }
 .exam-hint { font-size: 14px; color: var(--muted); margin: 10px 0 0; }
 .note-foot .link { padding: 0; font: 500 14px var(--sans); color: var(--muted); text-decoration-thickness: 1px; }
@@ -460,6 +509,7 @@ ol.steps .c { color: var(--muted); font-size: 15px; }
 .flash.long { text-align: left; justify-content: flex-start; }
 .flash.long .front { font: 650 18px/1.45 var(--sans); letter-spacing: 0; }
 .flash.long .back { font-size: 16.5px; }
+.flash.long .back::before { transform-origin: 0 0; }
 .flash.long .again-tag { align-self: flex-start; }
 .study-box:not(.compact) > .grades, .study-box:not(.compact) > .btn-block {
   position: sticky; bottom: 0; z-index: 2; padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--page);
@@ -543,10 +593,13 @@ details.faq .waitlist { margin: 0 0 18px; }
 .iphone-app { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 2cqw 4cqw 8cqw; color: var(--ink); }
 .iphone-app #demo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 /* zwinięte pojęcia na stronie notatki: nagłówek jak h2 działu, z liczbą definicji i „Pokaż” */
-details.fold > summary { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 14px; margin: 34px 0 10px; cursor: pointer; list-style: none; }
+/* odstęp nad zwiniętym działem stoi na <details>, a nie na nagłówku, żeby rozwijanie (motion.js) liczyło wysokość bez skoku */
+details.fold { margin-top: 34px; }
+details.fold > summary { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 14px; margin: 0; padding-bottom: 10px; cursor: pointer; list-style: none; }
 details.fold > summary::-webkit-details-marker { display: none; }
-details.fold > summary::after { content: "Pokaż"; grid-column: 2; grid-row: 1; font-size: 15px; font-weight: 650; color: var(--moss-dark); text-decoration: underline; text-underline-offset: 4px; }
-details.fold[open] > summary::after { content: "Zwiń"; }
+details.fold > summary::after { content: "Pokaż"; grid-column: 2; grid-row: 1; font-size: 15px; font-weight: 650; color: var(--moss-dark); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+details.fold > summary:hover::after { text-decoration-color: currentColor; }
+details.fold[open]:not(.closing) > summary::after { content: "Zwiń"; }
 .fold-title { font: 800 23px/1.2 var(--display); font-stretch: 125%; letter-spacing: -.02em; color: var(--ink); }
 .fold-meta { grid-column: 1 / -1; font-size: 14.5px; color: var(--muted); }
 /* gotowa prośba do prowadzącego (share.js) */
@@ -554,3 +607,213 @@ details.fold[open] > summary::after { content: "Zwiń"; }
 .today-more .link { font-size: 15.5px; padding: 6px 0; }
 details.faq .faq-more { margin: -8px 0 16px; }
 details.faq .faq-more .link { font-size: 15.5px; padding: 4px 0; }
+
+/* Link do przedmiotu (/p/#KOD): powrót z notatki do listy, sąsiednie zajęcia, lista zajęć z kartą „Ucz się z całości”,
+   wybór zajęć do nauki i PDF, tablice z zajęć z powiększaniem na cały ekran, wydruk wybranych zajęć */
+.back-link { display: inline-block; font-size: 15px; font-weight: 650; color: var(--moss-dark); text-decoration: none; padding: 8px 0; margin: 2px 0; }
+.back-link:hover { text-decoration: underline; }
+.lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 40px 0 0; }
+.lesson-nav a {
+  display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+  text-decoration: none; color: var(--ink); -webkit-tap-highlight-color: transparent;
+  transition: border-color .3s var(--ease), box-shadow .4s var(--ease), transform .4s var(--ease);
+}
+@media (hover: hover) { .lesson-nav a:hover { border-color: #D3CFC1; box-shadow: var(--lift); transform: translateY(-2px); } }
+.lesson-nav a:active { transform: scale(.98); transition-duration: .08s; }
+.lesson-nav .lesson-nav-next { text-align: right; }
+.lesson-nav-label { font-size: 14px; font-weight: 700; color: var(--moss-dark); }
+.lesson-nav-topic { font-size: 15px; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+.course-study { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 22px 20px; margin: 22px 0 8px; display: flex; flex-direction: column; gap: 10px; }
+.course-study h2 { font-size: 24px; margin: 0; }
+.course-study .eyebrow { margin: 0; }
+.course-study > p { margin: 0; }
+.scope-line { color: var(--muted); font-size: 15.5px; }
+.scope-line .link { font-size: 15.5px; padding: 6px 0; }
+.course-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.course-actions .btn { min-height: 52px; padding: 0 12px; }
+.course-actions .btn:only-child { grid-column: 1 / -1; }
+.course-links { display: flex; flex-wrap: wrap; gap: 0 22px; }
+.course-links .link { font-size: 15px; padding: 8px 0; }
+.picker { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 4px 0; max-height: 360px; overflow-y: auto; }
+.pick { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 15.5px; cursor: pointer; }
+.pick input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--moss); }
+.pick span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-head { font-weight: 700; margin-top: 4px; }
+.pick:not(.pick-head) { padding-left: 30px; }
+.course-scope { margin: 22px 0 10px; }
+.course-back { margin: 18px 0 0; }
+.course-back .link { font-size: 15.5px; padding: 8px 0; }
+.course-empty { padding: 30px 0; }
+.lessons-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 14px; margin: 32px 0 6px; }
+.lessons-head h2 { font-size: 23px; margin: 0; }
+/* zajęcia na liście: linie między nimi stoją na <li>, a sam link ma zaokrąglone podświetlenie i strzałkę, która
+   pod kursorem odsuwa się w prawo */
+.lessons { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.lessons > li { border-bottom: 1px solid var(--line); }
+.lesson {
+  position: relative; display: flex; flex-direction: column; gap: 3px; margin: 4px -10px; padding: 10px 42px 10px 10px; border-radius: 14px;
+  text-decoration: none; color: var(--ink); -webkit-tap-highlight-color: transparent; transition: background-color .3s var(--ease);
+}
+.lesson::after {
+  content: ""; position: absolute; right: 16px; top: 50%; width: 8px; height: 8px; margin-top: -5px;
+  border-top: 2px solid var(--faint); border-right: 2px solid var(--faint); transform: rotate(45deg);
+  transition: transform .4s var(--ease), border-color .3s var(--ease);
+}
+.lesson:active { background: rgba(42, 42, 34, .05); transition-duration: .05s; }
+@media (hover: hover) {
+  .lesson:hover { background: rgba(42, 42, 34, .035); }
+  .lesson:hover .lesson-topic { color: var(--moss-dark); }
+  .lesson:hover::after { transform: translateX(4px) rotate(45deg); border-color: var(--moss-dark); }
+}
+.lesson-meta { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.lesson-topic { font-size: 18px; font-weight: 650; line-height: 1.35; transition: color .3s var(--ease); }
+/* pierwsze zdanie z „W skrócie”: najwyżej dwie linijki */
+.lesson-sum { font-size: 15.5px; line-height: 1.45; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lesson-facts { font-size: 13.5px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.new-chip { font-size: 12px; font-weight: 800; color: #6E5110; background: var(--mustard-soft); border-radius: 6px; padding: 1px 7px; }
+
+figure.board { margin: 26px 0; }
+.board-open { display: block; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: #F7F5EE; cursor: zoom-in; transition: border-color .3s var(--ease), box-shadow .4s var(--ease); }
+.board-open img { display: block; width: 100%; height: auto; transition: opacity .6s var(--ease), transform .7s var(--ease); }
+@media (hover: hover) {
+  .board-open:hover { border-color: #D3CFC1; box-shadow: var(--lift); }
+  .board-open:hover img { transform: scale(1.012); }
+}
+.board figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; margin-top: 8px; font-size: 14px; color: var(--muted); }
+.board-title { font-weight: 650; color: var(--ink); }
+/* scrollbar-gutter: strona pod powiększeniem nie przesuwa się, gdy znika pasek przewijania (Windows) */
+html.zoomed { overflow: hidden; scrollbar-gutter: stable; }
+.zoom { position: fixed; inset: 0; z-index: 60; overflow: auto; -webkit-overflow-scrolling: touch; }
+/* tło powiększenia osobną warstwą: rozjaśnia się i gaśnie samą przezroczystością (motion.js) */
+.zoom-bg { position: fixed; inset: 0; z-index: -1; background: var(--page); }
+.zoom-in { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 64px 12px 24px; }
+.zoom img { display: block; max-width: 100%; height: auto; cursor: zoom-in; }
+/* w pełnej rozdzielczości ramka ma szerokość całej tablicy: pomniejszony na czas animacji obrazek nie zmniejsza
+   obszaru przewijania, więc stuknięte miejsce zostaje pod palcem co do piksela */
+.zoom.full .zoom-in { align-items: flex-start; justify-content: flex-start; width: max-content; min-width: 100%; }
+.zoom.full img { max-width: none; cursor: zoom-out; }
+.zoom-close { position: fixed; top: 12px; right: 12px; z-index: 61; box-shadow: var(--shadow); }
+
+.print-area { display: none; }
+@media print {
+  html.print-all #course, html.print-all #loading, html.print-all #missing { display: none !important; }
+  html.print-all .print-area { display: block; }
+  .print-title { font-size: 26pt; margin: 0 0 4pt; }
+  .print-sub { color: var(--muted); font-size: 10pt; margin: 0 0 16pt; }
+  .print-note { break-before: page; }
+  .print-note:first-of-type { break-before: auto; }
+  .print-topic { font-size: 18pt; margin: 2pt 0 10pt; }
+  .board-hint, .lesson-nav, .back-link, .zoom { display: none !important; }
+  figure.board { break-inside: avoid; }
+}
+.zoom-hint { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); margin: 0; z-index: 61; font-size: 13.5px; color: var(--muted); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; white-space: nowrap; pointer-events: none; }
+/* na telefonie przyciski nauki jeden pod drugim: „Fiszki z całości” i „Quiz przed kolokwium” w jednej linii każdy */
+@media (max-width: 520px) { .course-actions { grid-template-columns: 1fr; } }
+/* tablica, zanim się wczyta: napis w zarezerwowanej ramce; wczytany obrazek (z własnym tłem) go zakrywa */
+.board-open { position: relative; }
+.board-open::before { content: "Wczytuję tablicę…"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12px; text-align: center; font-size: 14.5px; color: var(--faint); }
+.board-open img { position: relative; }
+figure.board.failed .board-open::before { content: "Nie udało się wczytać tablicy. Odśwież stronę."; color: var(--muted); }
+figure.board.failed img { visibility: hidden; }
+@media print { .board-open::before { display: none; } }
+
+/* MARK: ruch. Krzywe są w :root (--ease…), a motion.js robi to, czego nie da się samym CSS (pigułka zakładek,
+   rozwijanie, wejścia po kolei, karta fiszki, tablica z miniatury). Klasę motion ustawia skrypt w <head>, gdy system
+   nie prosi o mniej ruchu: pod nią są animacje przy wczytaniu strony, więc przy wyłączonych animacjach nic nie czeka. */
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes fade-out { to { opacity: 0; } }
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 18px, 0); } }
+@keyframes rise-far { from { opacity: 0; transform: translate3d(0, 44px, 0); } }
+@keyframes tile-in { from { opacity: 0; transform: scale(.94); } }
+@keyframes marker { from { background-size: 0% 100%; } }
+@keyframes draw { from { transform: scaleX(0); } }
+@keyframes mark-in { from { opacity: 0; transform: scale(.3) rotate(-25deg); } }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@keyframes sheet-up { from { transform: translate3d(0, 105%, 0); } }
+@keyframes sheet-down { to { transform: translate3d(0, 105%, 0); } }
+@keyframes sheet-pop { from { opacity: 0; transform: translateY(calc(-50% + 16px)) scale(.97); } }
+@keyframes sheet-unpop { to { opacity: 0; transform: translateY(calc(-50% + 10px)) scale(.98); } }
+@keyframes toast-in { from { opacity: 0; transform: translate3d(-50%, -16px, 0) scale(.96); } }
+@keyframes toast-out { to { opacity: 0; transform: translate3d(-50%, -10px, 0) scale(.98); } }
+
+/* strona główna: pierwszy ekran wchodzi po kolei, kafelki i zrzuty wyrastają, a zakreślacz przeciąga się po „całego roku” */
+html.smooth { scroll-behavior: smooth; }
+.motion .hero h1, .motion .hero-sub, .motion .hero .btn-lg, .motion .hero .platform { animation: rise .9s var(--ease) backwards; }
+.motion .hero-sub { animation-delay: .08s; }
+.motion .hero .btn-lg { animation-delay: .16s; }
+.motion .hero .platform { animation-delay: .24s; }
+.motion .hero mark { animation: marker 1.1s var(--ease) .55s backwards; }
+.motion .hero-art .tile { animation: tile-in 1.2s var(--ease) .12s backwards; }
+.motion .hero-art .tile-mustard { animation-delay: .24s; }
+.motion .hero-art .shot-mac { animation: rise-far 1.2s var(--ease) .22s backwards; }
+.motion .hero-art .iphone { animation: rise-far 1.3s var(--ease) .38s backwards; }
+/* strzałka „Pobierz” lekko w dół, ikona „Wyślij na grupę” lekko w górę */
+#get:hover svg { transform: translateY(3px); }
+#share-top:hover svg { transform: translateY(-2px); }
+
+/* sekcje pod pierwszym ekranem pojawiają się przy przewijaniu (motion.js dodaje reveal tylko temu, czego jeszcze nie
+   widać), a zdjęcia wczytywane później wyłaniają się w swojej ramce */
+.motion .reveal { opacity: 0; transform: translate3d(0, 28px, 0); }
+.motion .reveal.in { opacity: 1; transform: none; transition: opacity 1s var(--ease), transform 1s var(--ease); }
+.motion img.img-wait { transition: opacity .7s var(--ease); }
+.motion img.img-wait:not(.img-in) { opacity: 0; }
+
+/* notatka: zakreślacz pod „W skrócie” przy pierwszym wejściu (klasa entering na chwilę po wczytaniu) */
+.motion #note.entering .brief-label { animation: marker .9s var(--ease) .45s backwards; }
+
+/* zanim notatka się wczyta: szkic strony z połyskiem; pojawia się dopiero po chwili, więc przy szybkim wczytaniu nie mignie */
+.skeleton { padding: 18px 0 0; animation: fade-in .5s ease .35s backwards; }
+.sk {
+  display: block; height: 14px; margin: 0 0 12px; border-radius: 8px;
+  background: linear-gradient(90deg, #EFECE3 25%, #F8F6F0 50%, #EFECE3 75%) 0 0 / 300% 100%; animation: shimmer 1.6s ease-in-out infinite;
+}
+.sk-sub { width: 38%; height: 13px; margin-top: 8px; }
+.sk-h1 { width: 88%; height: 34px; border-radius: 10px; margin-top: 16px; }
+.sk-h1.short { width: 56%; }
+.sk-tabs { width: 62%; height: 42px; border-radius: 999px; margin: 30px 0 26px; }
+.sk-box { height: 132px; border-radius: 16px; margin-bottom: 28px; }
+.sk-line.short { width: 70%; }
+
+/* tablica, zanim się wczyta: połysk przesuwa się po ramce, a wczytany obrazek się z niej wyłania */
+.motion figure.board:not(.ready):not(.failed) .board-open img { opacity: 0; }
+.motion figure.board:not(.ready):not(.failed) .board-open::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent 35%, rgba(255, 255, 255, .75) 50%, transparent 65%) 0 0 / 250% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* quiz i fiszki: znak ✓/✗ wskakuje z małym odbiciem, dopisek pod licznikiem wyłania się; odlatująca karta
+   (motion.js: flying) nie powtarza swoich animacji */
+.motion .qmark { animation: mark-in .5s var(--ease-spring) backwards; }
+.motion .back-note { animation: fade-in .45s var(--ease) backwards; }
+.flying, .flying *, .flying *::before, .flying *::after { animation: none !important; }
+
+/* okienko „Wyślij na grupę”: na telefonie wysuwa się od dołu, na komputerze wyrasta na środku; znika tak samo */
+.sheet-back { animation: fade-in .3s var(--ease) backwards; }
+.sheet { animation: sheet-up .55s var(--ease) backwards; }
+.sheet-back.leaving { animation: fade-out .28s var(--ease-exit) forwards; pointer-events: none; }
+.sheet.leaving { animation: sheet-down .3s var(--ease-exit) forwards; pointer-events: none; }
+@media (min-width: 640px) {
+  .sheet { animation-name: sheet-pop; animation-duration: .45s; }
+  .sheet.leaving { animation-name: sheet-unpop; animation-duration: .22s; }
+}
+.toast { animation: toast-in .5s var(--ease) backwards; }
+.toast.leaving { animation: toast-out .32s var(--ease-exit) forwards; }
+
+/* zapis na inne urządzenia: ptaszek wskakuje, napis o zapisie się wyłania */
+.waitlist-opts .btn[aria-pressed="true"]::before { animation: mark-in .45s var(--ease-spring) backwards; }
+.motion .waitlist-status:not(:empty) { animation: fade-in .45s var(--ease) backwards; }
+
+/* przejście między stronami (lista zajęć → notatka → z powrotem): stara strona gaśnie, nowa się rozjaśnia, zamiast
+   białego mignięcia (przeglądarki z View Transitions; pozostałe przechodzą zwyczajnie) */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+}
+::view-transition-old(root) { animation: .22s var(--ease-exit) both fade-out; }
+::view-transition-new(root) { animation: .42s var(--ease) both fade-in; }
+
+@media print {
+  .reveal, img.img-wait, figure.board .board-open img { opacity: 1 !important; transform: none !important; }
+  .board-open::after, .skeleton { display: none !important; }
+}

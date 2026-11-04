@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="pl">
+<html lang="pl" class="smooth">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EduNote · notatki z wykładu dla całego roku</title>
-<meta name="description" content="Nagrywasz wykład w EduNote na Macu i dostajesz notatki, wzory i fiszki. Wysyłasz link, a cały rok uczy się z nich na telefonie, nawet bez Maca.">
+<meta name="description" content="EduNote słucha wykładu na Macu i od razu robi notatki, wzory i fiszki. Wysyłasz link, a cały rok uczy się z nich na telefonie, nawet bez Maca.">
 <meta name="theme-color" content="#FAF9F5">
 <meta property="og:title" content="EduNote · notatki z wykładu dla całego roku">
-<meta property="og:description" content="Nagrywasz wykład na Macu, dostajesz notatki, wzory i fiszki, a cały rok uczy się z nich na telefonie. Od studenta dla studentów.">
+<meta property="og:description" content="Ty słuchasz, EduNote notuje: notatki, wzory i fiszki, a cały rok uczy się z nich na telefonie. Od studenta dla studentów.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://edunote.rozycki.pro/">
 <meta property="og:image" content="https://edunote.rozycki.pro/og.png">
@@ -17,7 +17,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=0d4386794f">
+<link rel="stylesheet" href="style.css?v=3b70ceaa97">
+<!-- ruch na stronie (style.css, motion.js): włączony, chyba że system prosi o mniej ruchu -->
+<script>if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) document.documentElement.classList.add("motion");</script>
 </head>
 <body class="home">
 <!-- ikonki paska stanu iPhone'a (zasięg, Wi-Fi, bateria) dla ramek telefonów -->
@@ -44,7 +46,7 @@
   <section class="hero frame">
     <div>
       <h1>Notatki z wykładu dla <mark>całego roku</mark></h1>
-      <p class="hero-sub">Nagrywasz wykład na Macu.<br>Cały rok dostaje notatki i fiszki.</p>
+      <p class="hero-sub">Ty słuchasz, EduNote notuje.<br>Cały rok dostaje notatki i fiszki.</p>
       <a class="btn btn-primary btn-lg" id="get" href="https://apps.apple.com/app/id6824044215?ct=site">Pobierz za darmo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v13M6.5 11.5L12 17l5.5-5.5"/></svg></a>
       <p class="platform" id="platform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg><span id="platform-text">Na Maca z macOS 15 · notatki otwierają się na każdym telefonie</span></p>
     </div>
@@ -63,7 +65,7 @@
       <ol>
         <li>Uczyć się z linku od kogoś z roku: notatka, fiszki i quiz w przeglądarce, bez konta.</li>
         <li>Przenieść fiszki do Quizleta albo Anki i wrócić do nich przed kolokwium.</li>
-        <li>Poprosić osobę z Makiem z roku, żeby za zgodą prowadzącego nagrywała wykłady.</li>
+        <li>Poprosić osobę z Makiem z roku, żeby za zgodą prowadzącego notowała wykłady w EduNote.</li>
       </ol>
       <div class="tile-row">
         <a class="btn btn-primary" href="n/#przyklad">Zobacz przykładową notatkę</a>
@@ -74,17 +76,17 @@
     </div>
   </section>
 
-  <!-- zalety: trzy konkrety z cienkimi liniami i zrzut z nagrywania -->
+  <!-- zalety: trzy konkrety z cienkimi liniami i zrzut z notowania -->
   <section class="feature frame" id="jak">
     <div>
       <h2>Ty słuchasz wykładu, notatki robią się same</h2>
       <ul class="points">
-        <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="4" width="8" height="15" rx="4"/><path d="M8 15a8 8 0 0 0 16 0M16 23v5M11 28h10"/></svg><span>Nagrywa z mikrofonu Maca, za zgodą prowadzącego, a <b>nagranie zostaje na komputerze</b></span></li>
+        <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="4" width="8" height="15" rx="4"/><path d="M8 15a8 8 0 0 0 16 0M16 23v5M11 28h10"/></svg><span>Słucha przez mikrofon Maca, za zgodą prowadzącego, a <b>dźwięk znika po kilku minutach</b></span></li>
         <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16h2M9 11v10M13 7v18M17 12v8M21 9v14M25 14v4"/></svg><span><b>Mowę rozpoznaje sam Mac</b>, po polsku</span></li>
         <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="17" height="15" rx="2.5"/><path d="M10 6h15a2.5 2.5 0 0 1 2.5 2.5V21"/><path d="M9.5 16h8M9.5 20h5"/></svg><span>Streszczenie, pojęcia, wzory i <b>fiszki od razu po zajęciach</b></span></li>
       </ul>
     </div>
-    <img class="shot" src="img/nagrywanie.jpg" width="1400" height="846" loading="lazy" alt="EduNote nagrywa wykład z biologii i na bieżąco pisze notatkę: streszczenie, działy i pojęcia">
+    <img class="shot" src="img/nagrywanie.jpg" width="1400" height="846" loading="lazy" alt="EduNote słucha wykładu z biologii i na bieżąco pisze notatkę: streszczenie, działy i pojęcia">
   </section>
 
   <!-- ciemny pas: jeden link dla całego roku i prawdziwa strona notatki na telefonach -->
@@ -142,7 +144,7 @@
       <ol class="price-steps">
         <li><b>Teraz</b><span>Wszystko za darmo, bez karty. To wczesny dostęp, w którym zbieram opinie studentów.</span></li>
         <li><b>Po wczesnym dostępie</b><span>Jeszcze 14 dni pełnej wersji.</span></li>
-        <li><b>Potem</b><span>Darmowy plan: nagrywanie, transkrypcja, plan zajęć i fiszki bez limitu oraz 3 notatki AI w tygodniu. Bez limitu: EduNote Pro za 24,99 zł miesięcznie w App Store.</span></li>
+        <li><b>Potem</b><span>Darmowy plan: notowanie zajęć, plan zajęć i fiszki bez limitu oraz 3 notatki AI w tygodniu. Bez limitu: EduNote Pro za 24,99 zł miesięcznie w App Store.</span></li>
       </ol>
       <div class="tile-row" id="price-row">
         <a class="btn btn-light btn-lg" id="price-get" href="https://apps.apple.com/app/id6824044215?ct=site">Pobierz za darmo</a>
@@ -154,10 +156,10 @@
   <section class="faq-wrap frame" id="pytania">
     <h2>Pytania</h2>
     <div>
-      <details class="faq"><summary>Czy mogę nagrywać wykład?</summary><p>Tak, za zgodą prowadzącego i zgodnie z zasadami uczelni. Nagranie zostaje na Twoim Macu, a do AI trafia sam tekst.</p><p class="faq-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p></details>
+      <details class="faq"><summary>Czy mogę nagrywać wykład?</summary><p>Tak, za zgodą prowadzącego i zgodnie z zasadami uczelni. Dźwięk jest tylko na Twoim Macu i znika po kilku minutach, a do AI trafia sam tekst.</p><p class="faq-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p></details>
       <details class="faq"><summary>Czy na studiach wolno uczyć się z AI?</summary><p>Zwykle tak, ale o zakresie na przedmiocie decyduje prowadzący. Na Uniwersytecie Łódzkim <a href="https://www.wz.uni.lodz.pl/fileadmin/Wydzialy/Wydzia%C5%82_Zarz%C4%85dzania/Strefa_Pracownika/GenAI/zarz._nr_73_z_16.02.2026_r.pdf" rel="noopener">zarządzenie rektora nr 73/2026</a> (PDF) wprost dopuszcza AI do streszczeń i nauki do egzaminów; zasady dla przedmiotu są w sylabusie.</p></details>
       <details class="faq"><summary>Nie mam Maca. Co mogę zrobić?</summary><p>Uczyć się z notatek, które wyśle Ci ktoś z roku: notatka, fiszki i quiz działają w każdej przeglądarce. Wystarczy jedna osoba z Makiem na roku. Jeśli chcesz EduNote na Windowsa, Androida albo iPhone'a, zapisz się tutaj:</p><div id="waitlist-faq"></div></details>
-      <details class="faq"><summary>Kto płaci, gdy jedna osoba nagrywa dla całego roku?</summary><p>Osoby, które dostają link, nigdy nie płacą. Teraz nie płaci też osoba nagrywająca, bo aplikacja jest za darmo. Po wczesnym dostępie darmowy plan daje 3 notatki AI w tygodniu, więc przy nagrywaniu wszystkich wykładów zwykle potrzebny będzie EduNote Pro (24,99 zł miesięcznie).</p></details>
+      <details class="faq"><summary>Kto płaci, gdy jedna osoba notuje dla całego roku?</summary><p>Osoby, które dostają link, nigdy nie płacą. Teraz nie płaci też osoba notująca, bo aplikacja jest za darmo. Po wczesnym dostępie darmowy plan daje 3 notatki AI w tygodniu, więc przy notowaniu wszystkich wykładów zwykle potrzebny będzie EduNote Pro (24,99 zł miesięcznie).</p></details>
       <details class="faq"><summary>Kto pisze notatki i co z moimi danymi?</summary><p>Notatki pisze model Claude firmy Anthropic (USA). Do AI trafia sam tekst zajęć, bez nagrania, przez serwer EduNote w UE (Frankfurt). Szczegóły są w <a href="prywatnosc/">polityce prywatności</a>.</p></details>
       <details class="faq"><summary>Czy poradzi sobie w dużej sali?</summary><p>Tak, jeśli Mac dobrze słyszy prowadzącego, więc lepiej usiąść bliżej i nie zasłaniać mikrofonu. Przed nauką warto zerknąć, czy liczby i nazwy własne się zgadzają.</p></details>
       <details class="faq"><summary>Co widzą osoby, którym wyślę link?</summary><p>Notatkę, pojęcia, fiszki i quiz. Nigdy nagranie ani transkrypcję, a nazwisko prowadzącego z planu zajęć EduNote zamienia na inicjały. Link działa do końca sesji poprawkowej: notatki z semestru zimowego do 15 marca, z letniego do 30 września.</p></details>
@@ -180,10 +182,11 @@
     <p class="foot-copy">© 2026 Marcin Różycki</p>
   </div>
 </footer>
-<script src="platform.js?v=0d4386794f"></script>
-<script src="study.js?v=0d4386794f"></script>
-<script src="share.js?v=0d4386794f"></script>
-<script src="waitlist.js?v=0d4386794f"></script>
+<script src="motion.js?v=3b70ceaa97"></script>
+<script src="platform.js?v=3b70ceaa97"></script>
+<script src="study.js?v=3b70ceaa97"></script>
+<script src="share.js?v=3b70ceaa97"></script>
+<script src="waitlist.js?v=3b70ceaa97"></script>
 <script>
 // Strona główna: pasek po przewinięciu, fiszki w telefonie, kroki z boku i przyciski zależne od urządzenia
 (function () {
@@ -238,7 +241,7 @@
       eduShare(eduAsk.mac, "https://edunote.rozycki.pro/n/#przyklad", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
     };
     document.getElementById("no-mac").classList.remove("hidden");
-    // bez Maca od razu po „co możesz zrobić dziś” nauka z telefonu, a dopiero potem nagrywanie na Macu
+    // bez Maca od razu po „co możesz zrobić dziś” nauka z telefonu, a dopiero potem notowanie na Macu
     var jak = document.getElementById("jak");
     jak.parentNode.insertBefore(document.getElementById("rok"), jak);
     eduWaitlist(document.getElementById("waitlist-home"), { privacy: "prywatnosc/" });
@@ -247,7 +250,7 @@
     cta.textContent = "Przykład";
     cta.href = "n/#przyklad";
     // bez Maca hasło mówi, co ma z tego ta osoba: link od roku i nauka z telefonu
-    document.querySelector(".hero-sub").innerHTML = "Ktoś z roku nagrywa wykład na Macu.<br>Ty uczysz się z telefonu, bez instalowania.";
+    document.querySelector(".hero-sub").innerHTML = "Ktoś z roku notuje wykład w EduNote.<br>Ty uczysz się z telefonu, bez instalowania.";
     var get = document.getElementById("get");
     get.textContent = "Zobacz przykładową notatkę";
     get.href = "n/#przyklad";
@@ -271,6 +274,14 @@
     wait.textContent = "Chcę na Androida lub Windowsa";
     row.appendChild(send);
     row.appendChild(wait);
+  }
+
+  // Ruch (motion.js): sekcje pod pierwszym ekranem pojawiają się przy przewijaniu, a zdjęcia wczytywane później
+  // wyłaniają się w swojej ramce. Na końcu, bo bez Maca kolejność sekcji jest inna.
+  if (window.eduMotion) {
+    eduMotion.reveal(document.querySelectorAll(".today-in, .feature h2, .points li, .feature > .shot, .band .eyebrow, .band h2, "
+      + ".band-lead, .phones figure, .band .btn-light, .phases-title, .phase, .price-tile, .faq-wrap > h2, details.faq, .foot-grid > div, .foot-copy"));
+    eduMotion.fadeImages(document.querySelectorAll("img[loading=lazy]"));
   }
 })();
 </script>

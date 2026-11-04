@@ -19,7 +19,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="stylesheet" href="../style.css?v=0d4386794f">
+<link rel="stylesheet" href="../style.css?v=3b70ceaa97">
+<!-- ruch na stronie (style.css, motion.js): włączony, chyba że system prosi o mniej ruchu -->
+<script>if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) document.documentElement.classList.add("motion");</script>
 </head>
 <body class="note-page">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -35,7 +37,8 @@
 </header>
 
 <main class="doc">
-  <div id="loading" class="center muted" style="padding:60px 0">Wczytuję notatkę…</div>
+  <!-- szkic notatki z połyskiem, zanim się wczyta (style.css: pojawia się dopiero po chwili, żeby nie mignąć) -->
+  <div id="loading" class="skeleton" aria-busy="true"><span class="sr">Wczytuję notatkę…</span><span class="sk sk-sub"></span><span class="sk sk-h1"></span><span class="sk sk-h1 short"></span><span class="sk sk-tabs"></span><span class="sk sk-box"></span><span class="sk sk-line"></span><span class="sk sk-line"></span><span class="sk sk-line short"></span></div>
 
   <div id="missing" class="hidden center" style="padding:40px 0">
     <h1>Tej notatki już nie ma</h1>
@@ -44,7 +47,9 @@
   </div>
 
   <article id="note" class="hidden">
-    <p class="sample-note hidden" id="sample">Przykładowa notatka z AI, nie z Twoich zajęć. EduNote robi takie notatki z nagrania wykładu na Macu, a fiszki i quiz działają tutaj, w przeglądarce, bez logowania.</p>
+    <p class="sample-note hidden" id="sample">Przykładowa notatka z AI, nie z Twoich zajęć. EduNote słucha wykładu na Macu i od razu robi z niego takie notatki, a fiszki i quiz działają tutaj, w przeglądarce, bez logowania.</p>
+    <!-- notatka z linku do przedmiotu: powrót do listy wszystkich zajęć -->
+    <a class="back-link hidden" id="back" href="../"></a>
     <!-- nagłówek notatki jak w aplikacji: przedmiot z kropką i data, temat, oznaczenie AI -->
     <p class="subject" id="subject"></p>
     <h1 id="topic"></h1>
@@ -82,10 +87,11 @@
     <a href="../regulamin/">Regulamin</a>
   </div>
 </footer>
-<script src="../platform.js?v=0d4386794f"></script>
-<script src="../study.js?v=0d4386794f"></script>
-<script src="../share.js?v=0d4386794f"></script>
-<script src="../waitlist.js?v=0d4386794f"></script>
-<script src="../note.js?v=0d4386794f"></script>
+<script src="../motion.js?v=3b70ceaa97"></script>
+<script src="../platform.js?v=3b70ceaa97"></script>
+<script src="../study.js?v=3b70ceaa97"></script>
+<script src="../share.js?v=3b70ceaa97"></script>
+<script src="../waitlist.js?v=3b70ceaa97"></script>
+<script src="../note.js?v=3b70ceaa97"></script>
 </body>
 </html>
