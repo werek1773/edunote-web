@@ -80,10 +80,11 @@
     var title = data.subject || "Notatki z zajęć";
     document.title = title + ": notatki · EduNote";
     $("title").textContent = title;
-    $("byline").textContent = "Udostępnia: " + (data.author || "ktoś z roku") + " · " + plural(notes.length, "notatka", "notatki", "notatek");
+    $("byline").textContent = "Udostępnia " + (data.author || "ktoś z roku") + " · " + plural(notes.length, "notatka", "notatki", "notatek");
     until = data.expires_at ? "Link działa do " + V.lastDay(data.expires_at) + "." : "";
     $("valid").textContent = until;
     $("report").href = "../zglos/#n=" + code;
+    remember();
 
     // podgląd linku na czacie jest jeden dla wszystkich przedmiotów, więc o przedmiocie mówi tekst wiadomości
     var share = $("share-top");
@@ -107,11 +108,13 @@
     if (types.length > 1) tabs.classList.remove("hidden");
 
     cta();
+    if (window.eduTypo) eduTypo($("course"));
     $("loading").classList.add("hidden");
     $("course").classList.remove("hidden");
     if (M && types.length > 1) place = M.pill(tabs);
     var start = types.filter(function (t) { return slug(t) === startTab; })[0];
     show(start !== undefined ? start : types[0] || "", false);
+    if (startTab === "powtorka") reviewHard();
     // nagłówek, karta nauki i pierwsze zajęcia wchodzą po kolei
     if (M) {
       M.stagger([$("byline"), $("title"), document.querySelector("#course .ai-line"), tabs]
@@ -156,10 +159,11 @@
     var when = data.meta && data.meta.when && data.meta.when[active];
     box.appendChild(el("div", { class: "lessons-head" }, [
       el("h2", { text: types.length > 1 ? V.typeInfo(active).tab : "Zajęcia" }),
-      when ? el("span", { class: "muted small", text: "Zajęcia: " + when }) : null]));
+      el("span", { class: "muted small", text: when ? "Zajęcia: " + when : "Stuknij zajęcia, żeby przeczytać notatkę" })]));
     var ol = el("ol", { class: "lessons" });
     ofType(active).forEach(function (n) { ol.appendChild(lessonItem(n)); });
     box.appendChild(ol);
+    if (window.eduTypo) eduTypo(box);
   }
 
   // ta sama lista po zmianie zakresu: bez skoku strony i bez przewijania wyboru zajęć z powrotem do góry
@@ -198,22 +202,30 @@
 
   // MARK: ucz się z całości
 
+  // „z wykładów”, „z ćwiczeń”: o czym jest wiersz nauki nad listą
+  var FROM = { "": "z pozostałych zajęć", "wykład": "z wykładów", "ćwiczenia": "z ćwiczeń", "laboratorium": "z laboratoriów",
+               "seminarium": "z seminariów" };
+
+  // Nauka z całej zakładki w jednym wierszu: fiszki i quiz, a w „Więcej” wybór zajęć, PDF, Quizlet i Anki.
+  // Lista zajęć jest tuż pod nim, bo po notatki ludzie otwierają link; duża karta nad listą ją zasłaniała.
   function studyCard() {
     if (!scopeNotes().length) {
       picking = true;
-      return el("section", { class: "course-study" }, [el("h2", { text: "Ucz się z całości" }),
+      return el("section", { class: "course-study" }, [el("h2", { text: "Ucz się z wybranych zajęć" }),
         el("p", { class: "scope-line" }, [document.createTextNode("Zaznacz zajęcia, z których chcesz się uczyć.")]), picker()]);
     }
     var cards = scopeCards(), qs = scopeQuestions(), key = scopeKey();
     var p = cards.length ? eduStudy.progress(key, cards) : null;
     var resume = p && p.rest.length && p.rest.length < cards.length, again = p && !resume && p.hard.length;
-    var meta = [cards.length ? plural(cards.length, "fiszka", "fiszki", "fiszek") : "", qs.length ? plural(qs.length, "pytanie", "pytania", "pytań") : ""]
-      .filter(Boolean).join(" · ");
+    var meta = [cards.length ? plural(cards.length, "fiszka", "fiszki", "fiszek") : "", qs.length ? plural(qs.length, "pytanie", "pytania", "pytań") : "",
+                cards.length ? "ok. " + eduStudy.minutes(cards) + " min" : ""].filter(Boolean).join(" · ");
+    var title = custom ? "Ucz się z wybranych zajęć (" + scopeNotes().length + ")"
+      : types.length > 1 ? "Ucz się " + FROM[active] : "Ucz się z całości";
     var card = el("section", { class: "course-study" }, [
-      el("p", { class: "eyebrow", text: meta ? meta + (cards.length ? " · ok. " + eduStudy.minutes(cards) + " min" : "") : "Notatki do przeczytania" }),
-      el("h2", { text: "Ucz się z całości" }),
-      el("p", { class: "scope-line" }, [document.createTextNode("Zakres: " + scopeLabel() + " "),
-        button(picking ? "Gotowe" : "Wybierz zajęcia", "link", togglePicker)])
+      el("div", { class: "course-study-head" }, [
+        el("div", {}, [el("h2", { text: title }), meta ? el("p", { class: "course-meta", text: meta }) : null]),
+        moreMenu(cards, resume || again)
+      ])
     ]);
     if (picking) card.appendChild(picker());
     var actions = el("div", { class: "course-actions" });
@@ -221,23 +233,56 @@
       // po powrocie najpierw dokończenie przerwanej nauki albo powtórka tego, czego ostatnio nie było
       if (resume) actions.appendChild(button("Dokończ fiszki (" + p.rest.length + ")", "btn btn-primary", function () { learn(cards, p.rest, "resume"); }));
       else if (again) actions.appendChild(button("Powtórz trudne (" + p.hard.length + ")", "btn btn-primary", function () { learn(cards, p.hard, "hard"); }));
-      else actions.appendChild(button("Fiszki z całości", "btn btn-primary", function () { learn(cards); }));
+      else actions.appendChild(button("Fiszki", "btn btn-primary", function () { learn(cards); }));
     }
-    if (qs.length) actions.appendChild(button("Quiz przed kolokwium", cards.length ? "btn btn-secondary" : "btn btn-primary", quizTime));
+    if (qs.length) actions.appendChild(button("Quiz", cards.length ? "btn btn-secondary" : "btn btn-primary", quizTime));
     if (actions.firstChild) card.appendChild(actions);
     else card.appendChild(el("p", { class: "muted", text: "W tych notatkach nie ma jeszcze fiszek ani pytań." }));
-    var links = el("p", { class: "course-links" });
-    if (resume || again) links.appendChild(button("Fiszki od początku", "link", function () { learn(cards); }));
-    links.appendChild(button("Zapisz te notatki jako PDF", "link", printScope));
-    // te same fiszki w Quizlecie albo Anki, z całego zakresu (jak pod jedną notatką)
-    if (cards.length) {
-      links.appendChild(button("Kopiuj do Quizleta", "link", function () { V.copyCards(cards); }));
-      links.appendChild(button("Pobierz plik dla Anki (.txt)", "link", function () {
-        V.downloadCards(cards, (data.subject || "przedmiot") + " " + (custom ? "wybrane zajęcia" : V.typeInfo(active).tab));
-      }));
-    }
-    card.appendChild(links);
     return card;
+  }
+
+  // „Więcej”: rzadziej potrzebne rzeczy, schowane, żeby nad listą zajęć były tylko dwa przyciski
+  function moreMenu(cards, studied) {
+    var box = el("details", { class: "more" });
+    var sum = el("summary", { class: "icon-btn", "aria-label": "Więcej: wybór zajęć, PDF, Quizlet i Anki", title: "Więcej" });
+    sum.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-more"/></svg>';
+    var list = el("div", { class: "more-list", role: "menu" });
+    function item(text, action) {
+      var b = button(text, "more-item", function () { box.open = false; action(); });
+      b.setAttribute("role", "menuitem");
+      list.appendChild(b);
+    }
+    item(picking ? "Gotowe z wyborem zajęć" : "Wybierz zajęcia do nauki", togglePicker);
+    if (studied && cards.length) item("Fiszki od początku", function () { learn(cards); });
+    item("Zapisz te notatki jako PDF", printScope);
+    if (cards.length) {
+      item("Kopiuj fiszki do Quizleta", function () { V.copyCards(cards); });
+      item("Pobierz fiszki dla Anki (.txt)", function () {
+        V.downloadCards(cards, (data.subject || "przedmiot") + " " + (custom ? "wybrane zajęcia" : V.typeInfo(active).tab));
+      });
+    }
+    box.appendChild(sum);
+    box.appendChild(list);
+    // Escape albo fokus poza listą ją zamyka (klik obok: jeden wspólny nasłuch niżej)
+    box.addEventListener("keydown", function (e) { if (e.key === "Escape" && box.open) { box.open = false; sum.focus(); } });
+    box.addEventListener("focusout", function (e) { if (box.open && e.relatedTarget && !box.contains(e.relatedTarget)) box.open = false; });
+    return box;
+  }
+
+  // klik obok otwartej listy „Więcej” ją zamyka (jeden nasłuch na całą stronę, lista rysuje się od nowa przy zmianie zakładki)
+  document.addEventListener("pointerdown", function (e) {
+    Array.prototype.forEach.call(document.querySelectorAll("details.more[open]"), function (d) { if (!d.contains(e.target)) d.open = false; });
+  });
+
+  // Powtórka z biblioteki: fiszki do powtórki z zakładki, w której ostatnio zostały; bez nich zwykły widok
+  function reviewHard() {
+    for (var i = 0; i < types.length; i++) {
+      active = types[i];
+      var cards = scopeCards(), p = eduStudy.progress(scopeKey(), cards);
+      if (p && p.hard.length) { show(types[i], false); learn(cards, p.hard, "hard"); return; }
+    }
+    active = types[0] || "";
+    show(active, false);
   }
 
   // „Wybierz zajęcia” rozwija listę zajęć, a „Gotowe” ją zwija (motion.js), zamiast żeby skakała cała karta
@@ -373,21 +418,24 @@
 
   function recordClick() { V.recordClick("record_subject_click", code); }
 
-  // Na Macu do App Store; bez Maca uczysz się już tutaj, więc prośba do osoby z Makiem z roku (jak pod notatką)
+  // Na końcu jedna spokojna linijka: na Macu przycisk do App Store, gdzie indziej link „Czym jest EduNote?”.
+  // Prośby do osoby z Makiem i do prowadzącego oraz zapis na inne urządzenia są na stronie głównej.
   function cta() {
-    var slot = $("cta-slot"), url = location.origin + location.pathname + "#" + code;
-    if (mac) {
-      slot.appendChild(V.invite(true, "btn btn-primary", "przedmiot", recordClick));
-      return;
-    }
-    $("cta-title").textContent = "Chcesz takie notatki z innych przedmiotów?";
-    $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote na Macu: wystarczy jedna osoba "
-      + "z Makiem na roku. Za zgodą prowadzącego EduNote słucha zajęć, od razu robi z nich notatki, a link dostaje cała grupa.";
-    slot.appendChild(button("Poproś kogoś z Makiem", "btn btn-primary", function () {
-      eduShare(eduAsk.mac, url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
-    }));
-    slot.appendChild(el("p", { class: "cta-links" }, [button("Prośba do prowadzącego o zgodę", "link", eduAsk.lecturer)]));
-    eduWaitlist(slot, { privacy: "../prywatnosc/" });
+    var slot = $("cta-slot");
+    if (mac) slot.appendChild(V.invite(true, "btn btn-secondary btn-sm", "przedmiot", recordClick));
+    else slot.appendChild(el("a", { class: "link", href: "../", text: "Czym jest EduNote?" }));
+  }
+
+  // Ten przedmiot w bibliotece tej przeglądarki (library.js): nazwa, kto udostępnia, ile zajęć, ostatnie zajęcia i do
+  // kiedy działa link. Pierwszy zapis jednym stuknięciem, potem same (eduLibrary.offer).
+  function remember() {
+    if (!window.eduLibrary) return;
+    var latest = notes[0], cards = 0, questions = 0;
+    notes.forEach(function (n) { cards += V.cardsOf(n.content || {}).length; questions += ((n.content || {}).quiz || []).length; });
+    eduLibrary.offer($("welcome"), { kind: "p", code: code, subject: data.subject || "", author: data.author || "",
+      lessons: notes.length, cards: cards, questions: questions, expires_at: data.expires_at || "", updated_at: data.updated_at || "",
+      latest: latest ? { label: label(latest), topic: topic(latest), date: latest.lesson_date || "" } : null },
+      { what: "ten przedmiot", hint: "Stuknij zajęcia, żeby przeczytać notatkę." });
   }
 
   function missing() {

@@ -89,13 +89,13 @@
   // Dwa gotowe teksty dla roku bez Maca: prośba do osoby z Makiem (co notujący ma z tego dla siebie, bez obiecywania
   // ceny; „notuj”, a nie „nagrywaj”, jak w aplikacji, CLAUDE.md) i prośba do prowadzącego o zgodę na nagrywanie, która
   // mówi o nagrywaniu wprost i zgodnie z tym, co naprawdę robi aplikacja (nagranie zostaje na komputerze, do AI trafia
-  // sam tekst, link tylko dla roku i wygasa po sesji poprawkowej)
+  // sam tekst, link tylko dla roku i wygasa po sesji poprawkowej; dźwięk znika po zamianie na tekst, jak w polityce prywatności)
   var ASK_LECTURER = "Dzień dobry,\n\n"
     + "czy możemy nagrywać Pani/Pana wykłady z [przedmiot], żeby się z nich uczyć? Nagrywa jedna osoba z roku "
-    + "na swoim komputerze i nagranie tam zostaje. Aplikacja EduNote robi z niego notatkę i fiszki z pomocą AI "
-    + "(do AI trafia sam tekst, bez nagrania). Udostępniamy je tylko naszemu rokowi przez link, nigdzie ich nie publikujemy, "
-    + "a link przestaje działać po sesji poprawkowej. Jeśli jakiejś części zajęć nie chce Pani/Pan nagrywać, "
-    + "oczywiście jej nie nagramy.\n\n"
+    + "na swoim komputerze, a dźwięk znika, gdy tylko aplikacja EduNote zamieni go na tekst. Z tego tekstu AI robi notatkę "
+    + "i fiszki (do modelu AI w chmurze trafia sam tekst, bez dźwięku). Notatki udostępniamy tylko naszemu rokowi przez link, "
+    + "nigdzie ich nie publikujemy, a link przestaje działać po sesji poprawkowej. Nagrania ani pełnego zapisu wykładu "
+    + "nikomu nie przekazujemy. Jeśli jakiejś części zajęć nie chce Pani/Pan nagrywać, oczywiście jej nie nagramy.\n\n"
     + "Z wyrazami szacunku\n[imię i nazwisko], [kierunek, rok]";
   window.eduAsk = {
     mac: "Hej, możesz notować nam wykład w EduNote, jeśli prowadzący się zgodzi? EduNote słucha zajęć i od razu robi z nich "

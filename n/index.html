@@ -6,7 +6,8 @@
 <title>Notatka z wykładu · EduNote</title>
 <meta name="description" content="Notatka z wykładu udostępniona z aplikacji EduNote: streszczenie, pojęcia, fiszki i quiz.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#FAF9F5">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F5EE">
 <!-- podgląd na czacie: jeden dla wszystkich notatek (kod notatki stoi po „#”, więc czat go nie widzi) -->
 <meta property="og:title" content="Notatka z wykładu: fiszki i quiz · EduNote">
 <meta property="og:description" content="Ktoś z Twojego roku udostępnił notatkę z wykładu. Ucz się z fiszek i sprawdź się w quizie, w przeglądarce i bez logowania.">
@@ -19,20 +20,23 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="stylesheet" href="../style.css?v=3b70ceaa97">
-<!-- ruch na stronie (style.css, motion.js): włączony, chyba że system prosi o mniej ruchu -->
-<script>if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) document.documentElement.classList.add("motion");</script>
+<link rel="stylesheet" href="../style.css?v=b960f5d284">
+<!-- wygląd (jasny/ciemny, theme.js) i ruch (motion.js) ustawione przed pierwszym malowaniem, żeby nic nie mrugało -->
+<script>(function(d){var t=null;try{t=localStorage.getItem("edunote.theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="dark"?"#191A15":"#F7F5EE";if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.classList.add("motion")})(document.documentElement)</script>
 </head>
 <body class="note-page">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
 </svg>
 
-<!-- pasek jak w aplikacji: marka po lewej, „Wyślij na grupę” po prawej (jak „Udostępnij” w dokumentach) -->
-<header class="bar">
+<!-- pasek: logo prowadzi do Twojej biblioteki (notatka już w niej jest), po prawej wygląd i udostępnianie -->
+<header class="bar app-bar">
   <div class="bar-in">
-    <a class="brand" href="../"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark" src="../logo.svg" width="128" height="34" alt="EduNote"></a>
-    <button class="btn btn-ghost btn-sm hidden" id="share-top" type="button">Wyślij na grupę</button>
+    <a class="brand" id="home" href="../biblioteka/" aria-label="EduNote: Moja biblioteka"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark wm-light" src="../logo.svg" width="128" height="34" alt=""><img class="wordmark wm-dark" src="../logo-dark.svg" width="128" height="34" alt=""></a>
+    <div class="bar-tools">
+      <div data-theme-switch="menu"></div>
+      <button class="btn btn-ghost btn-sm hidden" id="share-top" type="button">Udostępnij</button>
+    </div>
   </div>
 </header>
 
@@ -40,23 +44,27 @@
   <!-- szkic notatki z połyskiem, zanim się wczyta (style.css: pojawia się dopiero po chwili, żeby nie mignąć) -->
   <div id="loading" class="skeleton" aria-busy="true"><span class="sr">Wczytuję notatkę…</span><span class="sk sk-sub"></span><span class="sk sk-h1"></span><span class="sk sk-h1 short"></span><span class="sk sk-tabs"></span><span class="sk sk-box"></span><span class="sk sk-line"></span><span class="sk sk-line"></span><span class="sk sk-line short"></span></div>
 
-  <div id="missing" class="hidden center" style="padding:40px 0">
+  <div id="missing" class="hidden missing">
     <h1>Tej notatki już nie ma</h1>
     <p class="muted">Link wygasł albo notatka nie jest już udostępniana. Poproś o nowy link osobę, która go wysłała.</p>
-    <p><a class="btn btn-secondary" href="../">Czym jest EduNote?</a></p>
+    <p class="missing-actions"><a class="btn btn-primary" href="../biblioteka/">Moja biblioteka</a> <a class="btn btn-ghost" href="../">Czym jest EduNote?</a></p>
   </div>
 
   <article id="note" class="hidden">
     <p class="sample-note hidden" id="sample">Przykładowa notatka z AI, nie z Twoich zajęć. EduNote słucha wykładu na Macu i od razu robi z niego takie notatki, a fiszki i quiz działają tutaj, w przeglądarce, bez logowania.</p>
-    <!-- notatka z linku do przedmiotu: powrót do listy wszystkich zajęć -->
-    <a class="back-link hidden" id="back" href="../"></a>
-    <!-- nagłówek notatki jak w aplikacji: przedmiot z kropką i data, temat, oznaczenie AI -->
+    <!-- skąd jesteś: biblioteka, a w notatce z linku do przedmiotu także przedmiot (powrót do listy zajęć) -->
+    <nav class="crumbs" id="crumbs" aria-label="Gdzie jesteś"><a href="../biblioteka/">Moja biblioteka</a></nav>
+    <!-- nagłówek notatki jak w aplikacji: rodzaj i data zajęć, temat, oznaczenie AI -->
     <p class="subject" id="subject"></p>
     <h1 id="topic"></h1>
     <p class="ai-line" id="ai-note"><span class="tag">AI</span><span id="ai-text"></span></p>
+    <!-- biblioteka: pierwszy zapis jednym stuknięciem, potem same (library.js) -->
+    <div class="welcome hidden" id="welcome" role="note"></div>
 
     <div class="tabs-anchor" id="tabs-anchor"></div>
     <div class="tabs hidden" id="tabs" role="tablist" aria-label="Notatka, fiszki i quiz"></div>
+    <!-- pierwsza notatka w tej przeglądarce: jedno zdanie, do czego są zakładki -->
+    <p class="tabs-hint hidden" id="tabs-hint"></p>
 
     <div id="panel-note" role="tabpanel">
       <div class="brief" id="brief"><p class="brief-label">W skrócie</p><p id="summary"></p></div>
@@ -65,14 +73,12 @@
     <div id="panel-cards" role="tabpanel" hidden></div>
     <div id="panel-quiz" role="tabpanel" hidden></div>
 
-    <section class="cta" id="cta">
-      <img class="cta-icon" src="../icon.png" width="56" height="56" alt="">
-      <h2 id="cta-title">Rób takie notatki z własnych wykładów</h2>
-      <p id="cta-text">EduNote słucha zajęć na Twoim Macu i robi z nich notatki, fiszki i quiz. Teraz za darmo, bez karty (<a href="../#cena">cennik</a>).</p>
+    <section class="made-with" id="cta">
+      <p id="cta-text">Notatka zrobiona w EduNote na Macu: aplikacja słucha zajęć i od razu robi z nich notatki, fiszki i quiz.</p>
       <div id="cta-slot"></div>
     </section>
     <div class="note-foot">
-      <span id="origin">Notatka studenta zrobiona z pomocą AI, a nie materiał prowadzącego.</span>
+      <span id="origin">Notatka studenta zrobiona z pomocą AI, a nie materiał prowadzącego. <a href="../skad-to-wiemy/">Skąd to wiemy, że tak można?</a></span>
       <span><span id="valid"></span> <a id="report" href="../zglos/">Zgłoś treść</a></span>
       <span><button class="link" id="print" type="button">Zapisz jako PDF albo wydrukuj</button></span>
     </div>
@@ -82,16 +88,18 @@
 <footer class="foot">
   <div class="foot-in">
     <span>EduNote · od studenta dla studentów</span>
+    <a href="../biblioteka/">Moja biblioteka</a>
     <a href="../">Czym jest EduNote?</a>
     <a href="../prywatnosc/">Polityka prywatności</a>
     <a href="../regulamin/">Regulamin</a>
   </div>
 </footer>
-<script src="../motion.js?v=3b70ceaa97"></script>
-<script src="../platform.js?v=3b70ceaa97"></script>
-<script src="../study.js?v=3b70ceaa97"></script>
-<script src="../share.js?v=3b70ceaa97"></script>
-<script src="../waitlist.js?v=3b70ceaa97"></script>
-<script src="../note.js?v=3b70ceaa97"></script>
+<script src="../theme.js?v=b960f5d284"></script>
+<script src="../motion.js?v=b960f5d284"></script>
+<script src="../platform.js?v=b960f5d284"></script>
+<script src="../study.js?v=b960f5d284"></script>
+<script src="../share.js?v=b960f5d284"></script>
+<script src="../library.js?v=b960f5d284"></script>
+<script src="../note.js?v=b960f5d284"></script>
 </body>
 </html>

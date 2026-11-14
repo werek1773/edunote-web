@@ -45,6 +45,13 @@
     latex = highlighted(latex);
     try {
       katex.render(latex, span, { displayMode: !!display, throwOnError: false, output: "html" });
+      // kolory symboli z \color{#…} jako zmienne CSS, żeby w ciemnym wyglądzie były jaśniejsze (jak na wykresach)
+      Array.prototype.forEach.call(span.querySelectorAll("[style*=color]"), function (n) {
+        var hex = (n.style.color || "").replace(/rgb\((\d+), (\d+), (\d+)\)/, function (m, r, g, b) {
+          return "#" + [r, g, b].map(function (x) { return ("0" + Number(x).toString(16)).slice(-2); }).join("").toUpperCase();
+        });
+        if (THEMED[hex]) n.style.color = THEMED[hex];
+      });
     } catch (e) {
       span.textContent = latex;
     }
@@ -214,9 +221,19 @@
   var COLORS = ["#6B8131", "#E2725B", "#3F7FBF"];
   var NS = "http://www.w3.org/2000/svg";
 
+  // Kolory rysunków idą przez zmienne CSS (style.css), żeby wykresy, mapy pojęć i osie lekcji miały w ciemnym
+  // wyglądzie jasny tusz i jaśniejsze kolory symboli; atrybut fill/stroke nie przyjmuje var(), więc styl
+  var THEMED = { "#2A2A22": "var(--ink)", "#6E6B5F": "var(--muted)", "#E2DFD3": "var(--line)", "#FFFEFA": "var(--paper)",
+                 "#F7F5EE": "var(--page)", "#6B8131": "var(--sym1)", "#E2725B": "var(--sym2)", "#3F7FBF": "var(--sym3)",
+                 "#A97C14": "var(--sym4)", "#6A3357": "var(--sym5)" };
+  function themed(v) { return THEMED[String(v).toUpperCase()] || v; }
+
   function svg(tag, attrs) {
     var e = document.createElementNS(NS, tag);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    for (var k in attrs) {
+      if ((k === "fill" || k === "stroke") && THEMED[String(attrs[k]).toUpperCase()]) e.style.setProperty(k, themed(attrs[k]));
+      else e.setAttribute(k, attrs[k]);
+    }
     return e;
   }
 
@@ -302,7 +319,7 @@
     box.appendChild(s);
     var legend = el("div", { class: "legend" });
     slide.plots.forEach(function (pl, i) {
-      var item = el("span", {}, [el("span", { class: "sw", style: "background:" + COLORS[i % 3] }), math(pl.label || pl.expression)]);
+      var item = el("span", {}, [el("span", { class: "sw", style: "background:" + themed(COLORS[i % 3]) }), math(pl.label || pl.expression)]);
       legend.appendChild(item);
     });
     return el("div", {}, [box, legend]);
@@ -310,7 +327,7 @@
 
   // MARK: mapa pojęć i oś lekcji – ten sam układ co w aplikacji (ConceptMapView, LessonPathView)
 
-  var TONES = ["#E3E9CF", "#FBF0C9", "#DCE8F5", "#F8DED7", "#ECE3EC"];
+  var TONES = ["var(--tone1)", "var(--tone2)", "var(--tone3)", "var(--tone4)", "var(--tone5)"];
 
   function noise(seed) { var x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); }
 
@@ -580,9 +597,10 @@
     return end.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Warsaw" });
   }
 
-  // KaTeX tylko przy notatkach ze wzorami (slajdy z wzorem, wykresem albo krokami), żeby pozostałe nie łączyły się
-  // z CDN. Gdy się nie wczyta, wzór zostaje tekstem (math).
-  var KATEX = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/";
+  // KaTeX tylko przy notatkach ze wzorami (slajdy z wzorem, wykresem albo krokami), żeby pozostałe nie pobierały
+  // niepotrzebnie ok. 300 KB. Leży na naszym serwerze (web/vendor, wersja w nazwie folderu), obok note.js, więc strona
+  // nie łączy się z obcym CDN. Gdy się nie wczyta, wzór zostaje tekstem (math).
+  var KATEX = new URL("vendor/katex-0.16.11/", (document.currentScript && document.currentScript.src) || location.href).href;
 
   function needsMath(c) {
     return !!(c.visual && (c.visual.slides || []).some(function (s) {
@@ -849,13 +867,16 @@
       origin.appendChild(el("a", { href: "mailto:marcin@rozycki.pro?subject=" + encodeURIComponent("Błąd w przykładowej notatce"),
         text: "Napisz do autora EduNote" }));
     }
-    // notatka z linku do przedmiotu: powrót do listy zajęć, a w nagłówku „Wykład 5 · 12 listopada”
-    if (data.inSubject) {
-      var back = $("back");
-      back.href = "../p/#" + data.inSubject.code + "/" + data.inSubject.tab;
-      back.textContent = "← " + (data.subject || "Przedmiot") + ": wszystkie zajęcia";
-      back.classList.remove("hidden");
+    // gdzie jesteś: biblioteka, a w notatce z linku do przedmiotu także przedmiot (powrót do listy zajęć);
+    // w nagłówku notatki z przedmiotu „Wykład 5 · 12 listopada”
+    var crumbs = $("crumbs");
+    if (data.sample) {
+      crumbs.classList.add("hidden");
+    } else if (data.inSubject) {
+      crumbs.appendChild(el("span", { class: "sep", "aria-hidden": "true", text: "›" }));
+      crumbs.appendChild(el("a", { href: "../p/#" + data.inSubject.code + "/" + data.inSubject.tab, text: data.subject || "Przedmiot" }));
     }
+    remember(data);
     $("subject").textContent = [data.inSubject ? data.inSubject.label : data.subject,
       data.sample ? "przykład" : shortDate(data.lesson_date)].filter(Boolean).join(" · ");
     $("topic").textContent = title;
@@ -1002,22 +1023,25 @@
       }));
     }
 
-    // Zaproszenie na końcu notatki: na Macu do App Store. Bez Maca uczysz się już tutaj, więc zaproszenie jest do
-    // poproszenia osoby z Makiem z roku, żeby notowała zajęcia (wystarczy jedna na rok), zwykłą prośbą, a nie reklamą.
+    // Na końcu jedna spokojna linijka: na Macu przycisk do App Store, gdzie indziej „Czym jest EduNote?”.
+    // Prośby do osoby z Makiem i do prowadzącego oraz zapis na inne urządzenia są na stronie głównej.
     var slot = $("cta-slot");
-    if (mac) {
-      slot.appendChild(appInvite(true, "btn btn-primary"));
-    } else {
-      $("cta-title").textContent = "Chcesz takie notatki z innych wykładów?";
-      $("cta-text").textContent = "Uczysz się tutaj i nic nie instalujesz. Notatki robi EduNote na Macu: wystarczy jedna osoba "
-        + "z Makiem na roku. Za zgodą prowadzącego EduNote słucha zajęć, od razu robi z nich notatki, a link dostaje cała grupa.";
-      slot.appendChild(button("Poproś kogoś z Makiem", "btn btn-primary", function () {
-        eduShare(eduAsk.mac, url, "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
-      }));
-      // drugi gotowy tekst: prośba do prowadzącego o zgodę, bez której nikt nie notuje zajęć (share.js)
-      slot.appendChild(el("p", { class: "cta-links" }, [button("Prośba do prowadzącego o zgodę", "link", eduAsk.lecturer)]));
-      // zapis na EduNote na Androida, Windowsa albo iPhone'a jednym kliknięciem (waitlist.js)
-      eduWaitlist(slot, { privacy: "../prywatnosc/" });
+    if (mac) slot.appendChild(appInvite(true, "btn btn-secondary btn-sm"));
+    else slot.appendChild(el("a", { class: "link", href: "../", text: "Czym jest EduNote?" }));
+    // pierwsza notatka w tej przeglądarce: jedno zdanie, do czego są zakładki (znika po pierwszym przełączeniu)
+    if (!data.sample && (cards.length || hasQuiz)) {
+      var hintKey = "edunote.n.wskazowka", seenHint = false;
+      try { seenHint = !!localStorage.getItem(hintKey); } catch (e) {}
+      if (!seenHint) {
+        var hint = $("tabs-hint");
+        hint.textContent = "Najpierw przeczytaj notatkę. " + (cards.length && hasQuiz ? "Potem przećwicz ją w zakładkach Fiszki i Quiz."
+          : cards.length ? "Potem przećwicz ją w zakładce Fiszki." : "Potem sprawdź się w zakładce Quiz.");
+        hint.classList.remove("hidden");
+        tabs.addEventListener("click", function () {
+          try { localStorage.setItem(hintKey, "1"); } catch (e) {}
+          hint.classList.add("hidden");
+        }, { once: true });
+      }
     }
     // zapis notatki na później: drukowanie albo PDF z przeglądarki, z rozwiniętymi rozwiązaniami
     $("print").addEventListener("click", function () {
@@ -1030,6 +1054,7 @@
     var report = $("report");
     if (sample) report.classList.add("hidden"); else report.href = "../zglos/#n=" + (subjectCode || code);
     $("loading").classList.add("hidden");
+    if (window.eduTypo) eduTypo($("note"));
     $("note").classList.remove("hidden");
     if (M && (cards.length || hasQuiz)) place = M.pill(tabs);
     // po odświeżeniu ta sama zakładka co przedtem
@@ -1038,11 +1063,38 @@
     // nagłówek, zakładki i treść wchodzą po kolei, a zakreślacz pod „W skrócie” przeciąga się tylko przy tym pierwszym
     // wejściu, nie po każdym powrocie do zakładki (style.css: #note.entering)
     if (M && M.ok()) {
-      M.stagger([$("sample"), $("back"), $("subject"), $("topic"), $("ai-note"), tabs, panels[current]], { step: 50, y: 12 });
+      M.stagger([$("sample"), $("crumbs"), $("subject"), $("topic"), $("ai-note"), tabs, panels[current]], { step: 50, y: 12 });
       var article = $("note");
       article.classList.add("entering");
       setTimeout(function () { article.classList.remove("entering"); }, 1600);
     }
+  }
+
+  // Notatka w bibliotece tej przeglądarki (library.js). Notatka z linku do przedmiotu zapisuje cały przedmiot (z jego
+  // danych w pamięci karty), a pojedyncza notatka siebie. Przykład ze strony głównej się nie zapisuje.
+  function remember(data) {
+    if (!window.eduLibrary || data.sample) return;
+    var host = $("welcome");
+    if (data.inSubject) {
+      var s = subjectCache(subjectCode);
+      if (!s) return;
+      var list = (s.notes || []).filter(function (n) { return n && n.content; }), nums = numbers(list), latest = list[0], cards = 0, qs = 0;
+      list.forEach(function (n) { cards += cardsOf(n.content || {}).length; qs += ((n.content || {}).quiz || []).length; });
+      eduLibrary.offer(host, { kind: "p", code: subjectCode, subject: s.subject || "", author: s.author || "", lessons: list.length, cards: cards,
+        questions: qs, expires_at: s.expires_at || "", updated_at: s.updated_at || "",
+        latest: latest ? { label: typeInfo(latest.type).one + " " + nums[latest.id], topic: latest.topic || "", date: latest.lesson_date || "" } : null },
+        { what: "cały przedmiot" });
+      return;
+    }
+    var c = data.content || {};
+    eduLibrary.offer(host, { kind: "n", code: code, subject: data.subject || "", topic: data.topic || "", cards: cardsOf(c).length,
+      questions: (c.quiz || []).length, expires_at: data.expires_at || "", updated_at: data.updated_at || "",
+      latest: { label: "", topic: data.topic || "", date: data.lesson_date || "" } }, { what: "tę notatkę" });
+  }
+
+  // przedmiot z pamięci karty (subjectData zapisuje go tam przy każdym wczytaniu)
+  function subjectCache(sc) {
+    try { var c = JSON.parse(sessionStorage.getItem("edunote.przedmiot." + sc) || "null"); return c && c.data; } catch (e) { return null; }
   }
 
   // Na wydruku i w PDF rozwiązania zadań są rozwinięte; po wydruku wracają do stanu sprzed

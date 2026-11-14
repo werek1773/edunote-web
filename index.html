@@ -3,25 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EduNote · notatki z wykładu dla całego roku</title>
-<meta name="description" content="EduNote słucha wykładu na Macu i od razu robi notatki, wzory i fiszki. Wysyłasz link, a cały rok uczy się z nich na telefonie, nawet bez Maca.">
-<meta name="theme-color" content="#FAF9F5">
-<meta property="og:title" content="EduNote · notatki z wykładu dla całego roku">
-<meta property="og:description" content="Ty słuchasz, EduNote notuje: notatki, wzory i fiszki, a cały rok uczy się z nich na telefonie. Od studenta dla studentów.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F5EE">
+<title>EduNote · Ty słuchasz, EduNote notuje</title>
+<meta name="description" content="EduNote słucha zajęć na Macu i od razu robi z nich notatki, fiszki i quiz. Cały rok uczy się z nich na telefonie, we własnej bibliotece, bez konta i bez Maca.">
+<meta property="og:title" content="EduNote · Ty słuchasz, EduNote notuje">
+<meta property="og:description" content="Notatki, fiszki i quiz z każdych zajęć. Cały rok uczy się z nich na telefonie. Od studenta dla studentów.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://edunote.rozycki.pro/">
 <meta property="og:image" content="https://edunote.rozycki.pro/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="EduNote: notatki z wykładu dla całego roku, fiszki i quiz w przeglądarce">
+<meta property="og:image:alt" content="EduNote: notatki z zajęć dla całego roku, fiszki i quiz w przeglądarce">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=3b70ceaa97">
-<!-- ruch na stronie (style.css, motion.js): włączony, chyba że system prosi o mniej ruchu -->
-<script>if (!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) document.documentElement.classList.add("motion");</script>
+<link rel="stylesheet" href="style.css?v=b960f5d284">
+<!-- wygląd (jasny/ciemny, theme.js) i ruch (motion.js) ustawione przed pierwszym malowaniem, żeby nic nie mrugało -->
+<script>(function(d){var t=null;try{t=localStorage.getItem("edunote.theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="dark"?"#191A15":"#F7F5EE";if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.classList.add("motion")})(document.documentElement)</script>
 </head>
-<body class="home">
+<body class="home v5">
 <!-- ikonki paska stanu iPhone'a (zasięg, Wi-Fi, bateria) dla ramek telefonów -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="sb-signal" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></symbol>
@@ -30,37 +31,85 @@
 </svg>
 <header class="bar" id="bar">
   <div class="bar-in">
-    <a class="brand" href="./"><img class="brand-icon" src="icon.png" width="34" height="34" alt=""><img class="wordmark" src="logo.svg" width="128" height="34" alt="EduNote"></a>
-    <nav class="nav">
+    <a class="brand" href="./" aria-label="EduNote"><img class="brand-icon" src="icon.png" width="34" height="34" alt=""><img class="wordmark wm-light" src="logo.svg" width="128" height="34" alt=""><img class="wordmark wm-dark" src="logo-dark.svg" width="128" height="34" alt=""></a>
+    <nav class="nav" aria-label="Strona główna">
       <a href="#jak">Jak to działa</a>
-      <a href="n/#przyklad">Przykład</a>
+      <a href="#biblioteka">Biblioteka</a>
       <a href="#cena">Cena</a>
       <a href="#pytania">Pytania</a>
     </nav>
-    <a class="btn btn-primary btn-sm" id="bar-cta" href="https://apps.apple.com/app/id6824044215?ct=site">Pobierz</a>
+    <div class="bar-tools">
+      <div data-theme-switch="menu"></div>
+      <a class="btn btn-secondary btn-sm hidden" id="bar-lib" href="biblioteka/">Moja biblioteka</a>
+      <a class="btn btn-primary btn-sm" id="bar-cta" href="https://apps.apple.com/app/id6824044215?ct=site">Pobierz</a>
+    </div>
   </div>
 </header>
 
 <main>
-  <!-- pierwszy ekran: nagłówek i jeden przycisk po lewej, prawdziwe zrzuty na kafelkach po prawej -->
-  <section class="hero frame">
-    <div>
-      <h1>Notatki z wykładu dla <mark>całego roku</mark></h1>
-      <p class="hero-sub">Ty słuchasz, EduNote notuje.<br>Cały rok dostaje notatki i fiszki.</p>
-      <a class="btn btn-primary btn-lg" id="get" href="https://apps.apple.com/app/id6824044215?ct=site">Pobierz za darmo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v13M6.5 11.5L12 17l5.5-5.5"/></svg></a>
-      <p class="platform" id="platform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg><span id="platform-text">Na Maca z macOS 15 · notatki otwierają się na każdym telefonie</span></p>
+  <!-- ktoś, kto już otwierał linki od znajomych: powrót do biblioteki jednym stuknięciem (library.js) -->
+  <div class="lib-return hidden" id="lib-return"><a href="biblioteka/"><span class="lib-return-text" id="lib-return-text"></span><span class="lib-return-go">Moja biblioteka →</span></a></div>
+
+  <!-- pierwszy ekran: hasło, jedno zdanie, jeden przycisk; po prawej prawdziwe okno aplikacji i biblioteka na telefonie -->
+  <section class="hero5 frame">
+    <div class="hero5-text">
+      <h1>Ty słuchasz.<br><mark>EduNote notuje.</mark></h1>
+      <p class="hero5-sub" id="hero-sub">Notatki, fiszki i quiz z każdych zajęć. Cały rok uczy się z nich na telefonie, we własnej bibliotece.</p>
+      <div class="hero5-cta">
+        <a class="ink-btn primary" id="get" href="https://apps.apple.com/app/id6824044215?ct=site">Pobierz na Maca</a>
+        <a class="link" id="get-second" href="n/#przyklad">Zobacz przykładową notatkę</a>
+      </div>
+      <p class="platform" id="platform"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg><span id="platform-text">Notujesz na Macu z macOS 15 · uczysz się na każdym telefonie</span></p>
     </div>
-    <div class="hero-art">
-      <div class="tile tile-dots"></div>
-      <div class="tile tile-mustard"></div>
-      <img class="shot shot-mac" src="img/edunote-mac.jpg" width="1400" height="800" alt="EduNote na Macu: notatka z wykładu z makroekonomii ze streszczeniem i fiszkami">
-      <div class="iphone hero-phone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-notatka.png" width="390" height="844" alt="Notatka otwarta z linku na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div>
+    <div class="hero5-art" aria-hidden="false">
+      <img class="sketch-shot hero5-mac" src="img/edunote-mac.jpg" width="1400" height="800" alt="EduNote na Macu: notatka z wykładu z makroekonomii ze streszczeniem i fiszkami">
+      <div class="iphone hero5-phone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-biblioteka.png" width="1170" height="2532" alt="Moja biblioteka na telefonie: przedmioty od ludzi z roku i fiszki na dziś"><span class="iphone-island" aria-hidden="true"></span></div></div>
+    </div>
+  </section>
+
+  <!-- jak to działa: trzy kroki na kartkach, każdy z prawdziwym zrzutem -->
+  <section class="steps5 frame" id="jak">
+    <h2>Jak to działa</h2>
+    <ol class="steps5-list">
+      <li class="sketch step5">
+        <span class="ink-num" aria-hidden="true">1</span>
+        <h3>Na zajęciach</h3>
+        <p>Klikasz „Notuj zajęcia”. EduNote słucha na Macu, za zgodą prowadzącego, a dźwięk znika po kilku minutach.</p>
+        <img class="step5-shot" src="img/nagrywanie.jpg" width="1400" height="846" loading="lazy" alt="EduNote słucha wykładu z biologii i na bieżąco pisze notatkę">
+      </li>
+      <li class="sketch step5">
+        <span class="ink-num" aria-hidden="true">2</span>
+        <h3>Po zajęciach</h3>
+        <p>Masz gotową notatkę: streszczenie, pojęcia, rozpisane wzory i fiszki. Mowę rozpoznaje sam Mac.</p>
+        <img class="step5-shot" style="--crop: 62% 0" src="img/wzory.jpg" width="1400" height="842" loading="lazy" alt="Wyjaśnienie wzoru na mnożnik inwestycyjny z kolorowymi symbolami">
+      </li>
+      <li class="sketch step5">
+        <span class="ink-num" aria-hidden="true">3</span>
+        <h3>Dla całego roku</h3>
+        <p>Wysyłasz jeden link na grupę. Każdy ma przedmiot w swojej bibliotece, z fiszkami i quizem.</p>
+        <img class="step5-shot step5-phone" src="img/telefon-przedmiot.png" width="1170" height="2532" loading="lazy" alt="Przedmiot z linku na telefonie: lista zajęć i nauka z całości">
+      </li>
+    </ol>
+  </section>
+
+  <!-- biblioteka: ciemny pas z trzema telefonami (biblioteka, przedmiot, fiszki do wypróbowania) -->
+  <section class="band" id="biblioteka">
+    <div class="frame">
+      <p class="eyebrow">Moja biblioteka</p>
+      <h2>Notatki od ludzi z roku w jednym miejscu</h2>
+      <p class="band-lead">Każdy link, który otworzysz, sam trafia do Twojej biblioteki. Wracasz do niej z telefonu przed kolokwium, bez szukania linku na czacie. Bez konta, bez instalowania i bez Maca.</p>
+      <div class="phones">
+        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-biblioteka.png" width="1170" height="2532" loading="lazy" alt="Moja biblioteka: przedmioty i fiszki na dziś"><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Biblioteka</b> z przedmiotami</figcaption></figure>
+        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><div class="iphone-app"><div id="demo"></div></div><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Fiszki</b> · spróbuj tutaj</figcaption></figure>
+        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-quiz.png" width="390" height="844" loading="lazy" alt="Quiz z wyjaśnieniami na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Quiz</b> z wyjaśnieniami</figcaption></figure>
+      </div>
+      <div class="band-cta"><a class="ink-btn" href="n/#przyklad">Otwórz przykładową notatkę</a></div>
     </div>
   </section>
 
   <!-- bez Maca: co ta osoba może zrobić dziś (pokazuje to skrypt na dole) -->
   <section class="today frame hidden" id="no-mac">
-    <div class="today-in">
+    <div class="today-in sketch">
       <h2>Nie masz Maca? Co możesz zrobić dziś</h2>
       <ol>
         <li>Uczyć się z linku od kogoś z roku: notatka, fiszki i quiz w przeglądarce, bez konta.</li>
@@ -68,75 +117,23 @@
         <li>Poprosić osobę z Makiem z roku, żeby za zgodą prowadzącego notowała wykłady w EduNote.</li>
       </ol>
       <div class="tile-row">
-        <a class="btn btn-primary" href="n/#przyklad">Zobacz przykładową notatkę</a>
-        <button class="btn btn-ghost" id="ask-mac" type="button">Poproś kogoś z Makiem</button>
+        <button class="ink-btn primary small" id="ask-mac" type="button">Poproś kogoś z Makiem</button>
+        <a class="link" href="n/#przyklad">Zobacz przykładową notatkę</a>
       </div>
-      <p class="today-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p>
       <div id="waitlist-home"></div>
     </div>
   </section>
 
-  <!-- zalety: trzy konkrety z cienkimi liniami i zrzut z notowania -->
-  <section class="feature frame" id="jak">
-    <div>
-      <h2>Ty słuchasz wykładu, notatki robią się same</h2>
-      <ul class="points">
-        <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="4" width="8" height="15" rx="4"/><path d="M8 15a8 8 0 0 0 16 0M16 23v5M11 28h10"/></svg><span>Słucha przez mikrofon Maca, za zgodą prowadzącego, a <b>dźwięk znika po kilku minutach</b></span></li>
-        <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 16h2M9 11v10M13 7v18M17 12v8M21 9v14M25 14v4"/></svg><span><b>Mowę rozpoznaje sam Mac</b>, po polsku</span></li>
-        <li><svg viewBox="0 0 32 32" fill="none" stroke="#2A2A22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="17" height="15" rx="2.5"/><path d="M10 6h15a2.5 2.5 0 0 1 2.5 2.5V21"/><path d="M9.5 16h8M9.5 20h5"/></svg><span>Streszczenie, pojęcia, wzory i <b>fiszki od razu po zajęciach</b></span></li>
-      </ul>
-    </div>
-    <img class="shot" src="img/nagrywanie.jpg" width="1400" height="846" loading="lazy" alt="EduNote słucha wykładu z biologii i na bieżąco pisze notatkę: streszczenie, działy i pojęcia">
-  </section>
-
-  <!-- ciemny pas: jeden link dla całego roku i prawdziwa strona notatki na telefonach -->
-  <section class="band" id="rok">
-    <div class="frame">
-      <p class="eyebrow">Dla całego roku</p>
-      <h2>Jeden link i cały rok ma notatki</h2>
-      <p class="band-lead">Wrzucasz link na grupę roku. Każdy otwiera notatkę, fiszki i quiz w przeglądarce: bez konta, bez instalowania i bez Maca.</p>
-      <div class="phones">
-        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-notatka.png" width="390" height="844" loading="lazy" alt="Notatka z linku na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Notatka</b> jak w aplikacji</figcaption></figure>
-        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><div class="iphone-app"><div id="demo"></div></div><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Fiszki</b> · spróbuj tutaj</figcaption></figure>
-        <figure><div class="iphone"><span class="iphone-btn action"></span><span class="iphone-btn vol-up"></span><span class="iphone-btn vol-down"></span><span class="iphone-btn power"></span><div class="iphone-screen"><div class="iphone-status" aria-hidden="true"><span>9:41</span><span class="iphone-icons"><svg viewBox="0 0 18 12"><use href="#sb-signal"/></svg><svg viewBox="0 0 16 12"><use href="#sb-wifi"/></svg><svg viewBox="0 0 27 12"><use href="#sb-battery"/></svg></span></div><img src="img/telefon-quiz.png" width="390" height="844" loading="lazy" alt="Quiz z wyjaśnieniami na telefonie"><span class="iphone-island" aria-hidden="true"></span></div></div><figcaption><b>Quiz</b> z wyjaśnieniami</figcaption></figure>
-      </div>
-      <a class="btn btn-light" href="n/#przyklad">Otwórz przykładową notatkę</a>
+  <!-- czy tak wolno: krótko i z odesłaniem do przepisów -->
+  <section class="law5 frame" id="zasady">
+    <div class="law5-in">
+      <h2>Czy tak wolno?</h2>
+      <p class="law5-quote">Notujesz dla siebie, tak samo jak w zeszycie. W typowej sytuacji prawo autorskie pozwala na taki osobisty użytek, a EduNote jest tylko narzędziem: dźwięk znika po kilku minutach, zostają Twoje notatki. Swoje notatki możesz udostępniać ludziom z roku. Pełnej transkrypcji nie udostępniaj bez zgody prowadzącego, a jeśli prowadzący prosi, żeby nie notować, uszanuj to.</p>
+      <p class="law5-links"><a class="ink-btn soft small" href="skad-to-wiemy/">Skąd to wiemy?</a> <button class="link" type="button" data-ask="lecturer">Gotowa prośba do prowadzącego o zgodę</button></p>
     </div>
   </section>
 
-  <!-- przed, w trakcie i po: kroki z prawdziwymi zrzutami aplikacji -->
-  <section class="phases frame">
-    <h2 class="phases-title">EduNote jest z Tobą przez cały semestr</h2>
-    <div class="phases-grid">
-      <nav class="phases-nav" aria-label="Kroki">
-        <a href="#przed" class="on">Przed zajęciami</a>
-        <a href="#po">Po zajęciach</a>
-        <a href="#kolokwium">Przed kolokwium</a>
-      </nav>
-      <div>
-        <article class="phase" id="przed">
-          <span class="tag">Przed zajęciami</span>
-          <h3>Plan zajęć w minutę</h3>
-          <p>Wczytujesz plan ze zdjęcia, zrzutu ekranu albo PDF z USOS. Każda notatka sama trafia do właściwych zajęć.</p>
-          <div class="phase-shot tile-dots"><img class="shot" src="img/plan.jpg" width="1400" height="800" loading="lazy" alt="Tygodniowy plan lekcji w EduNote z przedmiotami i salami"></div>
-        </article>
-        <article class="phase" id="po">
-          <span class="tag">Po zajęciach</span>
-          <h3>Rozumiesz wzór, zamiast go wkuwać</h3>
-          <p>Wzór z wykładu dostajesz rozpisany: co znaczy każdy symbol i przykład krok po kroku. Notatkę wysyłasz rokowi jednym linkiem.</p>
-          <div class="phase-shot tile-mustard"><img class="shot" src="img/wzory.jpg" width="1400" height="842" loading="lazy" alt="Wyjaśnienie wzoru na mnożnik inwestycyjny z kolorowymi symbolami"></div>
-        </article>
-        <article class="phase" id="kolokwium">
-          <span class="tag">Przed kolokwium</span>
-          <h3>Kolokwium bez paniki</h3>
-          <p>Streszczenie całego materiału i powtórki rozłożone do dnia kolokwium.</p>
-          <div class="phase-shot tile-night"><img class="shot" src="img/kolokwium.jpg" width="1400" height="800" loading="lazy" alt="Przygotowanie do kolokwium z makroekonomii: fiszki w zakresie, ściąga i quiz"></div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- cena na kafelku -->
+  <!-- cena -->
   <section class="price frame" id="cena">
     <div class="price-tile tile-moss">
       <h2>Za darmo na start</h2>
@@ -156,13 +153,13 @@
   <section class="faq-wrap frame" id="pytania">
     <h2>Pytania</h2>
     <div>
-      <details class="faq"><summary>Czy mogę nagrywać wykład?</summary><p>Tak, za zgodą prowadzącego i zgodnie z zasadami uczelni. Dźwięk jest tylko na Twoim Macu i znika po kilku minutach, a do AI trafia sam tekst.</p><p class="faq-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p></details>
+      <details class="faq"><summary>Czy wolno notować wykład z EduNote?</summary><p>W typowej sytuacji tak, jeśli notujesz do własnej nauki, a prowadzący się nie sprzeciwia. Na części uczelni trzeba zapytać o zgodę z góry. Dźwięk jest tylko na Twoim Macu i znika po kilku minutach, a do AI trafia sam tekst. Szczegóły i przepisy: <a href="skad-to-wiemy/">Skąd to wiemy?</a></p><p class="faq-more"><button class="link" type="button" data-ask="lecturer">Prośba do prowadzącego o zgodę</button></p></details>
       <details class="faq"><summary>Czy na studiach wolno uczyć się z AI?</summary><p>Zwykle tak, ale o zakresie na przedmiocie decyduje prowadzący. Na Uniwersytecie Łódzkim <a href="https://www.wz.uni.lodz.pl/fileadmin/Wydzialy/Wydzia%C5%82_Zarz%C4%85dzania/Strefa_Pracownika/GenAI/zarz._nr_73_z_16.02.2026_r.pdf" rel="noopener">zarządzenie rektora nr 73/2026</a> (PDF) wprost dopuszcza AI do streszczeń i nauki do egzaminów; zasady dla przedmiotu są w sylabusie.</p></details>
-      <details class="faq"><summary>Nie mam Maca. Co mogę zrobić?</summary><p>Uczyć się z notatek, które wyśle Ci ktoś z roku: notatka, fiszki i quiz działają w każdej przeglądarce. Wystarczy jedna osoba z Makiem na roku. Jeśli chcesz EduNote na Windowsa, Androida albo iPhone'a, zapisz się tutaj:</p><div id="waitlist-faq"></div></details>
+      <details class="faq"><summary>Nie mam Maca. Co mogę zrobić?</summary><p>Uczyć się z notatek, które wyśle Ci ktoś z roku: notatka, fiszki i quiz działają w każdej przeglądarce, a przedmiot zostaje w Twojej bibliotece. Wystarczy jedna osoba z Makiem na roku. Jeśli chcesz EduNote na Windowsa, Androida albo iPhone'a, zapisz się tutaj:</p><div id="waitlist-faq"></div></details>
       <details class="faq"><summary>Kto płaci, gdy jedna osoba notuje dla całego roku?</summary><p>Osoby, które dostają link, nigdy nie płacą. Teraz nie płaci też osoba notująca, bo aplikacja jest za darmo. Po wczesnym dostępie darmowy plan daje 3 notatki AI w tygodniu, więc przy notowaniu wszystkich wykładów zwykle potrzebny będzie EduNote Pro (24,99 zł miesięcznie).</p></details>
-      <details class="faq"><summary>Kto pisze notatki i co z moimi danymi?</summary><p>Notatki pisze model Claude firmy Anthropic (USA). Do AI trafia sam tekst zajęć, bez nagrania, przez serwer EduNote w UE (Frankfurt). Szczegóły są w <a href="prywatnosc/">polityce prywatności</a>.</p></details>
+      <details class="faq"><summary>Kto pisze notatki i co z moimi danymi?</summary><p>Notatki pisze model Claude firmy Anthropic (USA). Do AI trafia sam tekst zajęć, bez dźwięku, przez serwer EduNote w UE (Frankfurt). Szczegóły są w <a href="prywatnosc/">polityce prywatności</a>.</p></details>
       <details class="faq"><summary>Czy poradzi sobie w dużej sali?</summary><p>Tak, jeśli Mac dobrze słyszy prowadzącego, więc lepiej usiąść bliżej i nie zasłaniać mikrofonu. Przed nauką warto zerknąć, czy liczby i nazwy własne się zgadzają.</p></details>
-      <details class="faq"><summary>Co widzą osoby, którym wyślę link?</summary><p>Notatkę, pojęcia, fiszki i quiz. Nigdy nagranie ani transkrypcję, a nazwisko prowadzącego z planu zajęć EduNote zamienia na inicjały. Link działa do końca sesji poprawkowej: notatki z semestru zimowego do 15 marca, z letniego do 30 września.</p></details>
+      <details class="faq"><summary>Co widzą osoby, którym wyślę link?</summary><p>Notatkę, pojęcia, fiszki i quiz. Nigdy dźwięk ani transkrypcję, a nazwisko prowadzącego z planu zajęć EduNote zamienia na inicjały. Link działa do końca sesji poprawkowej: notatki z semestru zimowego do 15 marca, z letniego do 30 września.</p></details>
       <details class="faq"><summary>Co, jeśli notatka narusza czyjeś prawa?</summary><p>Zgłoś ją przez <a href="zglos/">formularz</a>. Każde zgłoszenie czyta człowiek, zwykle w ciągu 48 godzin.</p></details>
     </div>
   </section>
@@ -172,37 +169,54 @@
   <div class="frame">
     <div class="foot-grid">
       <div class="foot-first">
-        <a class="brand" href="./"><img class="brand-icon" src="icon.png" width="34" height="34" alt=""><img class="wordmark" src="logo.svg" width="128" height="34" alt="EduNote"></a>
+        <a class="brand" href="./" aria-label="EduNote"><img class="brand-icon" src="icon.png" width="34" height="34" alt=""><img class="wordmark wm-light" src="logo.svg" width="128" height="34" alt=""><img class="wordmark wm-dark" src="logo-dark.svg" width="128" height="34" alt=""></a>
         <p>Od studenta dla studentów.</p>
       </div>
-      <div class="foot-col"><b>EduNote</b><a href="#jak">Jak to działa</a><a href="n/#przyklad">Przykładowa notatka</a><a href="#cena">Cena</a><a href="#pytania">Pytania</a></div>
-      <div class="foot-col"><b>Pomoc</b><a href="zglos/">Zgłoś treść</a><a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a></div>
+      <div class="foot-col"><b>EduNote</b><a href="#jak">Jak to działa</a><a href="biblioteka/">Moja biblioteka</a><a href="n/#przyklad">Przykładowa notatka</a><a href="#cena">Cena</a><a href="#pytania">Pytania</a></div>
+      <div class="foot-col"><b>Pomoc</b><a href="skad-to-wiemy/">Skąd to wiemy?</a><a href="zglos/">Zgłoś treść</a><a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a></div>
       <div class="foot-col"><b>Zasady</b><a href="regulamin/">Regulamin</a><a href="prywatnosc/">Polityka prywatności</a></div>
     </div>
+    <div class="foot-theme"><span>Wygląd strony</span><div data-theme-switch="segmented"></div></div>
     <p class="foot-copy">© 2026 Marcin Różycki</p>
   </div>
 </footer>
-<script src="motion.js?v=3b70ceaa97"></script>
-<script src="platform.js?v=3b70ceaa97"></script>
-<script src="study.js?v=3b70ceaa97"></script>
-<script src="share.js?v=3b70ceaa97"></script>
-<script src="waitlist.js?v=3b70ceaa97"></script>
+<script src="theme.js?v=b960f5d284"></script>
+<script src="library.js?v=b960f5d284"></script>
+<script src="motion.js?v=b960f5d284"></script>
+<script src="platform.js?v=b960f5d284"></script>
+<script src="study.js?v=b960f5d284"></script>
+<script src="share.js?v=b960f5d284"></script>
+<script src="waitlist.js?v=b960f5d284"></script>
 <script>
-// Strona główna: pasek po przewinięciu, fiszki w telefonie, kroki z boku i przyciski zależne od urządzenia
+// Strona główna: pasek po przewinięciu, biblioteka dla tych, którzy już ją mają, fiszki w telefonie i przyciski
+// zależne od urządzenia (EduNote jest na razie tylko na Maca)
 (function () {
   "use strict";
   var MAIL = "mailto:?subject=" + encodeURIComponent("EduNote na Maca")
     + "&body=" + encodeURIComponent("EduNote w Mac App Store: https://apps.apple.com/app/id6824044215?ct=mail");
-  // zapis na inne urządzenia (waitlist.js), w pytaniach dla każdego, a bez Maca także na górze
   eduWaitlist(document.getElementById("waitlist-faq"), { privacy: "prywatnosc/" });
-  // gotowa prośba do prowadzącego o zgodę na nagrywanie (share.js)
   Array.prototype.forEach.call(document.querySelectorAll("[data-ask=lecturer]"), function (b) { b.addEventListener("click", eduAsk.lecturer); });
 
-  // po przewinięciu pasek odrywa się od brzegów (jak u Granoli)
+  // po przewinięciu pasek odrywa się od brzegów
   var bar = document.getElementById("bar");
   function stick() { bar.classList.toggle("stuck", window.scrollY > 8); }
   window.addEventListener("scroll", stick, { passive: true });
   stick();
+
+  // biblioteka: kto już otwierał linki od znajomych, ma do niej przycisk w pasku i pasek z przedmiotami nad nagłówkiem
+  var mine = window.eduLibrary ? eduLibrary.list().filter(function (x) { return !eduLibrary.expired(x); }) : [];
+  if (mine.length) {
+    document.getElementById("bar-lib").classList.remove("hidden");
+    var names = mine.slice(0, 3).map(function (x) { return x.subject || x.topic; }).filter(Boolean);
+    if (names.length) {
+      var text = document.getElementById("lib-return-text");
+      text.appendChild(document.createTextNode("Twoje notatki: "));
+      var b = document.createElement("b");
+      b.textContent = names.join(", ") + (mine.length > names.length ? " i " + (mine.length - names.length) + " więcej" : "");
+      text.appendChild(b);
+      document.getElementById("lib-return").classList.remove("hidden");
+    }
+  }
 
   // fiszki z n/przyklad.json w telefonie, pytanie skrócone, żeby zmieściło się w ramce
   eduStudy.start([
@@ -222,45 +236,35 @@
     }
   });
 
-  // kroki: z boku zaznaczony ten, który jest na ekranie
-  var links = document.querySelectorAll(".phases-nav a");
-  if ("IntersectionObserver" in window) {
-    var seen = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        Array.prototype.forEach.call(links, function (a) { a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id); });
-      });
-    }, { rootMargin: "-40% 0px -55% 0px" });
-    Array.prototype.forEach.call(document.querySelectorAll(".phase"), function (p) { seen.observe(p); });
-  }
-
-  // Na telefonie i na Windowsie strona „tylko na Maca” w App Store prowadzi donikąd: główną akcją jest przykład,
-  // do App Store prowadzi tylko link wysłany sobie na Maca, a przy cenie prośba do osoby z Makiem (cennik jest ten sam)
+  // Na telefonie i na Windowsie strona „tylko na Maca” w App Store prowadzi donikąd: główną akcją jest biblioteka
+  // albo przykład, a App Store tylko jako link wysłany sobie na Maca
   if (eduPlatform() !== "mac") {
     var ask = function () {
       eduShare(eduAsk.mac, "https://edunote.rozycki.pro/n/#przyklad", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
     };
     document.getElementById("no-mac").classList.remove("hidden");
-    // bez Maca od razu po „co możesz zrobić dziś” nauka z telefonu, a dopiero potem notowanie na Macu
     var jak = document.getElementById("jak");
-    jak.parentNode.insertBefore(document.getElementById("rok"), jak);
+    jak.parentNode.insertBefore(document.getElementById("biblioteka"), jak);
     eduWaitlist(document.getElementById("waitlist-home"), { privacy: "prywatnosc/" });
     document.getElementById("ask-mac").addEventListener("click", ask);
     var cta = document.getElementById("bar-cta");
-    cta.textContent = "Przykład";
-    cta.href = "n/#przyklad";
-    // bez Maca hasło mówi, co ma z tego ta osoba: link od roku i nauka z telefonu
-    document.querySelector(".hero-sub").innerHTML = "Ktoś z roku notuje wykład w EduNote.<br>Ty uczysz się z telefonu, bez instalowania.";
+    cta.textContent = mine.length ? "Moja biblioteka" : "Przykład";
+    cta.href = mine.length ? "biblioteka/" : "n/#przyklad";
+    if (mine.length) document.getElementById("bar-lib").classList.add("hidden");
+    document.getElementById("hero-sub").textContent = "Ktoś z roku notuje zajęcia w EduNote na Macu. Ty uczysz się z telefonu, we własnej bibliotece, bez konta i bez instalowania.";
     var get = document.getElementById("get");
-    get.textContent = "Zobacz przykładową notatkę";
-    get.href = "n/#przyklad";
-    var text = document.getElementById("platform-text");
-    text.textContent = "";
+    get.textContent = mine.length ? "Otwórz moją bibliotekę" : "Zobacz przykładową notatkę";
+    get.href = mine.length ? "biblioteka/" : "n/#przyklad";
+    var second = document.getElementById("get-second");
+    second.textContent = mine.length ? "Zobacz przykładową notatkę" : "Mam link od kogoś z roku";
+    second.href = mine.length ? "n/#przyklad" : "biblioteka/";
+    var t = document.getElementById("platform-text");
+    t.textContent = "";
     var mail = document.createElement("a");
     mail.href = MAIL;
     mail.textContent = "Masz Maca? Wyślij sobie link";
-    text.appendChild(document.createTextNode("Notatki otwierają się na każdym telefonie. "));
-    text.appendChild(mail);
+    t.appendChild(document.createTextNode("Notatki otwierają się na każdym telefonie. "));
+    t.appendChild(mail);
     var row = document.getElementById("price-row");
     row.innerHTML = "";
     var send = document.createElement("button");
@@ -276,11 +280,9 @@
     row.appendChild(wait);
   }
 
-  // Ruch (motion.js): sekcje pod pierwszym ekranem pojawiają się przy przewijaniu, a zdjęcia wczytywane później
-  // wyłaniają się w swojej ramce. Na końcu, bo bez Maca kolejność sekcji jest inna.
   if (window.eduMotion) {
-    eduMotion.reveal(document.querySelectorAll(".today-in, .feature h2, .points li, .feature > .shot, .band .eyebrow, .band h2, "
-      + ".band-lead, .phones figure, .band .btn-light, .phases-title, .phase, .price-tile, .faq-wrap > h2, details.faq, .foot-grid > div, .foot-copy"));
+    eduMotion.reveal(document.querySelectorAll(".steps5 h2, .step5, .band .eyebrow, .band h2, .band-lead, .phones figure, .band-cta, "
+      + ".today-in, .law5-in, .price-tile, .faq-wrap > h2, details.faq, .foot-grid > div, .foot-copy"));
     eduMotion.fadeImages(document.querySelectorAll("img[loading=lazy]"));
   }
 })();

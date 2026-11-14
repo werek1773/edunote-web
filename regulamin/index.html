@@ -2,17 +2,22 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F5EE">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Regulamin · EduNote</title>
 <meta name="description" content="Regulamin aplikacji EduNote.">
 <link rel="icon" href="../favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../style.css?v=b960f5d284">
+<!-- wygląd (jasny/ciemny, theme.js) i ruch (motion.js) ustawione przed pierwszym malowaniem, żeby nic nie mrugało -->
+<script>(function(d){var t=null;try{t=localStorage.getItem("edunote.theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="dark"?"#191A15":"#F7F5EE";if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.classList.add("motion")})(document.documentElement)</script>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="brand" href="../"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark" src="../logo.svg" width="128" height="34" alt="EduNote"></a>
+    <a class="brand" href="../" aria-label="EduNote"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark wm-light" src="../logo.svg" width="128" height="34" alt=""><img class="wordmark wm-dark" src="../logo-dark.svg" width="128" height="34" alt=""></a>
+    <div class="bar-tools"><div data-theme-switch="menu"></div><a class="btn btn-ghost btn-sm" href="../biblioteka/">Moja biblioteka</a></div>
   </div>
   <main class="prose">
     <h1>Regulamin EduNote</h1>
@@ -37,8 +42,10 @@
     <a href="../prywatnosc/">Polityka prywatności</a>
     <a href="../regulamin/">Regulamin</a>
     <a href="../zglos/">Zgłoś treść</a>
+    <a href="../skad-to-wiemy/">Skąd to wiemy?</a>
     <a href="mailto:marcin@rozycki.pro">marcin@rozycki.pro</a>
   </footer>
 </div>
+<script src="../theme.js?v=b960f5d284"></script>
 </body>
 </html>
