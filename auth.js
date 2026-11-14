@@ -155,25 +155,54 @@
     });
   }
 
-  function signInApple(redirect) {
+  // Okno Apple musi się otworzyć od razu w kliknięciu: Safari blokuje okna otwarte po czekaniu na sieć (wczytanie
+  // skryptu Apple, nonce). Dlatego prepareApple() robi to wszystko zawczasu, po wejściu na stronę logowania, a kliknięcie
+  // tylko otwiera okno. Każdy nonce idzie do Apple raz; po każdej próbie przygotowuje się następny.
+  var apple = null;
+  function prepareApple(redirect) {
     var n;
     return nonce().then(function (x) { n = x; return appleReady(redirect, n); })
-      .then(function () { return window.AppleID.auth.signIn(); })
-      .then(function (res) {
-        var a = (res && res.authorization) || {};
-        if (!a.id_token) throw new Error("Apple nie potwierdził logowania. Spróbuj jeszcze raz.");
-        return sb().auth.signInWithIdToken({ provider: "apple", token: a.id_token, nonce: n.raw }).then(function (r) {
-          if (r.error) throw r.error;
-          var session = r.data.session;
-          // kod autoryzacji dla funkcji account-apple (unieważnienie zgody przy usuwaniu konta); bez czekania
-          if (a.code && session) fn("account-apple", { authorization_code: a.code, client: "web" }, session.access_token).catch(function () {});
-          return session;
-        });
-      }, function (e) {
-        // zamknięte okienko Apple to nie błąd
-        if (e && (e.error === "popup_closed_by_user" || e.error === "user_cancelled_authorize")) { var c = new Error(""); c.cancelled = true; throw c; }
-        throw e && e.message ? e : new Error("Apple nie potwierdził logowania. Spróbuj jeszcze raz.");
+      .then(function () { apple = { n: n, redirect: redirect }; return true; });
+  }
+
+  var APPLE_ERRORS = {
+    popup_blocked_by_browser: "Przeglądarka zablokowała okno Apple. Zezwól na wyskakujące okna dla edunote.rozycki.pro albo zaloguj się kodem z e‑maila.",
+    user_trigger_new_signin_flow: "Okno Apple jest już otwarte. Dokończ w nim logowanie albo je zamknij i spróbuj jeszcze raz."
+  };
+
+  function signInApple(redirect) {
+    var ready = apple, n, flow;
+    if (ready && ready.redirect === redirect && window.AppleID) {
+      apple = null;
+      n = ready.n;
+      flow = window.AppleID.auth.signIn();
+    } else {
+      flow = nonce().then(function (x) { n = x; return appleReady(redirect, n); }).then(function () { return window.AppleID.auth.signIn(); });
+    }
+    var result = flow.then(function (res) {
+      var a = (res && res.authorization) || {};
+      if (!a.id_token) throw new Error("Apple nie przysłał potwierdzenia logowania. Spróbuj jeszcze raz albo zaloguj się kodem z e‑maila.");
+      return sb().auth.signInWithIdToken({ provider: "apple", token: a.id_token, nonce: n.raw }).then(function (r) {
+        if (r.error) {
+          if (window.console) console.warn("Apple → Supabase:", r.error);
+          throw new Error("Serwer EduNote nie przyjął logowania Apple (" + (r.error.message || r.error.code || "błąd") + "). Zaloguj się kodem z e‑maila.");
+        }
+        var session = r.data.session;
+        // kod autoryzacji dla funkcji account-apple (unieważnienie zgody przy usuwaniu konta); bez czekania
+        if (a.code && session) fn("account-apple", { authorization_code: a.code, client: "web" }, session.access_token).catch(function () {});
+        return session;
       });
+    }, function (e) {
+      // zamknięte okienko Apple to nie błąd
+      if (e && (e.error === "popup_closed_by_user" || e.error === "user_cancelled_authorize")) { var c = new Error(""); c.cancelled = true; throw c; }
+      if (window.console) console.warn("Apple:", e);
+      if (e && e.message) throw e;
+      var code = e && e.error ? String(e.error) : "";
+      throw new Error(APPLE_ERRORS[code] || ("Apple nie potwierdził logowania" + (code ? " (" + code + ")" : "") + ". Spróbuj jeszcze raz albo zaloguj się kodem z e‑maila."));
+    });
+    // następna próba z nowym nonce, gotowa przed kolejnym kliknięciem
+    result.then(null, function () {}).then(function () { prepareApple(redirect).catch(function () {}); });
+    return result;
   }
 
   // MARK: Google
@@ -226,6 +255,6 @@
   window.eduAuth = {
     client: sb, peek: peek, inApp: inApp, sendCode: sendCode, verifyCode: verifyCode, signInApple: signInApple, appleEnabled: appleEnabled,
     mountGoogle: mountGoogle, session: session, onChange: onChange, signOut: signOut, storageKey: STORAGE, ready: ready, open: OPEN,
-    initial: initial, personName: personName, rememberName: rememberName
+    initial: initial, personName: personName, rememberName: rememberName, prepareApple: prepareApple
   };
 })();

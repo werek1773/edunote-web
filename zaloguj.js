@@ -117,9 +117,12 @@
       .catch(function () { $("google").classList.add("hidden"); });
     A.appleEnabled().then(function (on) {
       if (!on) { $("apple").classList.add("hidden"); return; }
+      var redirect = location.origin + location.pathname;
+      // skrypt Apple i nonce zawczasu, żeby kliknięcie od razu otwierało okno (Safari blokuje spóźnione okna)
+      A.prepareApple(redirect).catch(function () {});
       $("apple").addEventListener("click", function () {
         error("start-error", "");
-        A.signInApple(location.origin + location.pathname).then(done).catch(function (err) {
+        A.signInApple(redirect).then(done).catch(function (err) {
           if (!err.cancelled) error("start-error", err.message || "Apple nie potwierdził logowania. Spróbuj jeszcze raz.");
         });
       });
