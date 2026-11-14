@@ -1239,6 +1239,8 @@ p, li, .lesson-sum, .shelf-latest { text-wrap: pretty; }
 .login-apple:active { transform: scale(.98); transition-duration: .08s; }
 :root[data-theme="dark"] .login-apple { background: #fff; color: #000; }
 .login-google { display: flex; justify-content: center; min-height: 44px; }
+/* okienko z przyciskiem Google ma jasny schemat: bez tego w ciemnym wyglądzie przeglądarka podkłada mu białe tło */
+.login-google iframe { color-scheme: light; }
 .login-google:empty { display: none; }
 .login-or { display: flex; align-items: center; gap: 12px; margin: 4px 0; color: var(--faint); font-size: 13.5px; }
 .login-or::before, .login-or::after { content: ""; flex: 1; border-top: 2px dashed var(--line); }
