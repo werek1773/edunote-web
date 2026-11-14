@@ -19,9 +19,9 @@
   var APPLE_SCRIPT = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/pl_PL/appleid.auth.js";
   // supabase-js leży obok auth.js (web/vendor); biblioteka wczytuje go dopiero dla zalogowanych (ready())
   var VENDOR = new URL("vendor/supabase-2.119.0.js", (document.currentScript && document.currentScript.src) || location.href).href;
-  // Logowanie widoczne dla wszystkich („Zaloguj się” w bibliotece). Do startu z nową polityką prywatności false:
-  // /zaloguj/ działa pod bezpośrednim adresem, a zalogowany widzi swoje konto, ale nikt inny nie trafi na logowanie.
-  var OPEN = false;
+  // Logowanie widoczne dla wszystkich („Zaloguj się” w bibliotece i na stronie głównej). Od 14.11.2026 true, razem z polityką
+  // prywatności o kontach; false chowa wejścia do logowania (strona /zaloguj/ działa wtedy tylko pod bezpośrednim adresem).
+  var OPEN = true;
   var GOOGLE_SCRIPT = "https://accounts.google.com/gsi/client";
 
   var client = null;
