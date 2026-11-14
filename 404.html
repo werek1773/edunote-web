@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nie ma takiej strony · EduNote</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F5EE">
+<!-- 404 serwer pokazuje pod dowolnym adresem (np. /a/b/), więc wszystkie ścieżki zaczynają się od „/” -->
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css?v=b960f5d284">
+<script>(function(d){var t=null;try{t=localStorage.getItem("edunote.theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="dark"?"#191A15":"#F7F5EE";if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.classList.add("motion")})(document.documentElement)</script>
+</head>
+<body class="app-page">
+<header class="bar app-bar">
+  <div class="bar-in">
+    <a class="brand" href="/" aria-label="EduNote"><img class="brand-icon" src="/icon.png" width="34" height="34" alt=""><img class="wordmark wm-light" src="/logo.svg" width="128" height="34" alt=""><img class="wordmark wm-dark" src="/logo-dark.svg" width="128" height="34" alt=""></a>
+    <div class="bar-tools"><div data-theme-switch="menu"></div></div>
+  </div>
+</header>
+
+<main class="doc">
+  <div class="missing">
+    <h1>Nie ma takiej strony</h1>
+    <p class="muted">Link może być niepełny albo przestał działać. Twoje notatki czekają w bibliotece.</p>
+    <p class="missing-actions"><a class="btn btn-primary" href="/biblioteka/">Moja biblioteka</a> <a class="btn btn-ghost" href="/">Czym jest EduNote?</a></p>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>EduNote · od studenta dla studentów</span>
+    <a href="/skad-to-wiemy/">Skąd to wiemy?</a>
+    <a href="/prywatnosc/">Polityka prywatności</a>
+    <a href="/regulamin/">Regulamin</a>
+  </div>
+</footer>
+<script src="/theme.js?v=b960f5d284"></script>
+</body>
+</html>

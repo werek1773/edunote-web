@@ -1,0 +1,23 @@
+# Nagłówki dla Cloudflare Pages (GitHub Pages ten plik ignoruje i podaje jak zwykły plik).
+# Bez pełnego Content-Security-Policy na razie: dojdzie razem z logowaniem, po sprawdzeniu Google i Apple.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+  Strict-Transport-Security: max-age=31536000
+
+# biblioteki z wersją w nazwie folderu (KaTeX, supabase-js) się nie zmieniają
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=2592000
+
+# kopia pod adresem *.pages.dev nie trafia do Google (strona ma jeden adres: edunote.rozycki.pro)
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
