@@ -138,7 +138,7 @@
     $("singles").classList.toggle("hidden", !notes.length);
     $("expired").classList.toggle("hidden", !gone.length);
     $("expired-meta").textContent = plural(gone.length, "link", "linki", "linków");
-    $("empty").classList.toggle("hidden", items.length > 0);
+    $("empty").classList.toggle("hidden", items.length > 0 || !!(mine && mine.hasData()));
     $("lib-sub").textContent = live.length
       ? "Notatki od ludzi z roku w jednym miejscu. Każdy link, który otworzysz, sam się tu zapisuje."
       : "Notatki od ludzi z roku w jednym miejscu.";
@@ -153,7 +153,15 @@
         el("span", { class: "today-count", text: "Powtórz " + plural(d.hard, "fiszkę", "fiszki", "fiszek") })
       ])]));
     });
-    $("today").classList.toggle("hidden", !due.length);
+    var own = mine ? mine.todayItems() : [];
+    own.forEach(function (x) {
+      $("today-list").appendChild(el("li", {}, [el("a", { class: "today-item", href: "#/przedmiot/" + x.subject.id }, [
+        el("span", { class: "today-name", text: x.subject.name || "Przedmiot" }),
+        el("span", { class: "today-count", text: "Powtórz " + plural(x.due, "fiszkę", "fiszki", "fiszek") })
+      ])]));
+    });
+    $("today").classList.toggle("hidden", !due.length && !own.length);
+    if (own.length) $("empty").classList.add("hidden");
     if (window.eduTypo) eduTypo(document.querySelector("main"));
 
     if (first && M && M.ok()) {
@@ -173,6 +181,86 @@
     location.href = "../" + p.kind + "/#" + p.code;
   });
 
+  // MARK: konto (etap 2) i moje notatki z Maca (etap 3)
+
+  var mine = null;
+  function account() {
+    var host = $("account"), who = window.eduAuth && eduAuth.peek();
+    host.innerHTML = "";
+    $("login-cta").classList.toggle("hidden", !!who || !window.eduAuth || !eduAuth.open);
+    if (!window.eduAuth) return;
+    if (!who) {
+      if (eduAuth.open) host.appendChild(el("a", { class: "btn btn-ghost btn-sm", href: "../zaloguj/?dalej=/biblioteka/", text: "Zaloguj się" }));
+      return;
+    }
+    // inicjał w kółku i menu: kto, wylogowanie
+    var initial = (who.name || who.email || "?").trim().charAt(0).toUpperCase();
+    var box = el("details", { class: "more account-menu" });
+    var sum = el("summary", { class: "avatar", "aria-label": "Konto: " + who.email, title: who.email, text: initial });
+    var list = el("div", { class: "more-list", role: "menu" }, [el("p", { class: "account-who", text: who.email }),
+      el("a", { class: "more-item", role: "menuitem", href: "../konto/", text: "Konto i ustawienia" })]);
+    var out = el("button", { type: "button", class: "more-item", role: "menuitem", text: "Wyloguj się z tej przeglądarki" });
+    out.addEventListener("click", function () {
+      eduAuth.signOut().then(function () { return window.eduSync ? eduSync.clear(who.id) : null; }).then(function () { location.href = "./"; });
+    });
+    list.appendChild(out);
+    box.appendChild(sum); box.appendChild(list);
+    host.appendChild(box);
+  }
+
+  function renderMine(api, offline) {
+    mine = api;
+    var n = api.shelf($("mine-subjects"), $("mine-status"));
+    $("mine").classList.toggle("hidden", !n);
+    if (offline) $("mine-status").textContent = "Bez połączenia: pokazuję ostatnio pobrane";
+    // z moimi notatkami półka linków od innych ma swoją nazwę
+    $("shelf-title").textContent = n ? "Od ludzi z roku" : "Przedmioty";
+    if (n) $("empty").classList.add("hidden");
+    render(false);
+  }
+
+  // Biblioteka na koncie (tabela library_items, tylko własne wiersze przez RLS): przy każdym otwarciu biblioteki
+  // nowsze zmiany z konta trafiają tutaj, a nowsze stąd na konto. Usunięcie to ślad removed = true. Bez tabeli na
+  // serwerze (przed wdrożeniem) biblioteka działa jak dotąd, tylko w tej przeglądarce.
+  var syncing = false;
+  function stamp(x) { return x.hidden ? x.removed_at : x.opened_at; }
+  function syncLibrary() {
+    if (syncing || !window.eduAuth || !eduAuth.peek()) return Promise.resolve();
+    syncing = true;
+    var client;
+    return eduAuth.session().then(function (s) {
+      if (!s) return;
+      client = eduAuth.client();
+      return client.from("library_items").select("kind,code,meta,added_at,opened_at,removed,updated_at").then(function (r) {
+        if (r.error) throw r.error;
+        var rows = r.data || [], server = {};
+        L.merge(rows);
+        rows.forEach(function (x) { server[x.kind + ":" + x.code] = x; });
+        var now = new Date().toISOString(), up = [];
+        L.all().forEach(function (item) {
+          var row = server[item.kind + ":" + item.code], rowStamp = row ? (row.removed ? row.updated_at : row.opened_at) : "";
+          if (row && String(stamp(item) || "") <= String(rowStamp || "")) return;
+          if (!row && item.hidden) return;
+          var meta = {};
+          ["subject", "topic", "author", "lessons", "cards", "questions", "latest", "expires_at", "updated_at"].forEach(function (k) { if (item[k] !== undefined) meta[k] = item[k]; });
+          up.push({ user_id: s.user.id, kind: item.kind, code: item.code, meta: meta, added_at: item.added_at || now,
+                    opened_at: item.opened_at || now, removed: !!item.hidden, updated_at: stamp(item) || now });
+        });
+        if (up.length) return client.from("library_items").upsert(up, { onConflict: "user_id,kind,code" }).then(function (u) { if (u.error) throw u.error; });
+      });
+    }).catch(function (e) {
+      // brak tabeli albo sieci: biblioteka zostaje w tej przeglądarce, bez komunikatu
+      if (window.console) console.info("Biblioteka na koncie niedostępna:", e && (e.message || e.code));
+    }).then(function () { syncing = false; });
+  }
+
   L.onChange(function () { render(false); });
   render(true);
+  account();
+  syncLibrary().then(function () { render(false); });
+  // usunięcie albo powrót pozycji w tej karcie: od razu na konto
+  L.onChange(function () { setTimeout(syncLibrary, 400); });
+  if (window.eduMine && window.eduAuth && eduAuth.peek()) {
+    eduMine.start({ home: $("home"), view: $("view"), render: renderMine, onHome: function () { render(false); } }).catch(function () {});
+  }
 })();
