@@ -35,7 +35,8 @@
   function signedIn(session) {
     user = session.user;
     var meta = user.user_metadata || {}, providers = (user.app_metadata && user.app_metadata.providers) || [user.app_metadata && user.app_metadata.provider];
-    $("who-initial").textContent = (meta.full_name || meta.name || user.email || "?").trim().charAt(0).toUpperCase();
+    $("who-initial").textContent = A.initial(A.peek());
+    A.personName().then(function () { $("who-initial").textContent = A.initial(A.peek()); });
     breakable($("who-email"), user.email || "Konto bez adresu e‑mail");
     $("who-via").textContent = providers.filter(Boolean).map(function (p) { return VIA[p] || p; }).join(" · ");
     ["who-box", "devices-box", "actions-box"].forEach(function (id) { $(id).classList.remove("hidden"); });

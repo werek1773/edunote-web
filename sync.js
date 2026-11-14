@@ -7,6 +7,18 @@
   "use strict";
   var REF = Date.UTC(2001, 0, 1);
   var PAGE = 1000;
+  // rekord ustawień „profile” z aplikacji (imię i poziom studiów), SyncPrefsID.profile w SyncRecords.swift
+  var PROFILE = "7e5c0001-0000-4000-8000-000000000002";
+
+  // Odwołania do innych rekordów (subjectID, noteID, noteIDs…) aplikacja zapisuje wielkimi literami (UUID.uuidString),
+  // a kolumna id wraca z bazy małymi, więc przed łączeniem wszystko sprowadzamy do małych liter
+  function lowerIDs(p) {
+    Object.keys(p).forEach(function (k) {
+      if (/ID$/.test(k) && typeof p[k] === "string") p[k] = p[k].toLowerCase();
+      else if (/IDs$/.test(k) && Array.isArray(p[k])) p[k] = p[k].map(function (v) { return typeof v === "string" ? v.toLowerCase() : v; });
+    });
+    return p;
+  }
 
   // data z aplikacji (sekundy od 1.01.2001) → Date
   function date(sec) { return typeof sec === "number" ? new Date(REF + sec * 1000) : null; }
@@ -82,10 +94,10 @@
   function model(uid) {
     return ready(uid).then(function (db) { return Promise.all([all(db, "records"), tx(db, "meta", "readonly", function (s) { return s.get("pulled_at"); })]); })
       .then(function (r) {
-        var recs = r[0], m = { subjects: {}, notes: {}, blocks: {}, cards: {}, boards: {}, exams: {}, materials: {}, slots: {}, pulledAt: r[1] || 0 };
+        var recs = r[0], m = { subjects: {}, notes: {}, blocks: {}, cards: {}, boards: {}, exams: {}, materials: {}, slots: {}, prefs: {}, personName: "", pulledAt: r[1] || 0 };
         Object.keys(recs).forEach(function (k) {
-          var x = recs[k], p = x.payload || {};
-          p.id = x.id;
+          var x = recs[k], p = lowerIDs(x.payload || {});
+          p.id = String(x.id).toLowerCase();
           switch (x.entity) {
             case "subject": m.subjects[x.id] = p; break;
             case "note": m.notes[x.id] = p; break;
@@ -95,8 +107,11 @@
             case "exam": m.exams[x.id] = p; break;
             case "material": m.materials[x.id] = p; break;
             case "slot": m.slots[x.id] = p; break;
+            case "prefs": m.prefs[p.id] = p; break;
           }
         });
+        var profile = m.prefs[PROFILE];
+        if (profile && typeof profile.name === "string") m.personName = profile.name.trim();
         // bloki przy notatkach (kolejność jak w aplikacji: czas, potem order), fiszki przy notatkach i przedmiotach
         Object.keys(m.notes).forEach(function (id) { m.notes[id].blocks = []; m.notes[id].cards = []; });
         Object.keys(m.blocks).forEach(function (id) { var b = m.blocks[id], n = b.noteID && m.notes[b.noteID]; if (n) n.blocks.push(b); });

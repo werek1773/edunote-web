@@ -1298,7 +1298,8 @@ p, li, .lesson-sum, .shelf-latest { text-wrap: pretty; }
   -webkit-tap-highlight-color: transparent;
 }
 .avatar::-webkit-details-marker { display: none; }
-.account-menu { margin: 0; }
+/* bez ujemnego marginesu menu „…” z kart (details.more), żeby kółko stało na środku paska */
+details.more.account-menu { margin: 0; }
 .account-menu .more-list { min-width: 260px; }
 .account-who { margin: 6px 12px 8px; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
 .lib-account { padding: 20px 22px; margin: 6px 0 22px; }

@@ -77,7 +77,7 @@
 
   function subjectCard(item) {
     var hard = hardCount(item), left = item.expires_at ? daysLeft(item.expires_at) : null;
-    var meta = ["udostępnia " + (item.author || "ktoś z roku"), item.lessons ? plural(item.lessons, "notatka", "notatki", "notatek") : ""]
+    var meta = ["udostępnia " + (item.author ? L.person(item.author) : "ktoś z roku"), item.lessons ? plural(item.lessons, "notatka", "notatki", "notatek") : ""]
       .filter(Boolean).join(" · ");
     var latest = item.latest && (item.latest.topic || item.latest.label);
     var card = el("a", { class: "shelf-card", href: L.href(item, "../") }, [
@@ -193,8 +193,8 @@
       if (eduAuth.open) host.appendChild(el("a", { class: "btn btn-ghost btn-sm", href: "../zaloguj/?dalej=/biblioteka/", text: "Zaloguj się" }));
       return;
     }
-    // inicjał w kółku i menu: kto, wylogowanie
-    var initial = (who.name || who.email || "?").trim().charAt(0).toUpperCase();
+    // inicjał w kółku (imię z aplikacji na Macu, nie z konta Google) i menu: kto, wylogowanie
+    var initial = eduAuth.initial(who);
     var box = el("details", { class: "more account-menu" });
     var sum = el("summary", { class: "avatar", "aria-label": "Konto: " + who.email, title: who.email, text: initial });
     var list = el("div", { class: "more-list", role: "menu" }, [el("p", { class: "account-who", text: who.email }),
@@ -208,11 +208,13 @@
     host.appendChild(box);
   }
 
-  function renderMine(api, offline) {
+  function renderMine(api, offline, loading) {
     mine = api;
     var n = api.shelf($("mine-subjects"), $("mine-status"));
-    $("mine").classList.toggle("hidden", !n);
-    if (offline) $("mine-status").textContent = "Bez połączenia: pokazuję ostatnio pobrane";
+    // przy pierwszym pobieraniu i przy błędzie sekcja zostaje widoczna z wyjaśnieniem, zamiast zniknąć bez słowa
+    $("mine").classList.toggle("hidden", !n && !loading && !offline);
+    if (!n && loading) $("mine-status").textContent = "Pobieram notatki z Twojego Maca…";
+    if (offline) $("mine-status").textContent = n ? "Bez połączenia: pokazuję ostatnio pobrane" : "Nie udało się pobrać notatek z Maca. Odśwież stronę za chwilę.";
     // z moimi notatkami półka linków od innych ma swoją nazwę
     $("shelf-title").textContent = n ? "Od ludzi z roku" : "Przedmioty";
     if (n) $("empty").classList.add("hidden");
@@ -257,6 +259,8 @@
   L.onChange(function () { render(false); });
   render(true);
   account();
+  // imię z aplikacji (zamiast imienia z Google) do inicjału w pasku
+  if (window.eduAuth && eduAuth.peek()) eduAuth.personName().then(function () { account(); });
   syncLibrary().then(function () { render(false); });
   // usunięcie albo powrót pozycji w tej karcie: od razu na konto
   L.onChange(function () { setTimeout(syncLibrary, 400); });

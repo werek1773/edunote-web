@@ -12,6 +12,9 @@
   // klucz publiczny (publishable), ten sam co w aplikacji i w note.js; nie jest sekretem
   var KEY = "sb_publishable_XtknqXVtb-T-5Wd-oKFxEA_NINWbDsE";
   var STORAGE = "edunote.konto";
+  // imię z aplikacji (ustawienia „profile” z synchronizacji) dla tego konta: { id, name }
+  var NAME = "edunote.konto.imie";
+  var PROFILE = "7e5c0001-0000-4000-8000-000000000002";
   var APPLE_CLIENT = "app.edunote.EduNote.web";
   var APPLE_SCRIPT = "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/pl_PL/appleid.auth.js";
   // supabase-js leży obok auth.js (web/vendor); biblioteka wczytuje go dopiero dla zalogowanych (ready())
@@ -37,9 +40,34 @@
       var d = JSON.parse(localStorage.getItem(STORAGE) || "null");
       var u = d && (d.user || (d.currentSession && d.currentSession.user));
       if (!u) return null;
-      var meta = u.user_metadata || {};
-      return { email: u.email || "", name: meta.full_name || meta.name || "", id: u.id };
+      var meta = u.user_metadata || {}, mine = null;
+      try { mine = JSON.parse(localStorage.getItem(NAME) || "null"); } catch (e) {}
+      var own = mine && mine.id === u.id && mine.name ? mine.name : "";
+      return { email: u.email || "", name: own || meta.full_name || meta.name || "", id: u.id };
     } catch (e) { return null; }
+  }
+
+  // Inicjał w kółku: imię, a bez imienia początek adresu e-mail (ale nie ukrytego adresu Apple, np. j8x…@privaterelay)
+  function initial(who) {
+    if (!who) return "?";
+    var src = who.name || (/@privaterelay\.appleid\.com$/i.test(who.email || "") ? "" : who.email) || "";
+    return src.trim().charAt(0).toLocaleUpperCase("pl-PL") || "?";
+  }
+  function rememberName(id, name) { try { localStorage.setItem(NAME, JSON.stringify({ id: id, name: name })); } catch (e) {} }
+
+  // Imię, którym podpisujesz się w aplikacji na Macu (AccountState.personName). Imię z konta Google bywa inne
+  // (np. pełne imię z innego kontekstu), więc w pasku i w koncie liczy się to z aplikacji. Zapamiętane dla tego konta.
+  function personName() {
+    var who = peek();
+    if (!who) return Promise.resolve("");
+    return ready().then(function () {
+      return sb().from("sync_records").select("payload").eq("entity", "prefs").eq("id", PROFILE).maybeSingle();
+    }).then(function (r) {
+      var n = r && r.data && r.data.payload && r.data.payload.name;
+      n = typeof n === "string" ? n.trim() : "";
+      if (n) rememberName(who.id, n);
+      return n || who.name;
+    }).catch(function () { return who.name; });
   }
 
   // Przeglądarki w aplikacjach (Messenger, Instagram, Facebook, TikTok, LinkedIn, Snapchat): Google tam blokuje
@@ -190,10 +218,14 @@
   function ready() { return window.supabase && window.supabase.createClient ? Promise.resolve() : load(VENDOR); }
   function session() { return ready().then(function () { return sb().auth.getSession(); }).then(function (r) { return r.data.session; }); }
   function onChange(fn) { return sb().auth.onAuthStateChange(function (event, s) { fn(event, s); }); }
-  function signOut() { return ready().then(function () { return sb().auth.signOut({ scope: "local" }); }); }
+  function signOut() {
+    try { localStorage.removeItem(NAME); } catch (e) {}
+    return ready().then(function () { return sb().auth.signOut({ scope: "local" }); });
+  }
 
   window.eduAuth = {
     client: sb, peek: peek, inApp: inApp, sendCode: sendCode, verifyCode: verifyCode, signInApple: signInApple, appleEnabled: appleEnabled,
-    mountGoogle: mountGoogle, session: session, onChange: onChange, signOut: signOut, storageKey: STORAGE, ready: ready, open: OPEN
+    mountGoogle: mountGoogle, session: session, onChange: onChange, signOut: signOut, storageKey: STORAGE, ready: ready, open: OPEN,
+    initial: initial, personName: personName, rememberName: rememberName
   };
 })();

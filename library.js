@@ -194,8 +194,14 @@
     if (e.key === KEY) listeners.forEach(function (fn) { try { fn(); } catch (err) {} });
   });
 
+  // Podpis autora tak, jak go wpisał, tylko z wielkiej litery („marcin” → „Marcin”)
+  function person(name) {
+    var s = String(name || "").trim();
+    return s ? s.charAt(0).toLocaleUpperCase("pl-PL") + s.slice(1) : "";
+  }
+
   window.eduLibrary = {
-    save: save, remove: remove, list: list, all: all, merge: merge, count: count, expired: expired, href: href, parse: parse, offer: offer, consented: consented, allow: consent,
+    person: person, save: save, remove: remove, list: list, all: all, merge: merge, count: count, expired: expired, href: href, parse: parse, offer: offer, consented: consented, allow: consent,
     onChange: function (fn) { listeners.push(fn); }
   };
 })();

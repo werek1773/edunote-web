@@ -241,11 +241,14 @@
       client = A.client(); uid = s.user.id;
       return S.model(uid).then(function (m) {
         model = m;
-        opts.render(api);
+        opts.render(api, false, true);
         route();
         return S.pull(client, uid).then(function (count) {
           return S.model(uid).then(function (m2) { model = m2; opts.render(api); if (count && /^#\//.test(location.hash)) route(); });
-        }).catch(function () { opts.render(api, true); });
+        }).catch(function (e) {
+          if (window.console) console.warn("Notatki z Maca: nie udało się pobrać", e && (e.message || e.code || e));
+          opts.render(api, true);
+        });
       });
     });
   }

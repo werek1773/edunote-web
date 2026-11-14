@@ -80,7 +80,7 @@
     var title = data.subject || "Notatki z zajęć";
     document.title = title + ": notatki · EduNote";
     $("title").textContent = title;
-    $("byline").textContent = "Udostępnia " + (data.author || "ktoś z roku") + " · " + plural(notes.length, "notatka", "notatki", "notatek");
+    $("byline").textContent = "Udostępnia " + (data.author ? (window.eduLibrary ? eduLibrary.person(data.author) : data.author) : "ktoś z roku") + " · " + plural(notes.length, "notatka", "notatki", "notatek");
     until = data.expires_at ? "Link działa do " + V.lastDay(data.expires_at) + "." : "";
     $("valid").textContent = until;
     $("report").href = "../zglos/#n=" + code;
