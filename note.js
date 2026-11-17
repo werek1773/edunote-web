@@ -737,13 +737,16 @@
     return section;
   }
 
-  // Fiszki do nauki w przeglądarce: prawdziwe fiszki z aplikacji (pole `cards`, gdy aplikacja zacznie je wysyłać),
-  // a do tego czasu pojęcia (termin → definicja) i pytania do nauki (pytanie → odpowiedź)
+  // Fiszki do nauki w przeglądarce: prawdziwe fiszki z aplikacji (pole `cards`), a w starych linkach bez nich pojęcia
+  // (termin → definicja) i pytania do nauki (pytanie → odpowiedź). Definicja dłuższa niż 16 słów nie jest fiszką:
+  // koleżanki Marcina dostawały całe akapity na tyle (17.11), taka definicja zostaje w „Pojęciach”.
   function cardsOf(c) {
     var out = [];
     (c.cards || []).forEach(function (k) { if (k.front && k.back) out.push({ front: k.front, back: k.back }); });
     if (out.length) return out;
-    (c.concepts || []).forEach(function (k) { if (k.term && k.definition) out.push({ front: k.term, back: k.definition }); });
+    (c.concepts || []).forEach(function (k) {
+      if (k.term && k.definition && k.definition.split(/\s+/).length <= 16) out.push({ front: k.term, back: k.definition });
+    });
     (c.questions || []).forEach(function (q) { if (q.question && q.answer) out.push({ front: q.question, back: q.answer }); });
     return out;
   }
@@ -769,6 +772,106 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
   }
 
+  // Tekst z indeksami: znaki indeksu dolnego i górnego (yₜ₋₁, x²) jako <sub>/<sup> ze zwykłymi literami, a litera
+  // z kreską lub daszkiem (x̄, ŷ) jako span. Na części telefonów te znaki Unicode wychodziły jako kwadraty.
+  var SUB = "₀₁₂₃₄₅₆₇₈₉₋₊ᵢⱼₙₜₖₑᵤₓₒₐᵣₘₚₛ", SUB_TO = "0123456789−+ijntkeuxoarmps";
+  var SUP = "⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺ⁿ", SUP_TO = "0123456789−+n";
+  function rich(text) {
+    var span = el("span"), t = eduStudy.tidy(String(text)).normalize("NFD"), buf = "", i = 0;
+    function flush() { if (buf) { span.appendChild(document.createTextNode(buf.normalize("NFC"))); buf = ""; } }
+    while (i < t.length) {
+      var ch = t[i], kind = SUB.indexOf(ch) >= 0 ? "sub" : SUP.indexOf(ch) >= 0 ? "sup" : "";
+      if (kind) {
+        var from = kind === "sub" ? SUB : SUP, to = kind === "sub" ? SUB_TO : SUP_TO, run = "";
+        while (i < t.length && from.indexOf(t[i]) >= 0) { run += to[from.indexOf(t[i])]; i++; }
+        flush(); span.appendChild(el(kind, { text: run })); continue;
+      }
+      if ((t[i + 1] === "\u0304" || t[i + 1] === "\u0302") && /[A-Za-z]/.test(ch)) {
+        flush(); span.appendChild(el("span", { class: t[i + 1] === "\u0304" ? "ov" : "hat", text: ch })); i += 2; continue;
+      }
+      buf += ch; i++;
+    }
+    flush();
+    return span;
+  }
+
+  // Sekcja z liniami z prefiksem (docs/notatki-jakosc-projekt.md, 2.2): „- ” lista, „Wzór:”, „gdzie:”, „Przykład:” z
+  // „Dane/Obliczenie/Wynik:”, „Uwaga:”, „| ” tabela. Bez prefiksów wychodzą same akapity, jak w starych notatkach.
+  function markup(body) {
+    var out = [], lines = String(body || "").split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean), i = 0;
+    function pref(line, names) {
+      var m = line.match(/^([A-Za-zÀ-ž]+)\s*:\s*(.*)$/);
+      if (!m) return null;
+      var k = fold(m[1]);
+      return names.indexOf(k) >= 0 ? { key: k, rest: m[2] } : null;
+    }
+    function bad(f) { return /\\|_\{|\^\{|\$/.test(f) || (f.match(/[([{]/g) || []).length !== (f.match(/[)\]}]/g) || []).length; }
+    while (i < lines.length) {
+      var line = lines[i], p;
+      if (/^[-•–*]\s+/.test(line)) {
+        var items = [];
+        while (i < lines.length && /^[-•–*]\s+/.test(lines[i])) { items.push(lines[i].replace(/^[-•–*]\s+/, "")); i++; }
+        if (items.length === 1) { out.push(el("p", {}, [rich(items[0])])); continue; }
+        out.push(el("ul", { class: "pts" }, items.map(function (t) { return el("li", {}, [rich(t)]); })));
+        continue;
+      }
+      if (/^\|/.test(line)) {
+        var rows = [];
+        while (i < lines.length && /^\|/.test(lines[i])) {
+          var cells = lines[i].replace(/^\||\|$/g, "").split("|").map(function (x) { return x.trim(); });
+          if (!cells.every(function (x) { return /^:?-{2,}:?$/.test(x); })) rows.push(cells);
+          i++;
+        }
+        var cols = rows.length ? rows[0].length : 0;
+        if (rows.length < 2 || cols < 2 || rows.some(function (r) { return r.length !== cols; })) {
+          rows.forEach(function (r) { out.push(el("p", { text: r.join(" · ") })); });
+          continue;
+        }
+        var head = rows[0];
+        out.push(el("div", { class: "cmp-wrap" }, [el("table", { class: "cmp" }, [
+          el("thead", {}, [el("tr", {}, head.map(function (h) { return el("th", { text: h }); }))]),
+          el("tbody", {}, rows.slice(1).map(function (r) {
+            return el("tr", {}, r.map(function (c, j) { return el("td", j ? { "data-col": head[j] } : {}, [rich(c)]); }));
+          }))
+        ])]));
+        continue;
+      }
+      if ((p = pref(line, ["wzor"]))) {
+        i++;
+        if (bad(p.rest)) { out.push(el("p", {}, [rich(p.rest)])); continue; }
+        var eq = p.rest.split(" = "), box = el("div", { class: "fx" });
+        // „nazwa = wyrażenie”: nazwa słowami nad wzorem, gdy to słowa, a nie symbol
+        if (eq.length > 1 && /[a-ząćęłńóśźż]{3,}\s/i.test(eq[0])) {
+          box.appendChild(el("p", { class: "fx-name", text: eq[0] }));
+          box.appendChild(el("p", { class: "fx-expr" }, [rich(eq.slice(1).join(" = "))]));
+        } else box.appendChild(el("p", { class: "fx-expr" }, [rich(p.rest)]));
+        if (i < lines.length && (p = pref(lines[i], ["gdzie"]))) { box.appendChild(el("p", { class: "fx-where" }, [rich("gdzie: " + p.rest)])); i++; }
+        out.push(box);
+        continue;
+      }
+      if ((p = pref(line, ["przyklad", "dane", "obliczenie", "wynik"]))) {
+        var ex = el("div", { class: "ex" }, [el("p", { class: "ex-label", text: "Przykład" })]), dl = el("dl", { class: "ex-rows" });
+        if (p.key === "przyklad") { ex.appendChild(el("p", { class: "ex-text" }, [rich(p.rest)])); i++; }
+        var LABEL = { dane: "Dane", obliczenie: "Obliczenie", wynik: "Wynik" };
+        while (i < lines.length && (p = pref(lines[i], ["dane", "obliczenie", "wynik"]))) {
+          dl.appendChild(el("div", { class: p.key === "wynik" ? "res" : "" }, [el("dt", { text: LABEL[p.key] }), el("dd", {}, [rich(p.rest)])]));
+          i++;
+        }
+        if (dl.childNodes.length) ex.appendChild(dl);
+        out.push(ex);
+        continue;
+      }
+      if ((p = pref(line, ["uwaga"]))) {
+        out.push(el("p", { class: "warn" }, [el("strong", { text: "Uwaga: " }), rich(p.rest)]));
+        i++;
+        continue;
+      }
+      out.push(el("p", {}, [rich(line)]));
+      i++;
+    }
+    return out;
+  }
+
   // Treść notatki jak w aplikacji: działy, własne dopiski, tablice, wyjaśnienie wizualne, pojęcia na kartach, „Może być
   // na kolokwium”, zadania i pytania, zadanie domowe. „W skrócie” każda strona stawia sama. Pojęcia i pytania są
   // zwinięte: rozwinięte wydłużały notatkę na telefonie o kilka ekranów, a gdy fiszki powstają z nich samych
@@ -783,23 +886,45 @@
           el("span", { class: "fold-meta", text: meta + (fromNote && cards.length ? " · są też w fiszkach" : "") })])
       ].concat(children))]);
     }
-    (c.sections || []).forEach(function (s) {
-      var sec = el("section", { class: "section" }, [el("h2", { text: s.heading })]);
-      (s.body || "").split(/\n+/).forEach(function (p) { if (p.trim()) sec.appendChild(el("p", { text: eduStudy.tidy(p) })); });
-      out.push(sec);
+    // „Najważniejsze” z nowych notatek (keyPoints); stare notatki mają tylko streszczenie, które stawia sama strona
+    if (c.keyPoints && c.keyPoints.length) {
+      out.push(el("section", { class: "brief key-brief" }, [el("p", { class: "brief-label", text: "Najważniejsze" }),
+        el("ol", { class: "key" }, c.keyPoints.map(function (t) { return el("li", {}, [rich(t)]); }))]));
+    }
+    var sections = (c.sections || []).filter(function (s) { return s.heading || s.body; });
+    var base = "s" + Math.random().toString(36).slice(2, 6);
+    // spis sekcji od czterech: na telefonie notatka ma kilka ekranów
+    if (sections.length >= 4) {
+      out.push(el("nav", { class: "toc", "aria-label": "Sekcje notatki" }, sections.map(function (s, i) {
+        return el("a", { href: "#" + base + (i + 1), text: s.heading || "Sekcja " + (i + 1) });
+      })));
+    }
+    sections.forEach(function (s, i) {
+      var h = el("h2", { id: base + (i + 1) }, [el("span", { class: "sec-no", text: ("0" + (i + 1)).slice(-2) }), document.createTextNode(s.heading)]);
+      out.push(el("section", { class: "section" }, [h].concat(markup(s.body))));
+    });
+    (c.notes || []).forEach(function (t) {
+      out.push(el("p", { class: "warn" }, [el("strong", { text: "Poprawione w notatce: " }), rich(t)]));
     });
     (c.own || []).forEach(function (t) { out.push(el("p", { class: "own", text: t })); });
     (c.boards || []).forEach(function (b) { if (b && b.url) out.push(boardFigure(b)); });
     if (c.visual && c.visual.slides && c.visual.slides.length) out.push(visual(c.visual));
     if (c.concepts && c.concepts.length) {
-      var grid = el("div", { class: "concepts" });
-      c.concepts.forEach(function (k) {
-        grid.appendChild(el("div", { class: "concept" }, [
-          el("p", { class: "term" }, [document.createTextNode(k.term), k.important ? el("span", { class: "key-chip", text: "kluczowe" }) : null]),
-          el("p", { class: "def", text: eduStudy.tidy(k.definition) })
+      // lista definicji, kluczowe najpierw; definicja w kolorze tekstu, bo to treść do nauki
+      var list = c.concepts.filter(function (k) { return k.important; }).concat(c.concepts.filter(function (k) { return !k.important; }));
+      var dl = el("dl", { class: "terms" });
+      list.forEach(function (k) {
+        dl.appendChild(el("div", {}, [
+          el("dt", {}, [document.createTextNode(k.term), k.important ? el("span", { class: "key-chip", text: "kluczowe" }) : null]),
+          el("dd", {}, [rich(k.definition)]),
+          k.formula ? el("dd", { class: "fx-inline" }, [rich(k.formula)]) : null
         ]));
       });
-      out.push(folded("Pojęcia", eduStudy.plural(c.concepts.length, "definicja", "definicje", "definicji"), [grid]));
+      if (list.length <= 8) {
+        out.push(el("section", { class: "section" }, [el("h2", { text: "Pojęcia" }), dl]));
+      } else {
+        out.push(folded("Pojęcia", eduStudy.plural(list.length, "definicja", "definicje", "definicji"), [dl]));
+      }
     }
     if (c.exam && c.exam.length) {
       var ul = el("ul", { class: "plain" });

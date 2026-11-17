@@ -367,6 +367,67 @@ details.faq p { margin: 0 0 18px; color: var(--muted); }
 .concept { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
 .concept .term { font-weight: 700; margin: 0 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .concept .def { margin: 0; color: var(--muted); font-size: 15.5px; line-height: 1.5; }
+
+/* Notatka z nowym zapisem sekcji (docs/notatki-jakosc-projekt.md, 5.1): listy, wzory, przykłady, uwagi, tabele, pojęcia */
+.section > p, .section > ul.pts, .section > .fx, .section > .ex, .section > .warn { max-width: 66ch; }
+.sec-no { display: block; font: 700 12px var(--sans); color: var(--faint); letter-spacing: .06em; margin-bottom: 4px; font-stretch: 100%; }
+.key-brief { margin-top: 14px; }
+ol.key { list-style: none; counter-reset: key; margin: 6px 0 0; padding: 0; }
+ol.key li { counter-increment: key; position: relative; padding-left: 34px; margin: 0 0 9px; font-size: 16.5px; line-height: 1.45; }
+ol.key li::before { content: counter(key); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--mat); color: var(--mat-text); font: 700 12.5px/22px var(--sans); text-align: center; }
+.toc { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; margin: 18px calc(-1 * var(--gutter)) 0;
+  padding: 0 var(--gutter) 4px; scrollbar-width: none; }
+.toc a { flex: none; scroll-snap-align: start; font: 600 14px var(--sans); padding: 7px 12px; border: 1px solid var(--line);
+  border-radius: 999px; white-space: nowrap; color: var(--muted); text-decoration: none; }
+.section h2[id] { scroll-margin-top: 90px; }
+ul.pts { list-style: none; margin: 4px 0 14px; padding: 0; }
+ul.pts li { position: relative; padding-left: 20px; margin-bottom: 7px; }
+ul.pts li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--moss); }
+.fx { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 6px 0 14px; }
+.fx p { margin: 0; }
+.fx-name { font: 700 11px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.fx-expr { font: 500 19px/1.4 "STIX Two Text", "Cambria Math", "Times New Roman", serif; overflow-x: auto; white-space: nowrap; padding: 6px 0 2px; }
+.fx-where { font-size: 14.5px; color: var(--muted); margin-top: 6px !important; }
+.fx-expr sub, .fx-expr sup, .fx-inline sub, .fx-inline sup, .section sub, .section sup, .terms sub, .terms sup { font-size: .72em; line-height: 0; }
+.ov { text-decoration: overline; }
+.hat { position: relative; }
+.hat::before { content: "^"; position: absolute; left: 50%; top: -.55em; transform: translateX(-50%); font-size: .8em; }
+.ex { background: var(--mustard-soft); border-radius: 14px; padding: 14px 16px; margin: 6px 0 14px; }
+.ex p { margin: 0; }
+.ex-label { font: 700 11px var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--mustard-text); margin-bottom: 4px !important; }
+dl.ex-rows { display: grid; grid-template-columns: 92px 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 15.5px; }
+dl.ex-rows > div { display: contents; }
+dl.ex-rows dt { color: var(--mustard-text); font-weight: 650; }
+dl.ex-rows dd { margin: 0; }
+dl.ex-rows .res dd { font-weight: 700; }
+.warn { border-left: 3px solid var(--coral); background: var(--coral-soft); border-radius: 0 12px 12px 0; padding: 10px 14px; font-size: 15.5px; margin: 6px 0 14px; }
+.warn strong { color: var(--coral-text); }
+.cmp-wrap { overflow-x: auto; margin: 6px calc(-1 * var(--gutter)) 14px; padding: 0 var(--gutter); }
+table.cmp { border-collapse: collapse; width: 100%; min-width: 440px; font-size: 15px; }
+.cmp th { text-align: left; font: 700 12px var(--sans); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line-strong); }
+.cmp td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.cmp td:first-child { font-weight: 650; color: var(--muted); }
+dl.terms { margin: 4px 0 0; }
+dl.terms > div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+dl.terms > div:last-child { border-bottom: 0; }
+dl.terms dt { font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+dl.terms dd { margin: 2px 0 0; color: var(--ink); font-size: 16px; line-height: 1.5; }
+dl.terms dd.fx-inline { font: 500 16.5px/1.4 "STIX Two Text", "Cambria Math", "Times New Roman", serif; overflow-x: auto; white-space: nowrap; }
+@media (max-width: 480px) {
+  .cmp-wrap { overflow: visible; margin: 6px 0 14px; padding: 0; }
+  table.cmp { min-width: 0; }
+  table.cmp, .cmp tbody, .cmp tr, .cmp td { display: block; }
+  .cmp thead { display: none; }
+  .cmp tr { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+  .cmp td { border: 0; padding: 2px 0; }
+  .cmp td:first-child { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .cmp td[data-col]::before { content: attr(data-col) ": "; font-weight: 650; color: var(--muted); }
+}
+@media (max-width: 420px) {
+  dl.ex-rows { grid-template-columns: 1fr; gap: 0; }
+  dl.ex-rows dd { margin-bottom: 6px; }
+}
 .key-chip { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--mat-text); background: var(--mat); border-radius: 6px; padding: 2px 7px; }
 .exam { background: var(--brief); border-radius: 16px; padding: 16px 20px; margin-top: 34px; }
 .exam-label { display: flex; align-items: center; gap: 9px; font-weight: 800; margin: 0 0 8px; }
