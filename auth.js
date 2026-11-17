@@ -166,7 +166,7 @@
   }
 
   var APPLE_ERRORS = {
-    popup_blocked_by_browser: "Przeglądarka zablokowała okno Apple. Zezwól na wyskakujące okna dla edunote.rozycki.pro albo zaloguj się kodem z e‑maila.",
+    popup_blocked_by_browser: "Przeglądarka zablokowała okno Apple. Zezwól na wyskakujące okna dla edunote.pl albo zaloguj się kodem z e‑maila.",
     user_trigger_new_signin_flow: "Okno Apple jest już otwarte. Dokończ w nim logowanie albo je zamknij i spróbuj jeszcze raz."
   };
 

@@ -2,6 +2,8 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<script>/* przeprowadzka na edunote.pl (wstawia scripts/publish-web.sh): stara domena oddaje dane z przeglądarki raz, potem tylko przekierowuje */(function(l){if(l.hostname!=="edunote.rozycki.pro")return;var d={},n=0,to=l.pathname+l.search+l.hash;try{if(!localStorage.getItem("edunote.przeniesione")){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf("edunote.")===0&&k!=="edunote.konto"){d[k]=localStorage.getItem(k);n++}}localStorage.setItem("edunote.przeniesione","1")}}catch(e){}l.replace("https://edunote.pl"+(n?"/przenies/#"+encodeURIComponent(JSON.stringify({to:to,d:d})):to))})(location)</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Moja biblioteka · EduNote</title>
 <meta name="description" content="Notatki z zajęć od ludzi z roku w jednym miejscu: przedmioty, notatki, fiszki i quizy.">

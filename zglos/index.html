@@ -2,6 +2,8 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<script>/* przeprowadzka na edunote.pl (wstawia scripts/publish-web.sh): stara domena oddaje dane z przeglądarki raz, potem tylko przekierowuje */(function(l){if(l.hostname!=="edunote.rozycki.pro")return;var d={},n=0,to=l.pathname+l.search+l.hash;try{if(!localStorage.getItem("edunote.przeniesione")){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf("edunote.")===0&&k!=="edunote.konto"){d[k]=localStorage.getItem(k);n++}}localStorage.setItem("edunote.przeniesione","1")}}catch(e){}l.replace("https://edunote.pl"+(n?"/przenies/#"+encodeURIComponent(JSON.stringify({to:to,d:d})):to))})(location)</script>
+
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F7F5EE">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -33,7 +35,7 @@
         <label class="choice"><input type="radio" name="kind" value="prowadzacy"> Prowadzę zajęcia i proszę o usunięcie notatek z nich</label>
       </fieldset>
 
-      <label for="url">Adres notatki <span class="hint">np. edunote.rozycki.pro/n/#…</span></label>
+      <label for="url">Adres notatki <span class="hint">np. edunote.pl/n/#…</span></label>
       <input type="text" id="url" autocomplete="off" inputmode="url" maxlength="500">
 
       <div id="classes-box" class="hidden">
@@ -107,7 +109,7 @@
   });
   // seria przed kolokwium: #s=KOD (strona /s/)
   var preset = (params.n || params.s || "").replace(/[^A-Za-z0-9]/g, "");
-  if (preset) document.getElementById("url").value = "https://edunote.rozycki.pro/" + (params.s ? "s" : "n") + "/#" + preset;
+  if (preset) document.getElementById("url").value = "https://edunote.pl/" + (params.s ? "s" : "n") + "/#" + preset;
   Array.prototype.forEach.call(form.querySelectorAll("input[name=kind]"), function (r) { r.addEventListener("change", syncKind); });
   syncKind();
 

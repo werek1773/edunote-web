@@ -2,6 +2,8 @@
 <html lang="pl" class="smooth">
 <head>
 <meta charset="utf-8">
+<script>/* przeprowadzka na edunote.pl (wstawia scripts/publish-web.sh): stara domena oddaje dane z przeglądarki raz, potem tylko przekierowuje */(function(l){if(l.hostname!=="edunote.rozycki.pro")return;var d={},n=0,to=l.pathname+l.search+l.hash;try{if(!localStorage.getItem("edunote.przeniesione")){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf("edunote.")===0&&k!=="edunote.konto"){d[k]=localStorage.getItem(k);n++}}localStorage.setItem("edunote.przeniesione","1")}}catch(e){}l.replace("https://edunote.pl"+(n?"/przenies/#"+encodeURIComponent(JSON.stringify({to:to,d:d})):to))})(location)</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F7F5EE">
@@ -10,8 +12,8 @@
 <meta property="og:title" content="EduNote · Ty słuchasz, EduNote notuje">
 <meta property="og:description" content="Notatki, fiszki i quiz z każdych zajęć. Cały rok uczy się z nich na telefonie. Od studenta dla studentów.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://edunote.rozycki.pro/">
-<meta property="og:image" content="https://edunote.rozycki.pro/og.png">
+<meta property="og:url" content="https://edunote.pl/">
+<meta property="og:image" content="https://edunote.pl/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="EduNote: notatki z zajęć dla całego roku, fiszki i quiz w przeglądarce">
@@ -248,7 +250,7 @@
   // albo przykład, a App Store tylko jako link wysłany sobie na Maca
   if (eduPlatform() !== "mac") {
     var ask = function () {
-      eduShare(eduAsk.mac, "https://edunote.rozycki.pro/n/#przyklad", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
+      eduShare(eduAsk.mac, "https://edunote.pl/n/#przyklad", "Poproś kogoś z Makiem", "Wyślij tę wiadomość osobie z Makiem z Twojego roku.");
     };
     document.getElementById("no-mac").classList.remove("hidden");
     var jak = document.getElementById("jak");

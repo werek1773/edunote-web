@@ -2,6 +2,8 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<script>/* przeprowadzka na edunote.pl (wstawia scripts/publish-web.sh): stara domena oddaje dane z przeglądarki raz, potem tylko przekierowuje */(function(l){if(l.hostname!=="edunote.rozycki.pro")return;var d={},n=0,to=l.pathname+l.search+l.hash;try{if(!localStorage.getItem("edunote.przeniesione")){for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf("edunote.")===0&&k!=="edunote.konto"){d[k]=localStorage.getItem(k);n++}}localStorage.setItem("edunote.przeniesione","1")}}catch(e){}l.replace("https://edunote.pl"+(n?"/przenies/#"+encodeURIComponent(JSON.stringify({to:to,d:d})):to))})(location)</script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#F7F5EE">
@@ -10,7 +12,7 @@
 <meta property="og:title" content="Skąd to wiemy? Notowanie zajęć a prawo · EduNote">
 <meta property="og:description" content="Prawo autorskie, RODO i zasady uczelni przy notowaniu zajęć z pomocą AI, zdanie po zdaniu, z przepisami.">
 <meta property="og:type" content="article">
-<meta property="og:image" content="https://edunote.rozycki.pro/og.png">
+<meta property="og:image" content="https://edunote.pl/og.png">
 <link rel="icon" href="../favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="../style.css?v=1e4dcd99e0">

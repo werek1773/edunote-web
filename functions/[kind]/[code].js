@@ -1,4 +1,4 @@
-// Cloudflare Pages Function: krótkie linki z podglądem na czacie, edunote.rozycki.pro/n/KOD (notatka), /p/KOD (przedmiot),
+// Cloudflare Pages Function: krótkie linki z podglądem na czacie, edunote.pl/n/KOD (notatka), /p/KOD (przedmiot),
 // /s/KOD (powtórka do słuchania). Oddaje zwykłą stronę n/, p/ albo s/ (ta sama co pod …/n/#KOD), tylko z tytułem
 // i opisem tej jednej notatki w og:title / og:description, np. „Notatki: Statystyka, czwartek 13.11”.
 // Nagłówek bierze z get_share_preview (bez licznika wyświetleń i bez podpisu autora). Gdy Supabase milczy,
