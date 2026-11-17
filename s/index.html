@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Powtórka do słuchania · EduNote</title>
+<meta name="description" content="Seria krótkich odcinków przed kolokwium udostępniona z aplikacji EduNote: słuchasz w przeglądarce, a po odcinku sprawdzasz się na fiszkach.">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F5EE">
+<!-- podgląd na czacie: jeden dla wszystkich serii (kod stoi po „#”, więc czat go nie widzi) -->
+<meta property="og:title" content="Powtórka przed kolokwium do słuchania · EduNote">
+<meta property="og:description" content="Ktoś z Twojego roku udostępnił krótkie odcinki z całego zakresu i fiszki. W przeglądarce, bez logowania.">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="EduNote">
+<meta property="og:image" content="https://edunote.rozycki.pro/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../style.css?v=60281d6161">
+<script>(function(d){var t=null;try{t=localStorage.getItem("edunote.theme")}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t==="dark"?"#191A15":"#F7F5EE";if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))d.classList.add("motion")})(document.documentElement)</script>
+<style>
+/* Strona serii przed kolokwium (makieta docs/prototyp/podcasty-seria.html, widok B). Kolory ze style.css. */
+.series .by { color: var(--muted); font-size: 15px; margin: 6px 0 8px; }
+.player { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 18px; margin-top: 18px; box-shadow: var(--shadow); }
+.player .ep { font-size: 13px; font-weight: 700; color: var(--mat-text); }
+.player h2 { font-size: 20px; line-height: 1.25; margin: 2px 0; }
+.player .from { font-size: 14px; color: var(--muted); }
+.ctrl { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 16px 0 12px; }
+.round { width: 60px; height: 60px; border-radius: 50%; border: 0; background: var(--moss-fill); color: var(--on-moss); display: grid; place-items: center; cursor: pointer; }
+.round:hover { background: var(--moss-press); }
+.round svg { width: 26px; height: 26px; }
+.skip { width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; font: 700 13px var(--sans); color: var(--muted); cursor: pointer; }
+.skip:hover { background: var(--line); color: var(--ink); }
+.speed { border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 700 13px var(--sans); min-width: 58px; cursor: pointer; }
+.tl { display: flex; align-items: center; gap: 10px; }
+.time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.track { flex: 1; height: 6px; border-radius: 3px; background: var(--line); position: relative; cursor: pointer; }
+.track i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 3px; background: var(--moss-fill); }
+.script { margin-top: 10px; font-size: 16px; line-height: 1.6; max-height: 240px; overflow: auto; }
+.script p { margin: 0 -8px; padding: 5px 8px; border-radius: 8px; color: var(--muted); }
+.script p.now { color: var(--ink); background: var(--mustard-soft); }
+.player .ai-line { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.sec { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin: 24px 2px 8px; }
+.eps { display: grid; gap: 8px; }
+.epi { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; width: 100%; text-align: left; color: var(--ink); font: inherit; cursor: pointer; }
+.epi:hover { border-color: var(--faint); }
+.epi.on { border-color: var(--moss-fill); }
+.epi .pl { width: 42px; height: 42px; border-radius: 50%; background: var(--mat); color: var(--mat-text); display: grid; place-items: center; }
+.epi.on .pl { background: var(--moss-fill); color: var(--on-moss); }
+.epi .pl svg { width: 18px; height: 18px; }
+.epi .t { font-weight: 650; font-size: 16px; line-height: 1.3; display: block; }
+.epi .m { font-size: 13.5px; color: var(--muted); }
+.epi .done { color: var(--moss-dark); font-weight: 700; }
+.epi.only { cursor: default; border-style: dashed; background: transparent; }
+.epi.only .pl { background: transparent; border: 1px dashed var(--line); color: var(--faint); }
+.check { margin-top: 14px; }
+.check h3 { font-size: 18px; margin: 0; }
+.check .cnt { font-size: 14px; color: var(--muted); margin: 2px 0 12px; }
+.grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.result { text-align: center; }
+.result .num { font: 800 34px var(--display); font-stretch: 125%; }
+</style>
+</head>
+<body class="note-page series">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.2v13.6a.8.8 0 0 0 1.2.7l11-6.8a.8.8 0 0 0 0-1.4l-11-6.8A.8.8 0 0 0 8 5.2z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></symbol>
+  <symbol id="i-cards" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h12a2 2 0 0 1 2 2v11"/></symbol>
+</svg>
+
+<header class="bar app-bar">
+  <div class="bar-in">
+    <a class="brand" href="../" aria-label="EduNote"><img class="brand-icon" src="../icon.png" width="34" height="34" alt=""><img class="wordmark wm-light" src="../logo.svg" width="128" height="34" alt=""><img class="wordmark wm-dark" src="../logo-dark.svg" width="128" height="34" alt=""></a>
+    <div class="bar-tools"><div data-theme-switch="menu"></div></div>
+  </div>
+</header>
+
+<main class="doc">
+  <div id="loading" class="skeleton" aria-busy="true"><span class="sr">Wczytuję serię…</span><span class="sk sk-sub"></span><span class="sk sk-h1 short"></span><span class="sk sk-box"></span><span class="sk sk-line"></span><span class="sk sk-line short"></span></div>
+
+  <div id="missing" class="hidden missing">
+    <h1>Tego linku już nie ma</h1>
+    <p class="muted">Link wygasł albo seria nie jest już udostępniana. Poproś o nowy link osobę, która go wysłała.</p>
+    <p class="missing-actions"><a class="btn btn-ghost" href="../">Czym jest EduNote?</a></p>
+  </div>
+
+  <article id="series" class="hidden">
+    <p class="muted" id="sub"></p>
+    <h1>Powtórka do słuchania</h1>
+    <p class="by" id="byline"></p>
+    <p class="ai-line"><span class="tag">AI</span><span>Nieoficjalne notatki i odcinki z AI · mogą zawierać błędy</span></p>
+
+    <section class="player" id="player" aria-label="Odtwarzacz">
+      <div class="ep" id="ep"></div>
+      <h2 id="ep-title"></h2>
+      <div class="from" id="ep-from"></div>
+      <div class="ctrl">
+        <button class="speed" id="speed" type="button" aria-label="Prędkość">1×</button>
+        <button class="skip" id="back" type="button" aria-label="Cofnij 15 sekund">−15</button>
+        <button class="round" id="pp" type="button" aria-label="Posłuchaj"><svg><use id="pp-ico" href="#i-play"/></svg></button>
+        <button class="skip" id="fwd" type="button" aria-label="Do przodu 15 sekund">+15</button>
+        <span style="min-width:58px"></span>
+      </div>
+      <div class="tl"><span class="time" id="cur">0:00</span><div class="track" id="track"><i id="fill"></i></div><span class="time" id="dur">0:00</span></div>
+      <button class="btn btn-ghost btn-sm" id="script-btn" type="button" style="margin-top:10px">Tekst odcinka</button>
+      <div class="script hidden" id="script"></div>
+      <p class="ai-line"><span class="tag">AI</span><span>Czyta lektorka AI. Scenariusz napisała AI z notatek studenta. <a id="report-ep" href="../zglos/">Coś się nie zgadza?</a></span></p>
+      <audio id="audio" preload="none"></audio>
+    </section>
+
+    <section class="card check hidden" id="check"></section>
+
+    <div class="sec" id="eps-title">Odcinki</div>
+    <div class="eps" id="eps"></div>
+    <div class="sec hidden" id="only-title">Tylko fiszki</div>
+    <div class="eps" id="only"></div>
+
+    <section class="made-with hidden" id="cta">
+      <p><b>Chcesz taką serię ze swoich zajęć?</b> EduNote słucha zajęć i od razu robi z nich notatki, fiszki i krótkie odcinki do słuchania przed kolokwium.</p>
+      <div class="row-btns"><a class="btn btn-primary btn-sm" id="get" href="../">EduNote na Maca i iPada</a></div>
+    </section>
+    <div class="note-foot">
+      <span>Odcinki i fiszki studenta zrobione z pomocą AI, a nie materiał prowadzącego. <a href="../skad-to-wiemy/">Skąd to wiemy, że tak można?</a></span>
+      <span><span id="valid"></span> <a id="report" href="../zglos/">Zgłoś treść</a></span>
+    </div>
+  </article>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>EduNote · od studenta dla studentów</span>
+    <a href="../">Czym jest EduNote?</a>
+    <a href="../prywatnosc/">Polityka prywatności</a>
+    <a href="../regulamin/">Regulamin</a>
+  </div>
+</footer>
+<script src="../theme.js?v=60281d6161"></script>
+<script src="../series.js?v=60281d6161"></script>
+</body>
+</html>
