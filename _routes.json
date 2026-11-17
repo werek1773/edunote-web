@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "include": ["/n/*", "/p/*", "/s/*"],
+  "exclude": ["/n/", "/p/", "/s/", "/n/*.json", "/n/*.html", "/p/*.html", "/s/*.html"]
+}

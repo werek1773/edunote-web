@@ -7,7 +7,9 @@
   var SUPABASE = "https://fjpbdwsbktiylkborxvf.supabase.co";
   // klucz publiczny (publishable) – ten sam co w aplikacji, nie jest sekretem
   var KEY = "sb_publishable_XtknqXVtb-T-5Wd-oKFxEA_NINWbDsE";
-  var code = (location.hash || "").replace(/^#/, "").split("/")[0].replace(/[^A-Za-z0-9]/g, "");
+  // krótki adres …/s/KOD (z podglądem na czacie) albo dawny …/s/#KOD
+  var pathCode = (/^\/s\/([A-Za-z0-9]+)\/?$/.exec(location.pathname) || [])[1] || "";
+  var code = (pathCode || (location.hash || "").replace(/^#/, "").split("/")[0]).replace(/[^A-Za-z0-9]/g, "");
   var $ = function (id) { return document.getElementById(id); };
   var audio = $("audio");
   var speeds = [1, 1.25, 1.5, 2], sp = 0;

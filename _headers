@@ -15,7 +15,7 @@
 /fonts/*
   Cache-Control: public, max-age=2592000
 
-# kopia pod adresem *.pages.dev nie trafia do Google (strona ma jeden adres: edunote.rozycki.pro)
+# kopia pod adresem *.pages.dev nie trafia do Google (strona ma jeden adres: edunote.pl)
 https://:project.pages.dev/*
   X-Robots-Tag: noindex
 

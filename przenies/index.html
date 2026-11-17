@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>EduNote</title>
+<!-- Przeprowadzka z edunote.rozycki.pro na edunote.rozycki.pro. Przeglądarka trzyma bibliotekę, postęp fiszek i wygląd osobno
+     dla każdego adresu, więc stara strona przy pierwszym wejściu przysyła je tutaj w adresie po „#” (nie trafia na serwer),
+     a ta strona zapisuje je pod nowym adresem i od razu otwiera to, po co ktoś przyszedł. Sesji logowania nie przenosimy:
+     po zalogowaniu biblioteka i tak wraca z konta. -->
+<script>
+(function () {
+  var to = "/";
+  try {
+    var data = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+    if (typeof data.to === "string" && data.to.charAt(0) === "/" && data.to.charAt(1) !== "/") to = data.to;
+    var d = data.d || {};
+    Object.keys(d).forEach(function (k) {
+      if (k.indexOf("edunote.") !== 0 || k === "edunote.konto" || typeof d[k] !== "string") return;
+      var here = localStorage.getItem(k);
+      if (k === "edunote.biblioteka" && here) {
+        // biblioteka jest już i tutaj: zostają jej wpisy, a ze starego adresu dochodzą tylko brakujące
+        var a = JSON.parse(here), b = JSON.parse(d[k]), seen = {};
+        var items = (a.items || []).concat(b.items || []).filter(function (x) {
+          var id = x.kind + ":" + x.code; if (seen[id]) return false; seen[id] = true; return true;
+        });
+        a.items = items;
+        localStorage.setItem(k, JSON.stringify(a));
+      } else if (here === null) {
+        localStorage.setItem(k, d[k]);
+      }
+    });
+  } catch (e) {}
+  location.replace(to);
+})();
+</script>
+</head>
+<body style="background:#F7F5EE"></body>
+</html>

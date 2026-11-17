@@ -7,7 +7,13 @@
 (function () {
   "use strict";
   var V = window.eduNoteView, el = V.el, button = V.button, M = window.eduMotion || null;
-  var hashParts = (location.hash || "").replace(/^#/, "").split("/");
+  // krótki adres …/p/KOD (z podglądem na czacie): kod w ścieżce, zakładka po „#” (…/p/KOD#cwiczenia)
+  var pathCode = (/^\/p\/([A-Za-z0-9]+)\/?$/.exec(location.pathname) || [])[1] || "";
+  function hashOf() {
+    var p = (location.hash || "").replace(/^#/, "").split("/");
+    return pathCode ? [pathCode].concat(p[0] ? p : []) : p;
+  }
+  var hashParts = hashOf();
   var code = hashParts[0].replace(/[^A-Za-z0-9]/g, ""), startTab = hashParts[1] || "";
   var mac = eduPlatform() === "mac";
   var QUIZ_SIZE = 15;
@@ -92,7 +98,7 @@
       var what = types.map(function (t) { return V.typeInfo(t).tab.toLowerCase(); }).join(" i ");
       eduShare(title + ": notatki z zajęć" + (what ? " (" + what + ")" : "") + ", fiszki i quiz z całości. "
         + "Nieoficjalne notatki z AI, sprawdźcie z zajęciami. Działa w przeglądarce, bez logowania:",
-        location.origin + location.pathname + "#" + code, "Wyślij na grupę roku");
+        location.origin + "/p/" + code, "Wyślij na grupę roku");
     });
     share.classList.remove("hidden");
 
@@ -132,7 +138,8 @@
       b.setAttribute("aria-selected", String(b.id === "tab-" + slug(type)));
     });
     if (place) place(byUser);
-    try { history.replaceState(null, "", "#" + code + (types.length > 1 && type !== types[0] ? "/" + slug(type) : "")); } catch (e) {}
+    var tab = types.length > 1 && type !== types[0] ? slug(type) : "";
+    try { history.replaceState(null, "", pathCode ? location.pathname + (tab ? "#" + tab : "") : "#" + code + (tab ? "/" + tab : "")); } catch (e) {}
     panel();
     if (byUser) {
       toTabs();
@@ -448,7 +455,7 @@
 
   // zmiana samej końcówki adresu (…/p/#KOD/cwiczenia): inna zakładka; inny kod: inny przedmiot
   window.addEventListener("hashchange", function () {
-    var parts = (location.hash || "").replace(/^#/, "").split("/");
+    var parts = hashOf();
     if (parts[0].replace(/[^A-Za-z0-9]/g, "") !== code) { location.reload(); return; }
     var t = types.filter(function (x) { return slug(x) === (parts[1] || ""); })[0];
     if (data) show(t !== undefined ? t : types[0] || "", false);

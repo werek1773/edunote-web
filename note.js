@@ -8,7 +8,10 @@
   // klucz publiczny (publishable) – ten sam co w aplikacji, nie jest sekretem
   var KEY = "sb_publishable_XtknqXVtb-T-5Wd-oKFxEA_NINWbDsE";
   // adres: …/n/#KOD, a po przełączeniu zakładki …/n/#KOD/fiszki albo …/n/#KOD/quiz (odświeżenie wraca do tej zakładki)
+  // krótki adres …/n/KOD (z podglądem na czacie): kod w ścieżce, zakładka po „#” (…/n/KOD#fiszki)
+  var pathCode = (/^\/n\/([A-Za-z0-9]+)\/?$/.exec(location.pathname) || [])[1] || "";
   var hashParts = (location.hash || "").replace(/^#/, "").split("/");
+  if (pathCode) hashParts = [pathCode].concat(hashParts[0] ? hashParts : []);
   var code = hashParts[0].replace(/[^A-Za-z0-9-]/g, ""), startTab = hashParts[1] || "";
   var inSubject = /^([A-Za-z0-9]+)-([0-9a-f]{8})$/.exec(code);
   var subjectCode = inSubject ? inSubject[1] : "";
@@ -973,7 +976,8 @@
     var title = data.topic || data.subject || "Notatka z zajęć";
     var label = data.topic && data.subject ? data.subject + ": " + data.topic : title;
     var mac = eduPlatform() === "mac";
-    var url = location.origin + location.pathname + "#" + code;
+    // notatkę z linku przedmiotu (KOD-klucz) da się otworzyć tylko przez „#”; zwykłą wysyłamy krótkim adresem z podglądem
+    var url = /-/.test(code) ? location.origin + location.pathname + "#" + code : location.origin + "/n/" + code;
     // dokładna data zamiast „do końca sesji”
     var until = data.expires_at ? "Link działa do " + lastDay(data.expires_at) + "." : "";
     var cards = cardsOf(c), hasQuiz = !!(c.quiz && c.quiz.length);
@@ -1048,7 +1052,7 @@
       });
       if (place) place(!!byUser);
       var name = { cards: "fiszki", quiz: "quiz" }[id];
-      try { history.replaceState(null, "", "#" + code + (name ? "/" + name : "")); } catch (e) {}
+      try { history.replaceState(null, "", pathCode ? location.pathname + (name ? "#" + name : "") : "#" + code + (name ? "/" + name : "")); } catch (e) {}
       if (id === "cards" && !panels.cards.firstChild) studyIntro();
       var top = $("tabs-anchor").getBoundingClientRect().top + window.scrollY - document.querySelector(".bar").offsetHeight;
       if (window.scrollY > top) window.scrollTo(0, top);
